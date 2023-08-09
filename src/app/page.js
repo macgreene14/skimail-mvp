@@ -47,7 +47,7 @@ export default function App() {
                   <h2 className="sr-only" id="section-1-title">
                     Section title
                   </h2>
-                  <div className="overflow-hidden rounded-lg bg-white shadow h-full">
+                  <div className="overflow rounded-lg bg-white shadow h-full">
                     <Map
                       resortCollection={resortCollection}
                       setRenderedResorts={setRenderedResorts}
