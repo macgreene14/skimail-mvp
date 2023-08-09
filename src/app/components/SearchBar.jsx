@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 

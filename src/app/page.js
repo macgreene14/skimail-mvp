@@ -1,11 +1,10 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
-import { Map } from "../../components/Map.jsx";
-import { ResultsContainer } from "../../components/ResultsContainer.jsx";
-import { SearchBar } from "../../components/SearchBar.jsx";
+import { Map } from "./components/Map.jsx";
+import { ResultsContainer } from "./components/ResultsContainer.jsx";
+import { SearchBar } from "./components/SearchBar.jsx";
 import resortCollection from "../../assets/resorts.json";
 import useDebounce from "../../hooks/useDebounce";
-import { ResultsCard } from "../../components/ResultsCard.jsx";
 
 export default function App() {
   const resorts = resortCollection.features;
@@ -26,6 +25,7 @@ export default function App() {
               <div className="grid grid-cols-1 gap-4 min-h-max">
                 {/* Search Bar */}
                 <section className="">
+                  <h1 className="hidden text-black"></h1>
                   <SearchBar
                     data={resorts}
                     setRenderedResorts={setRenderedResorts}
@@ -40,27 +40,6 @@ export default function App() {
                   <div className="overflow-x-auto rounded-lg bg-white shadow h-[30vh] lg:h-[80vh] flex flex-row">
                     <div className="p-6">
                       {/* Start Cards */}
-                      {/* <h2 className=" text-gray-600 font-md uppercase text-5xl m-6">
-                        Resorts
-                      </h2> */}
-                      {/* insert hidden card to force styling on card component */}
-                      <div className="hidden">
-                        <a href={"url"} target="_blank">
-                          <div className="w-full rounded overflow-hidden shadow-lg border border-solid">
-                            <div className="px-6 py-4">
-                              <div className="text-gray-700 ml-2 font-semibold text-xl mb-2">
-                                {"name"}
-                              </div>
-                              <p className="text-gray-700 text-base">
-                                {"description"}
-                              </p>
-                            </div>
-                            <div className="px-6 pt-4 pb-2">
-                              <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"></span>
-                            </div>
-                          </div>
-                        </a>
-                      </div>
                       <ResultsContainer resorts={renderedResorts} />
                     </div>
                   </div>
