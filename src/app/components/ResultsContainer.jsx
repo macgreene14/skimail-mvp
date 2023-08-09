@@ -1,13 +1,13 @@
 "use client";
 import React from "react";
-import { ResultsCard } from "./ResultsCard.jsx";
+import { Card } from "./Card.jsx";
 
 export function ResultsContainer({ resorts }) {
   return (
-    <div>
+    <div className="overflow-auto rounded-lg bg-white shadow h-[30vh] lg:h-[80vh] flex flex-row lg:flex-col p-6">
       {resorts.map((feature, index) => {
         return (
-          <ResultsCard
+          <Card
             key={index}
             name={feature.properties.name}
             description={feature.properties.description}
