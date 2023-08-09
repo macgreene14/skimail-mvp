@@ -85,7 +85,7 @@ export function Map({ resortCollection, setRenderedResorts }) {
       new mapboxgl.Popup()
         .setLngLat(coordinates)
         .setHTML(
-          `<h1 class="text-black">${name}</h1><p class="text-black">${description}</p>`
+          `<h1 style="color: black;">${name}</h1><p style="color: black;">${description}</p>`
         )
         .addTo(map.current);
     });
