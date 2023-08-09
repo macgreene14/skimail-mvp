@@ -3,7 +3,7 @@ export function Card({ name, description, url }) {
   return (
     <div>
       <a href={url} target="_blank">
-        <div className="w-96 lg:w-full h-full mx-2 rounded overflow-hidden shadow-lg border-solid border-2">
+        <div className=" lg:w-full w-72 h-full mx-2 rounded overflow-hidden shadow-lg border-solid border-2">
           <div className="px-6 py-4">
             <div className="text-gray-700 ml-1 font-semibold text-xl mb-2">
               {name}
