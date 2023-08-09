@@ -37,12 +37,7 @@ export default function App() {
                   <h2 className="sr-only" id="section-2-title">
                     Results
                   </h2>
-                  <div className="overflow-x-auto rounded-lg bg-white shadow h-[30vh] lg:h-[80vh] flex flex-row">
-                    <div className="p-6">
-                      {/* Start Cards */}
-                      <ResultsContainer resorts={renderedResorts} />
-                    </div>
-                  </div>
+                  <ResultsContainer resorts={renderedResorts} />
                 </section>
               </div>
 
