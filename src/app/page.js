@@ -1,16 +1,17 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import { Map } from "../../components/Map";
-import { ResultsContainer } from "../../components/ResultsContainer";
+import { Map } from "../../components/Map.jsx";
+import { ResultsContainer } from "../../components/ResultsContainer.jsx";
 
 import resortCollection from "../../assets/resorts.json";
 import useDebounce from "../../hooks/useDebounce";
+import { ResultsCard } from "../../components/ResultsCard.jsx";
 
 export default function App() {
   const resorts = resortCollection.features;
-  const [renderedResorts, setRenderedResorts] = useState(resorts);
-  const debouncedRenderedResorts = useDebounce(renderedResorts, 2000); // 2-second debounce
+  const [renderedResorts, setRenderedResorts] = useState(resorts); //list of resort features
+  // const debouncedRenderedResorts = useDebounce(renderedResorts, 2000); // 2-second debounce
 
   return (
     <>
@@ -55,7 +56,7 @@ export default function App() {
                   <div className="overflow-x-auto rounded-lg bg-white shadow h-[30vh] lg:h-[80vh] flex flex-row">
                     <div className="p-6">
                       {/* Start Cards */}
-                      <h2 className="text-black font-md uppercase text-5xl m-6">
+                      <h2 className=" text-gray-600 font-md uppercase text-5xl m-6">
                         Resorts
                       </h2>
                       <ResultsContainer resorts={renderedResorts} />

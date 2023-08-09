@@ -1,4 +1,5 @@
-export default function Card({ name, description, url }) {
+"use client";
+export function ResultsCard({ name, description, url }) {
   return (
     <a href={url} target="_blank">
       <div className="w-full rounded overflow-hidden shadow-lg border border-solid">

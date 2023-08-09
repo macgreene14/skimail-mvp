@@ -57,6 +57,18 @@ export function Map({ resortCollection, setRenderedResorts }) {
   }, []);
 
   useEffect(() => {
+    map.current.on("move", () => {
+      // on move, fetched rendered resorts
+      const features = map.current.queryRenderedFeatures({
+        layers: ["poi-mountain"],
+      });
+
+      // pass rendered resorts to parent component via functional prop
+      setRenderedResorts(features);
+    });
+  });
+
+  useEffect(() => {
     map.current.on("click", "poi-mountain", (e) => {
       // Copy coordinates array.
       const coordinates = e.features[0].geometry.coordinates.slice();
@@ -76,18 +88,6 @@ export function Map({ resortCollection, setRenderedResorts }) {
           `<h1 class="text-black">${name}</h1><p class="text-black">${description}</p>`
         )
         .addTo(map.current);
-    });
-  });
-
-  useEffect(() => {
-    map.current.on("move", () => {
-      // on move, fetched rendered resorts
-      const features = map.current.queryRenderedFeatures({
-        layers: ["poi-mountain"],
-      });
-
-      // pass rendered resorts to parent component via functional prop
-      setRenderedResorts(features);
     });
   });
 
