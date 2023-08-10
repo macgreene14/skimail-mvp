@@ -48,6 +48,9 @@ export function Map({ resortCollection, setRenderedResorts }) {
               "icon-image": ["get", "icon"], // same as inserting feature.properties.icon, just picks it from featureset
               "icon-allow-overlap": true,
               "icon-size": 1.75,
+              "text-field": ["get", "name"],
+              "text-offset": [0, 1.75],
+              "text-size": 10,
             },
             filter: ["==", "icon", symbol],
           });

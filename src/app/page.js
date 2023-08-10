@@ -3,17 +3,29 @@ import React, { useRef, useEffect, useState } from "react";
 import { Map } from "./components/Map.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
+import { Flights } from "./components/Flights.jsx";
 import resortCollection from "../../assets/resorts.json";
 import useDebounce from "../../hooks/useDebounce";
 
 export default function App() {
   const resorts = resortCollection.features;
   const [renderedResorts, setRenderedResorts] = useState(resorts); //list of resort features
-
-  // const debouncedRenderedResorts = useDebounce(renderedResorts, 2000); // 2-second debounce
+  const debouncedRenderedResorts = useDebounce(renderedResorts, 2000); // 2-second debounce
+  console.log(debouncedRenderedResorts);
+  // flight fetching
+  // pass debounced resorts to flights component
+  // flights will check flight memory and flight queue object (combine these)
+  // flight memory stored in app, passed to flights component
+  const [flightsCache, setFlightsCache] = useState({});
+  // console.log(flightsCache);
 
   return (
     <>
+      <Flights
+        debouncedRenderedResorts={debouncedRenderedResorts}
+        flightsCache={flightsCache}
+        setFlightsCache={setFlightsCache}
+      />
       <div className="">
         <main className="p-2 lg:p-4">
           <div className="mx-auto px-1 lg:px-4">
@@ -37,7 +49,10 @@ export default function App() {
                   <h2 className="sr-only" id="section-2-title">
                     Results
                   </h2>
-                  <ResultsContainer resorts={renderedResorts} />
+                  <ResultsContainer
+                    resorts={renderedResorts}
+                    flights={flightsCache}
+                  />
                 </section>
               </div>
 

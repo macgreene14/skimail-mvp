@@ -1,118 +1,150 @@
 {
-    "type": "FeatureCollection",
-    "features": [
-      {
-        "type": "Feature",
-        "properties": {
-          "icon": "mountain",
-          "description": "Vail Ski Resort is located in Colorado and is known for its vast terrain, efficient lift system, and luxury resort amenities. It's one of the largest and most popular ski resorts in the world.",
-          "name": "Vail Ski Resort",
-          "airport": "EGE",
-          "website": "https://www.vail.com/"
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [-106.374196, 39.640264]
-        }
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "icon": "mountain",
+        "description": "Vail Ski Resort is located in Colorado and is known for its vast terrain, efficient lift system, and luxury resort amenities. It's one of the largest and most popular ski resorts in the world.",
+        "name": "Vail Ski Resort",
+        "airport": "EGE",
+        "website": "https://www.vail.com/",
+        "vertical_drop": 1000,
+        "number_of_runs": 200,
+        "skiable_acres": 5000,
+        "season": "December - April"
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "icon": "mountain",
-          "description": "Park City Mountain Resort in Utah is the largest ski resort in the United States, offering varied terrain for all skill levels and a vibrant apres-ski scene. It was one of the main locations for the 2002 Winter Olympics.",
-          "name": "Park City Mountain Resort",
-          "airport": "SLC",
-          "website": "https://www.parkcitymountain.com/"
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [-111.508271, 40.651392]
-        }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-106.374196, 39.640264]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "icon": "mountain",
+        "description": "Park City Mountain Resort in Utah is the largest ski resort in the United States, offering varied terrain for all skill levels and a vibrant apres-ski scene. It was one of the main locations for the 2002 Winter Olympics.",
+        "name": "Park City Mountain Resort",
+        "airport": "SLC",
+        "website": "https://www.parkcitymountain.com/",
+        "vertical_drop": 1000,
+        "number_of_runs": 200,
+        "skiable_acres": 5000,
+        "season": "December - April"
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "icon": "mountain",
-          "description": "Breckenridge Ski Resort in Colorado is famous for its high altitude and boasts one of the highest chairlifts in North America. The town offers a charming historic district with vibrant nightlife.",
-          "name": "Breckenridge Ski Resort",
-          "airport": "DEN",
-          "website": "https://www.breckenridge.com/"
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [-106.038352, 39.480227]
-        }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-111.508271, 40.651392]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "icon": "mountain",
+        "description": "Breckenridge Ski Resort in Colorado is famous for its high altitude and boasts one of the highest chairlifts in North America. The town offers a charming historic district with vibrant nightlife.",
+        "name": "Breckenridge Ski Resort",
+        "airport": "DEN",
+        "website": "https://www.breckenridge.com/",
+        "vertical_drop": 1000,
+        "number_of_runs": 200,
+        "skiable_acres": 5000,
+        "season": "December - April"
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "icon": "mountain",
-          "description": "Aspen Snowmass in Colorado offers a unique mix of high-end luxury and family-friendly features. It provides a vast array of terrains and on-mountain dining experiences.",
-          "name": "Aspen Snowmass",
-          "airport": "ASE",
-          "website": "https://www.aspensnowmass.com/"
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [-106.9403, 39.2086]
-        }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-106.038352, 39.480227]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "icon": "mountain",
+        "description": "Aspen Snowmass in Colorado offers a unique mix of high-end luxury and family-friendly features. It provides a vast array of terrains and on-mountain dining experiences.",
+        "name": "Aspen Snowmass",
+        "airport": "ASE",
+        "website": "https://www.aspensnowmass.com/",
+        "vertical_drop": 1000,
+        "number_of_runs": 200,
+        "skiable_acres": 5000,
+        "season": "December - April"
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "icon": "mountain",
-          "description": "Jackson Hole Mountain Resort in Wyoming is renowned for its challenging terrain and the breathtaking scenery of the Teton mountain range. Its iconic aerial tram offers stunning views of the surroundings.",
-          "name": "Jackson Hole Mountain Resort",
-          "airport": "JAC",
-          "website": "https://www.jacksonhole.com/"
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [-110.827915, 43.58749]
-        }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-106.9403, 39.2086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "icon": "mountain",
+        "description": "Jackson Hole Mountain Resort in Wyoming is renowned for its challenging terrain and the breathtaking scenery of the Teton mountain range. Its iconic aerial tram offers stunning views of the surroundings.",
+        "name": "Jackson Hole Mountain Resort",
+        "airport": "JAC",
+        "website": "https://www.jacksonhole.com/",
+        "vertical_drop": 1000,
+        "number_of_runs": 200,
+        "skiable_acres": 5000,
+        "season": "December - April"
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "icon": "mountain",
-          "description": "Alta Ski Area in Utah is one of the oldest ski resorts in the country, known for its high snowfall and excellent terrain for powder skiing. Note that snowboarding is not permitted at Alta.",
-          "name": "Alta Ski Area",
-          "airport": "SLC",
-          "website": "https://www.alta.com/"
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [-111.633331, 40.58849]
-        }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-110.827915, 43.58749]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "icon": "mountain",
+        "description": "Alta Ski Area in Utah is one of the oldest ski resorts in the country, known for its high snowfall and excellent terrain for powder skiing. Note that snowboarding is not permitted at Alta.",
+        "name": "Alta Ski Area",
+        "airport": "SLC",
+        "website": "https://www.alta.com/",
+        "vertical_drop": 1000,
+        "number_of_runs": 200,
+        "skiable_acres": 5000,
+        "season": "December - April"
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "icon": "mountain",
-          "description": "Telluride Ski Resort in Colorado offers diverse terrain, breathtaking alpine scenery, and a charming Victorian-era town. It's known for its unique free gondola, the first and only one in the U.S.",
-          "name": "Telluride Ski Resort",
-          "airport": "TEX",
-          "website": "https://www.tellurideskiresort.com/"
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [-107.839111, 37.937494]
-        }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-111.633331, 40.58849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "icon": "mountain",
+        "description": "Telluride Ski Resort in Colorado offers diverse terrain, breathtaking alpine scenery, and a charming Victorian-era town. It's known for its unique free gondola, the first and only one in the U.S.",
+        "name": "Telluride Ski Resort",
+        "airport": "TEX",
+        "website": "https://www.tellurideskiresort.com/",
+        "vertical_drop": 1000,
+        "number_of_runs": 200,
+        "skiable_acres": 5000,
+        "season": "December - April"
       },
-      {
-        "type": "Feature",
-        "properties": {
-          "icon": "mountain",
-          "description": "Mammoth Mountain in California is famous for its long ski season, often extending into June or July. It offers a mix of terrain suitable for both beginners and advanced skiers.",
-          "name": "Mammoth Mountain",
-          "airport": "MMH",
-          "website": "https://www.mammothmountain.com/"
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [-119.036803, 37.650871]
-        }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-107.839111, 37.937494]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "icon": "mountain",
+        "description": "Mammoth Mountain in California is famous for its long ski season, often extending into June or July. It offers a mix of terrain suitable for both beginners and advanced skiers.",
+        "name": "Mammoth Mountain",
+        "airport": "MMH",
+        "website": "https://www.mammothmountain.com/",
+        "vertical_drop": 1000,
+        "number_of_runs": 200,
+        "skiable_acres": 5000,
+        "season": "December - July"
       },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-119.036803, 37.650871]
+      }
+    },
       {
         "type": "Feature",
         "properties": {
@@ -120,7 +152,11 @@
           "description": "Big Sky Resort in Montana provides vast terrain and uncrowded slopes due to its remote location. With the 'Biggest Skiing in America,' it offers long runs and diverse landscapes.",
           "name": "Big Sky Resort",
           "airport": "BZN",
-          "website": "https://bigskyresort.com/"
+          "website": "https://bigskyresort.com/",
+          "vertical_drop": 1000,
+          "number_of_runs": 200,
+          "skiable_acres": 5000,
+          "season": "December - April"
         },
         "geometry": {
           "type": "Point",
@@ -134,7 +170,11 @@
           "description": "Squaw Valley Ski Resort, now known as Palisades Tahoe, was the host site for the 1960 Winter Olympics. Located in California, it offers a vast network of trails and an energetic apres-ski scene.",
           "name": "Palisades Tahoe",
           "airport": "RNO",
-          "website": "https://www.palisadestahoe.com/"
+          "website": "https://www.palisadestahoe.com/",
+          "vertical_drop": 1000,
+          "number_of_runs": 200,
+          "skiable_acres": 5000,
+          "season": "December - April"
         },
         "geometry": {
           "type": "Point",
@@ -148,7 +188,12 @@
           "description": "Mount Bachelor in Oregon is renowned for its dry snow and offers a 360-degree skiing experience around the summit. The resort's unique volcanic landscape provides thrilling terrain parks and tree skiing.",
           "name": "Mount Bachelor",
           "airport": "RDM",
-          "website": "https://www.mtbachelor.com/"
+          "website": "https://www.mtbachelor.com/",
+          "vertical_drop": 1000,
+          "number_of_runs": 200,
+          "skiable_acres": 5000,
+          "season": "December - April"
+
         },
         "geometry": {
           "type": "Point",
