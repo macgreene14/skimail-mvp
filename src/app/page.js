@@ -4,6 +4,7 @@ import { Map } from "./components/Map.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
 import { Flights } from "./components/Flights.jsx";
+import { FlightSearchForm } from "./components/FlightSearchForm.jsx";
 import resortCollection from "../../assets/resorts.json";
 import useDebounce from "../../hooks/useDebounce";
 
@@ -11,7 +12,7 @@ export default function App() {
   const resorts = resortCollection.features;
   const [renderedResorts, setRenderedResorts] = useState(resorts); //list of resort features
   const debouncedRenderedResorts = useDebounce(renderedResorts, 2000); // 2-second debounce
-  console.log(debouncedRenderedResorts);
+  // console.log(debouncedRenderedResorts);
   // flight fetching
   // pass debounced resorts to flights component
   // flights will check flight memory and flight queue object (combine these)
@@ -19,16 +20,29 @@ export default function App() {
   const [flightsCache, setFlightsCache] = useState({});
   // console.log(flightsCache);
 
+  const [flightDates, setFlightDates] = useState({
+    startDate: "2023-11-01",
+    endDate: "2024-03-01",
+  });
+
+  //flight search params
+  // {departureAirport: , departureDate: , arrivalDate: }
+
   return (
     <>
-      <Flights
+      {/* <Flights
         debouncedRenderedResorts={debouncedRenderedResorts}
         flightsCache={flightsCache}
         setFlightsCache={setFlightsCache}
-      />
+        flightInputs={flightDates}
+      /> */}
       <div className="">
         <main className="p-2 lg:p-4">
           <div className="mx-auto px-1 lg:px-4">
+            {/* <FlightSearchForm
+              flightDates={flightDates}
+              setFlightDates={setFlightDates}
+            /> */}
             <h1 className="sr-only">Explore</h1>
 
             {/* Main 3 column grid */}

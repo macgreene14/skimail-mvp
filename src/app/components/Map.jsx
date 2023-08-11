@@ -94,5 +94,5 @@ export function Map({ resortCollection, setRenderedResorts }) {
     });
   });
 
-  return <div ref={mapContainer} className="w-full h-full z-20" />;
+  return <div ref={mapContainer} className="w-full h-full z-10" />;
 }
