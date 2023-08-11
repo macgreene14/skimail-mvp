@@ -1,13 +1,14 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "./Card.jsx";
 
-export function ResultsContainer({ resorts, flights }) {
+export function ResultsContainer({ resorts, flights, setFocusedResortName }) {
   return (
     <div className="overflow-auto rounded-lg bg-white shadow h-[32vh] lg:h-[80vh] flex flex-row lg:flex-col p-6 snap-y">
       {resorts.map((resort, index) => {
         return (
           <Card
+            setFocusedResortName={setFocusedResortName}
             key={index}
             resort={resort}
             flight={

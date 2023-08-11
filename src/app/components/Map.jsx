@@ -1,11 +1,16 @@
 import React, { useRef, useEffect } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
+import ReactDOM from "react-dom/client";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
 
-export function Map({ resortCollection, setRenderedResorts }) {
+export function Map({
+  resortCollection,
+  setRenderedResorts,
+  focusedResortName,
+}) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const resorts = resortCollection.features;
@@ -85,14 +90,60 @@ export function Map({ resortCollection, setRenderedResorts }) {
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
 
-      new mapboxgl.Popup()
+      // add popup
+      new mapboxgl.Popup({ offset: 25 })
         .setLngLat(coordinates)
         .setHTML(
-          `<h1 style="color: black;">${name}</h1><p style="color: black;">${description}</p>`
+          `<div style="borderRadius:60px;"><h1 style="color: black;">${name}</h1><p style="color: black;">${description}</p></div>`
         )
         .addTo(map.current);
+
+      // highlight marker
+      map.current.setLayoutProperty("poi-mountain", "icon-size", [
+        "match",
+        ["get", "name"],
+        name,
+        2.75,
+        1.75,
+      ]);
     });
+
+    map.current.on("click", (e) => {
+      // Get the clicked layer's ID
+      const clickedLayerId = e.features[0]?.properties?.icon;
+
+      // Check if the clicked layer is not "poi-mountain"
+      if (clickedLayerId !== "mountain") {
+        // Reset the icon size to its original value
+        map.current.setLayoutProperty("poi-mountain", "icon-size", 1.75);
+      }
+    });
+
+    if (!map.current.style) {
+      return;
+    }
+
+    // return () => map.current.off("click", "poi-mountain");
   });
+
+  useEffect(() => {
+    try {
+      if (focusedResortName === undefined) {
+        return;
+      }
+      console.log(focusedResortName);
+
+      map.current.setLayoutProperty("poi-mountain", "icon-size", [
+        "match",
+        ["get", "name"],
+        focusedResortName,
+        2.75,
+        1.75,
+      ]);
+    } catch {
+      console.log("style loading");
+    }
+  }, [focusedResortName]);
 
   return <div ref={mapContainer} className="w-full h-full z-20" />;
 }

@@ -1,7 +1,18 @@
 "use client";
-export function Card({ resort, flight }) {
+export function Card({ resort, flight, setFocusedResortName }) {
   return (
-    <div className="snap-start">
+    <div
+      data-id={resort.properties.name}
+      className="snap-start"
+      onMouseEnter={(e) => {
+        // console.log("mouse enter", e.target.dataset.id);
+        setFocusedResortName(e.target.dataset.id);
+      }}
+      // onMouseLeave={(e) => {
+      //   console.log("mouse leave", e.target.dataset.id);
+      //   setFocusedResortName();
+      // }}
+    >
       <a href={resort.properties.website} target="_blank">
         <div className="min-w-[400px] min-h-[250px] lg:w-full h-full mx-2 rounded shadow-md rounded-lg border-solid hover:shadow:lg hover:border-4 m-4">
           <div className="p-4">

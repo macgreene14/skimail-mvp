@@ -11,21 +11,22 @@ export default function App() {
   const resorts = resortCollection.features;
   const [renderedResorts, setRenderedResorts] = useState(resorts); //list of resort features
   const debouncedRenderedResorts = useDebounce(renderedResorts, 2000); // 2-second debounce
-  console.log(debouncedRenderedResorts);
+  // console.log(debouncedRenderedResorts);
   // flight fetching
   // pass debounced resorts to flights component
   // flights will check flight memory and flight queue object (combine these)
   // flight memory stored in app, passed to flights component
   const [flightsCache, setFlightsCache] = useState({});
   // console.log(flightsCache);
+  const [focusedResortName, setFocusedResortName] = useState();
 
   return (
     <>
-      <Flights
+      {/* <Flights
         debouncedRenderedResorts={debouncedRenderedResorts}
         flightsCache={flightsCache}
         setFlightsCache={setFlightsCache}
-      />
+      /> */}
       <div className="">
         <main className="p-2 lg:p-4">
           <div className="mx-auto px-1 lg:px-4">
@@ -52,6 +53,7 @@ export default function App() {
                   <ResultsContainer
                     resorts={renderedResorts}
                     flights={flightsCache}
+                    setFocusedResortName={setFocusedResortName}
                   />
                 </section>
               </div>
@@ -66,6 +68,7 @@ export default function App() {
                     <Map
                       resortCollection={resortCollection}
                       setRenderedResorts={setRenderedResorts}
+                      focusedResortName={focusedResortName}
                     />
                   </div>
                 </section>
