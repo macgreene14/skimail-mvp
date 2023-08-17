@@ -5,7 +5,7 @@ import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
 import { Flights } from "./components/Flights.jsx";
 import { FlightSearchForm } from "./components/FlightSearchForm.jsx";
-import resortCollection from "../../assets/resorts3.json";
+import resortCollection from "../../assets/resorts.json";
 // import resortCollection from "../../assets/resorts-cluster.json";
 import useDebounce from "../../hooks/useDebounce";
 
@@ -50,7 +50,7 @@ export default function App() {
             {/* Main 3 column grid */}
             <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-4">
               {/* Left column - Results */}
-              <div className="grid grid-cols-1 gap-4 min-h-max">
+              <div className="hidden lg:grid md:grid-cols-1 gap-4 min-h-max">
                 {/* Search Bar */}
                 <section className="">
                   <h1 className="hidden text-black"></h1>
@@ -73,7 +73,7 @@ export default function App() {
               </div>
 
               {/* Right column - Map */}
-              <div className="grid grid-cols-1 gap-4 lg:col-span-2 order-first lg:order-last h-[50vh] lg:h-[85.8vh]">
+              <div className="grid grid-cols-1 gap-4 lg:col-span-2 order-first lg:order-last h-[85.8vh]">
                 <section aria-labelledby="section-1-title">
                   <h2 className="sr-only" id="section-1-title">
                     Section title

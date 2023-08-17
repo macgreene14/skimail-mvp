@@ -124,7 +124,12 @@ export function Map({ resortCollection, setRenderedResorts }) {
       })
         .setLngLat(coordinates)
         .setHTML(
-          `<a href="resorts/${slug}" target="_blank"><div style=""><h1 style="color: black; padding: 1%;font-size:1.5rem;font-weight:600;">${name}</h1><img src="${img_url}" style="max-width:450px; height: auto;"></img></div><a/>`
+          `<a href="resorts/${slug}" target="_blank">
+            <div>
+              <h1 style="color: black; padding: 1%;font-size: 1rem;font-weight: 600;">${name}</h1>
+              <img src="${img_url}" style="max-width: 300px; height: auto; padding: 1%;"/>
+            </div>
+          <a/>`
         )
         .addTo(map.current);
 

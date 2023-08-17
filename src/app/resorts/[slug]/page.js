@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from "react";
 import Image from "next/image";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
-import resortCollection from "../../../../assets/resorts3.json";
+import resortCollection from "../../../../assets/resorts.json";
 mapboxgl.accessToken =
   "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
 
@@ -51,6 +51,9 @@ function MapGuideBook({ resort }) {
 
     // Navigation
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+
+    // Navigation
+    map.current.addControl(new mapboxgl.FullscreenControl());
   });
 
   return <div ref={mapContainer} className="w-full h-full z-10"></div>;

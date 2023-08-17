@@ -144,7 +144,7 @@ export function NavControl({ map }) {
   // };
 
   return (
-    <div className="fixed flex flex-col h-4/6 backdrop-blur-xs right-10 top-40 bottom-0 p-4 rounded-lg z-30 text-right">
+    <div className="fixed flex flex-col h-1/2 right-5 top-10 p-4 rounded-lg z-30 text-right">
       {/* <p className="text-xl uppercase text-center mt-4 font-bold">PASS type</p> */}
       {/* <div className="space-y-4 bg-white shadow-lg rounded-lg p-4">
         <Layers map={map} />
@@ -168,9 +168,9 @@ export function NavControl({ map }) {
         <MapSVG center={map.center} zoom={map.zoom} />
       </div> */}
       {/* <p className="text-xl uppercase text-center mt-4  font-bold">ZOOM</p> */}
-      <div className="space-y-2 rounded-lg p-2">
+      <div className="space-y-1 rounded-lg p-2">
         {regionalFlyTo.map((item, index) => (
-          <ol className="sm:text-xl hover:cursor-pointer" key={item.id}>
+          <ol className="sm:text-lg hover:cursor-pointer" key={item.id}>
             <p
               className="text-blue-800"
               onClick={() =>

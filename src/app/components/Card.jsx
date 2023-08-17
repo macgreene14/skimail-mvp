@@ -12,17 +12,17 @@ export function Card({ resort, flight }) {
               {resort.properties.description}
             </p>
           </div> */}
-          <div className="px-6 p-4">
-            <span className="text-gray-700 font-semibold text-md mx-2 mb-2">
+          <div className="px-6 p-4 block ">
+            <span className="text-gray-700 font-semibold text-sm mx-2 mb-2">
               {resort.properties.name}
             </span>
-            <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+            <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
               {resort.properties.vertical_drop} vert ft
             </span>
-            <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+            <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
               {resort.properties.skiable_acres} acres
             </span>
-            <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+            <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
               {resort.properties.avg_snowfall} inches
             </span>
             {/* <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
