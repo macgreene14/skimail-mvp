@@ -5,7 +5,8 @@ import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
 import { Flights } from "./components/Flights.jsx";
 import { FlightSearchForm } from "./components/FlightSearchForm.jsx";
-import resortCollection from "../../assets/resorts.json";
+import resortCollection from "../../assets/resorts3.json";
+// import resortCollection from "../../assets/resorts-cluster.json";
 import useDebounce from "../../hooks/useDebounce";
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
   // console.log(flightsCache);
 
   const [flightDates, setFlightDates] = useState({
+    airportIATA: "BZN",
     startDate: "2023-11-01",
     endDate: "2024-03-01",
   });
