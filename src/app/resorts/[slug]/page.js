@@ -19,11 +19,11 @@ export default function Page({ params }) {
       <h1 className="text-3xl font-extrabold m-4">
         {resort[0].properties.name}
       </h1>
-      <div className="flex">
-        <div className="">
-          <img alt="" className="basis-1/4" src={img_url} />
+      <div className="flex flex-row w-full">
+        <div className="w-full overflow-auto">
+          <img src={img_url} alt="" className="max-w-[800px]" />
         </div>
-        <div className="basis-3/4 z-10">
+        <div className="relative w-full z-10">
           <MapGuideBook resort={resort} />
         </div>
       </div>
