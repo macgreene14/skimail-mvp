@@ -72,19 +72,19 @@ export default function Page({ params }) {
         </dl>
       </div>
 
-      <div className="min-h-screen w-full max-w-6xl mx-auto">
+      <div className="min-h-screen min-w-full mx-auto">
         {/* Image section */}
-        <div className="m-4 xl:px-2">
+        <div className="m-1 xl:px-2 overflow-auto aspect-[4/2] rounded-3xl">
           <img
             src={img_url}
             alt=""
-            className="aspect-[4/2] w-3/4 mx-auto object-cover rounded-3xl overflow-auto"
+            className=" lg:w-3/4 mx-auto object-cover rounded-3xl"
           />
         </div>
 
         {/* Map section */}
-        <div className="m-4 xl:px-2">
-          <div className="aspect-[4/2] w-3/4 mx-auto object-cover rounded-3xl overflow-auto">
+        <div className="m-1 xl:px-2">
+          <div className="aspect-[4/2] w-full lg:w-3/4  mx-auto object-cover rounded-3xl overflow-auto">
             <MapGuideBook resort={resort} />
           </div>
         </div>
