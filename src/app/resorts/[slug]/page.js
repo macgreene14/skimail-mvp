@@ -62,7 +62,7 @@ export default function Page({ params }) {
 
       {/* Values section */}
       <div className="mx-auto m-8 max-w-7xl px-6 lg:px-8">
-        <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-base leading-7 sm:grid-cols-2 lg:grid-cols-3">
+        <dl className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-4 text-base leading-7 sm:grid-cols-2 lg:grid-cols-3">
           {values.map((value) => (
             <div key={value.name}>
               <dt className="font-semibold text-white">{value.name}</dt>
@@ -74,17 +74,17 @@ export default function Page({ params }) {
 
       <div className="min-h-screen min-w-full mx-auto">
         {/* Image section */}
-        <div className="m-1 xl:px-2 overflow-auto aspect-[4/2] rounded-3xl">
+        <div className="xl:px-2 rounded-3xl">
           <img
             src={img_url}
             alt=""
-            className=" lg:w-3/4 mx-auto object-cover rounded-3xl"
+            className="m-2 lg:w-3/4 mx-auto object-cover rounded-3xl"
           />
         </div>
 
         {/* Map section */}
-        <div className="m-1 xl:px-2">
-          <div className="aspect-[4/2] w-full lg:w-3/4  mx-auto object-cover rounded-3xl overflow-auto">
+        <div className="xl:px-2">
+          <div className=" aspect-[1/1] md:aspect-[3/2] lg:aspect-[4/2] w-full lg:w-3/4  mx-auto object-cover rounded-3xl overflow-auto">
             <MapGuideBook resort={resort} />
           </div>
         </div>
