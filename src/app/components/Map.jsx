@@ -3,6 +3,11 @@ import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-load
 import "mapbox-gl/dist/mapbox-gl.css";
 import { NavControl } from "./NavControl";
 import CustomControl from "../../../utils/CustomControl";
+import CheckboxControl from "../../../utils/Checkbox";
+import CollapsibleControl from "../../../utils/CollapsibleControl";
+import offsetCoords from "../../../utils/offsetCoords";
+import { Radar } from "./Radar";
+
 mapboxgl.accessToken =
   "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
 
@@ -21,10 +26,12 @@ export function Map({
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       // style: "mapbox://styles/mapbox/light-v11",
-      style: "mapbox://styles/macgreene14/cllroyibd004c01ofcyv7eks3",
+      // style: "mapbox://styles/macgreene14/cllroyibd004c01ofcyv7eks3",
       // style: "mapbox://styles/macgreene14/cllb90sr900dj01ojf33a3w1b",
-      center: [-101, 35],
-      zoom: 3,
+      // style: "mapbox://styles/macgreene14/clltty6cg004y01r91ooz74cm", //cali top
+      style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8", //unicorn
+      center: [-101, 41],
+      zoom: 2.7,
     });
 
     // Full Screen
@@ -32,10 +39,37 @@ export function Map({
 
     //custom control
     // Add the custom control
-    const customControl = new CustomControl(() => {
-      map.current.flyTo({ center: [1, 1] });
+    const customControl = new CollapsibleControl((e) => {
+      // coordinates from button data
+      const lat = e.target.dataset.lat;
+      const lng = e.target.dataset.lng;
+      const zoom = e.target.dataset.zoom;
+      map.current.flyTo({ center: [lng, lat], zoom: zoom });
+      // console.log(e.target.dataset);
     });
     map.current.addControl(customControl, "top-left");
+
+    //custom control
+    // Add the checkbox control
+    const checkboxControlIkon = new CheckboxControl({
+      labelText: "Ikon",
+      layerId: "Ikon",
+      // backgroundColor: "blue",
+    });
+    map.current.addControl(checkboxControlIkon, "top-left");
+
+    // // custom control - collapse
+    // const collapsibleControl = new CollapsibleControl({
+    //   content: "This is the control content.",
+    // });
+    // map.current.addControl(collapsibleControl, "top-right");
+
+    const checkboxControlEpic = new CheckboxControl({
+      labelText: "Epic",
+      layerId: "Epic",
+      backgroundColor: "orange",
+    });
+    map.current.addControl(checkboxControlEpic, "top-left");
 
     // Navigation
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
@@ -56,6 +90,24 @@ export function Map({
 
     // Load feature set into symbole layer
     map.current.on("load", () => {
+      // load icons
+      // <a href="https://www.freepik.com/icon/mountains_762386#fromView=search&term=ski+mountain&page=1&position=12">Icon by Freepik</a>
+      map.current.loadImage(
+        "https://ik.imagekit.io/bamlnhgnz/mountain-black.png?updatedAt=1693110148838",
+        (error, image) => {
+          if (error) throw error;
+          map.current.addImage("Ikon", image); // Add the image to the map style.
+        }
+      );
+
+      map.current.loadImage(
+        "https://ik.imagekit.io/bamlnhgnz/mountain-orange.png?updatedAt=1693110233960",
+        (error, image) => {
+          if (error) throw error;
+          map.current.addImage("Epic", image); // Add the image to the map style.
+        }
+      );
+
       map.current.addSource("resorts", {
         type: "geojson",
         data: resortCollection,
@@ -63,7 +115,7 @@ export function Map({
 
       for (const feature of resorts) {
         const symbol = feature.properties.icon;
-        const layerID = `poi-${symbol}`;
+        const layerID = `${symbol}`;
 
         // Add a layer for this symbol type if it hasn't been added already.
         if (!map.current.getLayer(layerID)) {
@@ -78,13 +130,14 @@ export function Map({
               // To add a new image to the style at runtime see
               // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
               "icon-image": ["get", "icon"], // same as inserting feature.properties.icon, just picks it from featureset
+              // "icon-image": "resort",
               "icon-allow-overlap": true,
-              "icon-size": 1.75,
+              "icon-size": 0.0375,
               // "icon-color": "#0000FF",
               "icon-allow-overlap": true,
               "icon-ignore-placement": true,
               "text-field": ["get", "name"],
-              "text-offset": [0, 1.75],
+              "text-offset": [0, 1.2],
               "text-size": 14,
               // "text-allow-overlap": true,
               // "text-ignore-placement": true,
@@ -101,18 +154,26 @@ export function Map({
     map.current.on("moveend", () => {
       // on move, fetched rendered resorts
       const features = map.current.queryRenderedFeatures({
-        layers: ["poi-mountain"],
+        layers: ["Epic", "Ikon"],
       });
 
       if (features) {
         // pass rendered resorts to parent component via functional prop
         setRenderedResorts(features);
       }
+
+      // Read out coordinates
+      // var center = map.current.getCenter();
+      // var zoom = map.current.getZoom().toFixed(2);
+
+      // console.log("Latitude:", center.lat);
+      // console.log("Longitude:", center.lng);
+      // console.log("Zoom:", zoom);
     });
   });
 
   useEffect(() => {
-    map.current.on("click", "poi-mountain", (e) => {
+    map.current.on("click", ["Epic", "Ikon"], (e) => {
       // Copy coordinates array.
       const coordinates = e.features[0].geometry.coordinates.slice();
       const name = e.features[0].properties.name;
@@ -128,10 +189,9 @@ export function Map({
       while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
+      map.current.flyTo({ center: coordinates });
 
       const popup = addPopup(coordinates, name, slug, img_url);
-
-      map.current.flyTo({ center: coordinates });
 
       // map.current.on("mouseleave", "poi-mountain", function () {
       //   map.current.getCanvas().style.cursor = "";
@@ -163,10 +223,10 @@ export function Map({
       // while (Math.abs(selectedResort.lngLat.lng - coordinates[0]) > 180) {
       //   coordinates[0] += selectedResort.lngLat.lng > coordinates[0] ? 360 : -360;
       // }
+      map.current.flyTo({ center: coordinates });
 
       const popup = addPopup(coordinates, name, slug, img_url);
 
-      map.current.flyTo({ center: coordinates });
       return () => {
         popup.remove();
       };
@@ -175,7 +235,7 @@ export function Map({
 
   function addPopup(coordinates, name, slug, img_url) {
     const popup = new mapboxgl.Popup({
-      anchor: "right",
+      anchor: "bottom",
       offset: 15,
       keepInView: true, // This option ensures the popup stays in view
       closeOnClick: true,
@@ -189,7 +249,7 @@ export function Map({
         `<div style="padding:1%; max-width:90%; border-radius: 15px;">
             <h1 style="color: black; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>
             <a href="resorts/${slug}" target="_blank">
-              <img src="${img_url}" style="max-width: 300px; height: auto;"/>
+              <img src="${img_url}" style="max-width: 300px; max-height: 150px;"/>
             <a/>
             </div>`
       )
@@ -200,7 +260,8 @@ export function Map({
 
   return (
     <div ref={mapContainer} className="w-full h-full z-1 rounded-lg">
-      <NavControl map={map} />
+      {/* <NavControl map={map} /> */}
+      <Radar map={map} />
     </div>
   );
 }

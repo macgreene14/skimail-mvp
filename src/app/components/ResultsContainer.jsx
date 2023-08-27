@@ -5,9 +5,9 @@ import { Card } from "./Card.jsx";
 export function ResultsContainer({ resorts, flights, setSelectedResort }) {
   return (
     <div className="overflow-auto rounded-lg bg-white shadow h-[32vh] lg:h-[80vh] flex flex-row lg:flex-col">
-      <h2 className="h-2 m-2 text-black font-bold">
+      {/* <h2 className="h-2 m-2 text-black font-bold">
         Results: {resorts.length}
-      </h2>
+      </h2> */}
       {resorts.map((resort, index) => {
         return (
           <Card

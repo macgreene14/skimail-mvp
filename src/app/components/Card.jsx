@@ -15,14 +15,42 @@ export function Card({ resort, flight, onClick }) {
           <span className="text-gray-700 font-semibold text-sm mx-2 mb-2 block">
             {resort.properties.name}
           </span>
-          <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
-            {resort.properties.vertical_drop} vert ft
+          <span className="text-gray-700 font-semibold text-sm mx-2 mb-2 block">
+            {resort.properties.state !== "Unknown" &&
+              `${resort.properties.state}`}
           </span>
-          <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
-            {resort.properties.skiable_acres} acres
+          <span className="flex h-5 justify-center bg-blue-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
+            {resort.properties.icon}
           </span>
-          <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
-            {resort.properties.avg_snowfall} inches
+          {/* <span className="inline-block bg-blue-300 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
+            {resort.properties.access}
+          </span> */}
+          <span className="flex items-center bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
+            <img
+              src="https://ik.imagekit.io/bamlnhgnz/mtn_height_icon.png"
+              alt=""
+              className="h-5 w-5 m-1"
+            />
+            {resort.properties.vertical_drop !== "Unknown" &&
+              `${resort.properties.vertical_drop} ft`}
+          </span>
+          <span className="flex items-center bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
+            <img
+              src="https://ik.imagekit.io/bamlnhgnz/mtn_flag_icon.png"
+              alt=""
+              className="h-5 w-5 m-1"
+            />
+            {resort.properties.skiable_acres !== "Unknown" &&
+              `${resort.properties.skiable_acres} acres`}
+          </span>
+          <span className="flex items-center bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2">
+            <img
+              src="https://ik.imagekit.io/bamlnhgnz/snow_icon.png"
+              alt=""
+              className="h-5 w-5 m-1"
+            />
+            {resort.properties.avg_snowfall !== "Unknown" &&
+              `${resort.properties.avg_snowfall} in`}{" "}
           </span>
           {/* <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
               ${flight}

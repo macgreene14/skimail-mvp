@@ -28,7 +28,9 @@ body {
 
 .mapboxgl-popup {
   padding:1%;
-  border-style: solid;
+  /* border-style: solid;
+  border-color: black;
+  border-width: 2px; */
 }
 
 .mapboxgl-popup-close-button {
@@ -38,6 +40,21 @@ body {
   font-size: 30px;
   line-height: 20px;
   z-index:10;
+}
+
+.mapboxgl-ctrl-group {
+  border: none;
+  box-shadow: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 2%; 
+  margin: 2%;
+}
+
+.mapboxgl-ctrl-group label {
+  display: block;
+  cursor: pointer;
+  color: black;
 }
 
 
