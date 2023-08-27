@@ -2,11 +2,16 @@ import React, { useRef, useEffect } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
 import { NavControl } from "./NavControl";
-
+import CustomControl from "../../../utils/CustomControl";
 mapboxgl.accessToken =
   "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
 
-export function Map({ resortCollection, setRenderedResorts }) {
+export function Map({
+  resortCollection,
+  setRenderedResorts,
+  selectedResort,
+  setSelectedResort,
+}) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const resorts = resortCollection.features;
@@ -15,11 +20,22 @@ export function Map({ resortCollection, setRenderedResorts }) {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/light-v11",
+      // style: "mapbox://styles/mapbox/light-v11",
+      style: "mapbox://styles/macgreene14/cllroyibd004c01ofcyv7eks3",
       // style: "mapbox://styles/macgreene14/cllb90sr900dj01ojf33a3w1b",
       center: [-101, 35],
       zoom: 3,
     });
+
+    // Full Screen
+    map.current.addControl(new mapboxgl.FullscreenControl());
+
+    //custom control
+    // Add the custom control
+    const customControl = new CustomControl(() => {
+      map.current.flyTo({ center: [1, 1] });
+    });
+    map.current.addControl(customControl, "top-left");
 
     // Navigation
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
@@ -106,32 +122,14 @@ export function Map({ resortCollection, setRenderedResorts }) {
       const slug = e.features[0].properties.slug;
       const img_url = `https://ik.imagekit.io/bamlnhgnz/maps/${slug}.png`;
 
-      // Ensure that if the map is zoomed out such that multiple
-      // copies of the feature are visible, the popup appears
-      // over the copy being pointed to.
+      // // Ensure that if the map is zoomed out such that multiple
+      // // copies of the feature are visible, the popup appears
+      // // over the copy being pointed to.
       while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
 
-      const popup = new mapboxgl.Popup({
-        anchor: top,
-        offset: 15,
-        keepInView: true, // This option ensures the popup stays in view
-        closeOnClick: true,
-        closeButton: true,
-        // closeOnMove: true,
-        maxWidth: "none",
-      })
-        .setLngLat(coordinates)
-        .setHTML(
-          `<a href="resorts/${slug}" target="_blank">
-            <div>
-              <h1 style="color: black; padding: 1%;font-size: 1rem;font-weight: 600;">${name}</h1>
-              <img src="${img_url}" style="max-width: 300px; height: auto; padding: 1%;"/>
-            </div>
-          <a/>`
-        )
-        .addTo(map.current);
+      const popup = addPopup(coordinates, name, slug, img_url);
 
       map.current.flyTo({ center: coordinates });
 
@@ -139,11 +137,69 @@ export function Map({ resortCollection, setRenderedResorts }) {
       //   map.current.getCanvas().style.cursor = "";
       //   popup.remove();
       // });
+
+      return () => {
+        popup.remove();
+      };
     });
   });
 
+  useEffect(() => {
+    if (selectedResort) {
+      console.log(selectedResort, " resort");
+
+      // Copy coordinates array.
+      const coordinates = selectedResort.geometry.coordinates.slice();
+      const name = selectedResort.properties.name;
+      const website = selectedResort.properties.website;
+
+      // const description = e.features[0].properties.description;
+      const slug = selectedResort.properties.slug;
+      const img_url = `https://ik.imagekit.io/bamlnhgnz/maps/${slug}.png`;
+
+      // Ensure that if the map is zoomed out such that multiple
+      // copies of the feature are visible, the popup appears
+      // over the copy being pointed to.
+      // while (Math.abs(selectedResort.lngLat.lng - coordinates[0]) > 180) {
+      //   coordinates[0] += selectedResort.lngLat.lng > coordinates[0] ? 360 : -360;
+      // }
+
+      const popup = addPopup(coordinates, name, slug, img_url);
+
+      map.current.flyTo({ center: coordinates });
+      return () => {
+        popup.remove();
+      };
+    }
+  }, [selectedResort]);
+
+  function addPopup(coordinates, name, slug, img_url) {
+    const popup = new mapboxgl.Popup({
+      anchor: "right",
+      offset: 15,
+      keepInView: true, // This option ensures the popup stays in view
+      closeOnClick: true,
+      closeButton: true,
+      // closeOnMove: true,
+      maxWidth: "none",
+      // className: "",
+    })
+      .setLngLat(coordinates)
+      .setHTML(
+        `<div style="padding:1%; max-width:90%; border-radius: 15px;">
+            <h1 style="color: black; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>
+            <a href="resorts/${slug}" target="_blank">
+              <img src="${img_url}" style="max-width: 300px; height: auto;"/>
+            <a/>
+            </div>`
+      )
+      .addTo(map.current);
+
+    return popup;
+  }
+
   return (
-    <div ref={mapContainer} className="w-full h-full z-10">
+    <div ref={mapContainer} className="w-full h-full z-1 rounded-lg">
       <NavControl map={map} />
     </div>
   );

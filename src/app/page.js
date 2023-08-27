@@ -12,6 +12,8 @@ import useDebounce from "../../hooks/useDebounce";
 export default function App() {
   const resorts = resortCollection.features;
   const [renderedResorts, setRenderedResorts] = useState(resorts); //list of resort features
+  const [selectedResort, setSelectedResort] = useState(null);
+  console.log(selectedResort, "init");
   const debouncedRenderedResorts = useDebounce(renderedResorts, 2000); // 2-second debounce
   // console.log(debouncedRenderedResorts);
   // flight fetching
@@ -68,6 +70,7 @@ export default function App() {
                   <ResultsContainer
                     resorts={renderedResorts}
                     flights={flightsCache}
+                    setSelectedResort={setSelectedResort}
                   />
                 </section>
               </div>
@@ -82,6 +85,8 @@ export default function App() {
                     <Map
                       resortCollection={resortCollection}
                       setRenderedResorts={setRenderedResorts}
+                      selectedResort={selectedResort}
+                      setSelectedResort={setSelectedResort}
                     />
                   </div>
                 </section>

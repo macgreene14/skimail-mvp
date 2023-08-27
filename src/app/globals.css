@@ -28,5 +28,16 @@ body {
 
 .mapboxgl-popup {
   padding:1%;
+  border-style: solid;
 }
+
+.mapboxgl-popup-close-button {
+  margin: 1%;
+  padding: 1%;
+  color: black;
+  font-size: 30px;
+  line-height: 20px;
+  z-index:10;
+}
+
 

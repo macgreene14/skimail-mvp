@@ -19,12 +19,14 @@ export default function Page({ params }) {
       <h1 className="text-3xl font-extrabold m-4">
         {resort[0].properties.name}
       </h1>
-      <div className="flex flex-row w-full">
-        <div className="w-full overflow-auto">
-          <img src={img_url} alt="" className="max-w-[800px]" />
+      <div className="flex flex-col">
+        <div className="w-1/2 h-4/6 overflow-auto">
+          <img src={img_url} alt="" className="h-full" />
         </div>
-        <div className="relative w-full z-10">
-          <MapGuideBook resort={resort} />
+        <div className="w-3/4 h-4/6 overflow-auto">
+          <div className="w-[600px] h-[300px] z-10">
+            <MapGuideBook resort={resort} />
+          </div>
         </div>
       </div>
     </div>
@@ -52,7 +54,7 @@ function MapGuideBook({ resort }) {
     // Navigation
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
-    // Navigation
+    // Full Screen
     map.current.addControl(new mapboxgl.FullscreenControl());
   });
 
