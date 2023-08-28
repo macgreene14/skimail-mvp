@@ -57,4 +57,22 @@ body {
   color: black;
 }
 
+/* .mapboxgl-ctrl-logo {
+  display: none !important;
+} */
 
+.mapbox-improve-map {
+  display: none !important;
+}
+
+@media only screen and (max-width: 480px) {
+  .mapboxgl-popup-content {
+      max-width: 250px;
+  }
+  .mapboxgl-popup-content div {
+      padding:0em;
+  }
+  .mapboxgl-popup-content p {
+      margin: 0.5em 0.5em;
+  }
+}

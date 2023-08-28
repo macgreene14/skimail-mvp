@@ -72,7 +72,7 @@ export default function Page({ params }) {
         </dl>
       </div>
 
-      <div className="min-h-screen min-w-full mx-auto">
+      <div className="min-h-screen w-3/4 mx-auto">
         {/* Image section */}
         <div className="xl:px-2 rounded-3xl">
           <img
@@ -115,7 +115,7 @@ function MapGuideBook({ resort }) {
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
     // Full Screen
-    map.current.addControl(new mapboxgl.FullscreenControl());
+    map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
   });
   useEffect(() => {
     map.current.on("mouseenter", ["road-path-bg"], (e) => {

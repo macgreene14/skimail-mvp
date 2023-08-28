@@ -34,45 +34,6 @@ export function Map({
       zoom: 2.7,
     });
 
-    // Full Screen
-    map.current.addControl(new mapboxgl.FullscreenControl());
-
-    //custom control
-    // Add the custom control
-    const customControl = new CollapsibleControl((e) => {
-      // coordinates from button data
-      const lat = e.target.dataset.lat;
-      const lng = e.target.dataset.lng;
-      const zoom = e.target.dataset.zoom;
-      map.current.flyTo({ center: [lng, lat], zoom: zoom });
-      // console.log(e.target.dataset);
-    });
-    map.current.addControl(customControl, "top-left");
-
-    //custom control
-    // Add the checkbox control
-    const checkboxControlIkon = new CheckboxControl({
-      labelText: "Ikon",
-      layerId: "Ikon",
-      // backgroundColor: "blue",
-    });
-    map.current.addControl(checkboxControlIkon, "top-left");
-
-    // // custom control - collapse
-    // const collapsibleControl = new CollapsibleControl({
-    //   content: "This is the control content.",
-    // });
-    // map.current.addControl(collapsibleControl, "top-right");
-
-    const checkboxControlEpic = new CheckboxControl({
-      labelText: "Epic",
-      layerId: "Epic",
-      backgroundColor: "orange",
-    });
-    map.current.addControl(checkboxControlEpic, "top-left");
-
-    // Navigation
-    map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
     // Add geolocate control to the map.
     map.current.addControl(
       new mapboxgl.GeolocateControl({
@@ -85,8 +46,44 @@ export function Map({
         showUserHeading: true,
         // fitBoundsOptions: { maxZoom: map.current.getZoom() },
         fitBoundsOptions: { maxZoom: 5 },
-      })
+      }),
+      "top-left"
     );
+
+    // custom controls - top left
+
+    // Add the checkbox control
+    // Ikon toggle
+    const checkboxControlIkon = new CheckboxControl({
+      labelText: "Ikon",
+      layerId: "Ikon",
+      // backgroundColor: "blue",
+    });
+    map.current.addControl(checkboxControlIkon, "top-left");
+
+    // Epic toggle
+    const checkboxControlEpic = new CheckboxControl({
+      labelText: "Epic",
+      layerId: "Epic",
+      backgroundColor: "orange",
+    });
+    map.current.addControl(checkboxControlEpic, "top-left");
+
+    // Drop down
+    const customControl = new CollapsibleControl((e) => {
+      // coordinates from button data
+      const lat = e.target.dataset.lat;
+      const lng = e.target.dataset.lng;
+      const zoom = e.target.dataset.zoom;
+      map.current.flyTo({ center: [lng, lat], zoom: zoom });
+      // console.log(e.target.dataset);
+    });
+    map.current.addControl(customControl, "top-left");
+
+    // Navigation
+    map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+    // Full Screen
+    map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
 
     // Load feature set into symbole layer
     map.current.on("load", () => {
@@ -206,8 +203,6 @@ export function Map({
 
   useEffect(() => {
     if (selectedResort) {
-      console.log(selectedResort, " resort");
-
       // Copy coordinates array.
       const coordinates = selectedResort.geometry.coordinates.slice();
       const name = selectedResort.properties.name;
@@ -223,13 +218,20 @@ export function Map({
       // while (Math.abs(selectedResort.lngLat.lng - coordinates[0]) > 180) {
       //   coordinates[0] += selectedResort.lngLat.lng > coordinates[0] ? 360 : -360;
       // }
-      map.current.flyTo({ center: coordinates });
 
-      const popup = addPopup(coordinates, name, slug, img_url);
+      //mobile
+      if (window.innerWidth <= 768) {
+        // This is a common breakpoint for mobile devices
+        window.location.href = `resorts/${slug}`;
+      } else {
+        map.current.flyTo({ center: coordinates });
 
-      return () => {
-        popup.remove();
-      };
+        const popup = addPopup(coordinates, name, slug, img_url);
+
+        return () => {
+          popup.remove();
+        };
+      }
     }
   }, [selectedResort]);
 
