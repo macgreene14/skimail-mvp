@@ -147,7 +147,7 @@ function MapGuideBook({ resort }) {
 
       const popup = addPopup(coordinates, name);
 
-      map.current.on("mouseleave", "road-path-bg", function () {
+      map.current.on("click", "road-path-bg", function () {
         map.current.getCanvas().style.cursor = "";
         popup.remove();
       });
