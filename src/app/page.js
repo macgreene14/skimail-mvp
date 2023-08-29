@@ -13,6 +13,18 @@ export default function App() {
   const resorts = resortCollection.features;
   const [renderedResorts, setRenderedResorts] = useState(resorts); //list of resort features
   const [selectedResort, setSelectedResort] = useState(null);
+  const [focusedResort, setFocusedResort] = useState(null);
+
+  // useEffect(() => {
+  //   setFocusedResort(renderedResorts[0]);
+  // }, [renderedResorts]);
+
+  // useEffect(() => {
+  //   if (renderedResorts.length === 1 && renderedResorts[0] !== selectedResort) {
+  //     setSelectedResort(renderedResorts[0]);
+  //   }
+  // }, [renderedResorts]);
+
   const debouncedRenderedResorts = useDebounce(renderedResorts, 2000); // 2-second debounce
   // console.log(debouncedRenderedResorts);
   // flight fetching
@@ -51,27 +63,29 @@ export default function App() {
             {/* Main 3 column grid */}
             <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-4">
               {/* Left column - Results */}
-              <div className="grid md:grid-cols-1 gap-4 min-h-max overflow-auto">
+              <div className="flex flex-col">
                 {/* Search Bar */}
-                <section className="">
-                  <h1 className="hidden text-black"></h1>
+                <section className="rounded-md m-1">
                   <SearchBar
                     data={resorts}
                     setRenderedResorts={setRenderedResorts}
                   />
                 </section>
 
-                {/* Results Container */}
-                <section aria-labelledby="section-2-title">
-                  <h2 className="sr-only" id="section-2-title">
-                    Results
-                  </h2>
-                  <ResultsContainer
-                    resorts={renderedResorts}
-                    flights={flightsCache}
-                    setSelectedResort={setSelectedResort}
-                  />
-                </section>
+                <div className="grid md:grid-cols-1 gap-4 min-h-max overflow-auto max-w-full rounded-md m-1">
+                  {/* Results Container */}
+                  <section aria-labelledby="section-2-title">
+                    <h2 className="sr-only" id="section-2-title">
+                      Results
+                    </h2>
+                    <ResultsContainer
+                      resorts={renderedResorts}
+                      flights={flightsCache}
+                      setSelectedResort={setSelectedResort}
+                      selectedResort={selectedResort}
+                    />
+                  </section>
+                </div>
               </div>
 
               {/* Right column - Map */}

@@ -51,26 +51,25 @@ export function Map({
     );
 
     // custom controls - top left
-
-    // Add the checkbox control
+    // Full Screen
+    map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
     // Ikon toggle
     const checkboxControlIkon = new CheckboxControl({
       labelText: "Ikon",
       layerId: "Ikon",
-      // backgroundColor: "blue",
+      checkedColor: "#74a5f2",
     });
-    map.current.addControl(checkboxControlIkon, "top-left");
-
+    map.current.addControl(checkboxControlIkon, "top-right");
     // Epic toggle
     const checkboxControlEpic = new CheckboxControl({
       labelText: "Epic",
       layerId: "Epic",
-      backgroundColor: "orange",
+      checkedColor: "orange",
     });
-    map.current.addControl(checkboxControlEpic, "top-left");
+    map.current.addControl(checkboxControlEpic, "top-right");
 
     // Drop down
-    const customControl = new CollapsibleControl((e) => {
+    const collapsibleControl = new CollapsibleControl((e) => {
       // coordinates from button data
       const lat = e.target.dataset.lat;
       const lng = e.target.dataset.lng;
@@ -78,12 +77,10 @@ export function Map({
       map.current.flyTo({ center: [lng, lat], zoom: zoom });
       // console.log(e.target.dataset);
     });
-    map.current.addControl(customControl, "top-left");
+    map.current.addControl(collapsibleControl, "top-left");
 
     // Navigation
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
-    // Full Screen
-    map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
 
     // Load feature set into symbole layer
     map.current.on("load", () => {
@@ -128,14 +125,24 @@ export function Map({
               // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
               "icon-image": ["get", "icon"], // same as inserting feature.properties.icon, just picks it from featureset
               // "icon-image": "resort",
+
               "icon-allow-overlap": true,
-              "icon-size": 0.0375,
+              // "icon-size": 0.0375,
               // "icon-color": "#0000FF",
               "icon-allow-overlap": true,
               "icon-ignore-placement": true,
               "text-field": ["get", "name"],
               "text-offset": [0, 1.2],
               "text-size": 14,
+              "icon-size": [
+                "match",
+                ["get", "state"],
+                "normal",
+                0.03,
+                "highlighted",
+                0.06,
+                0.03,
+              ],
               // "text-allow-overlap": true,
               // "text-ignore-placement": true,
               "text-optional": true,
@@ -147,6 +154,22 @@ export function Map({
     });
   }, []);
 
+  // create function to update state of top rendered icon
+  // function setFeatureState(featureId, newState) {
+  //   // Assuming the source is named 'marker-source'
+  //   if (map.current.isStyleLoaded()) {
+  //     map.current.setFeatureState(
+  //       { source: "resorts", id: featureId },
+  //       { state: newState }
+  //     );
+  //     console.log(newState);
+  //     // Trigger the map to update its style
+  //     map.current.style._dirty = true;
+  //     map.current.style._recompute();
+  //   }
+  // }
+
+  // update rendered features state
   useEffect(() => {
     map.current.on("moveend", () => {
       // on move, fetched rendered resorts
@@ -158,6 +181,19 @@ export function Map({
         // pass rendered resorts to parent component via functional prop
         setRenderedResorts(features);
       }
+      //   // Retrieve the feature that was clicked
+
+      //   // Get the feature's current state
+      //   const currentState = features[0].state
+      //     ? features[0].state.state
+      //     : "normal";
+
+      //   // Compute the new state
+      //   const newState = currentState === "normal" ? "highlighted" : "normal";
+
+      //   // Update the feature's state and style
+      //   setFeatureState(feature.id, newState);
+      // }
 
       // Read out coordinates
       // var center = map.current.getCenter();
@@ -220,18 +256,18 @@ export function Map({
       // }
 
       //mobile
-      if (window.innerWidth <= 768) {
-        // This is a common breakpoint for mobile devices
-        window.location.href = `resorts/${slug}`;
-      } else {
-        map.current.flyTo({ center: coordinates });
+      // if (window.innerWidth <= 768) {
+      //   // This is a common breakpoint for mobile devices
+      //   window.open(`resorts/${slug}`);
+      // } else {
+      map.current.flyTo({ center: coordinates });
 
-        const popup = addPopup(coordinates, name, slug, img_url);
+      const popup = addPopup(coordinates, name, slug, img_url);
 
-        return () => {
-          popup.remove();
-        };
-      }
+      return () => {
+        popup.remove();
+      };
+      // }
     }
   }, [selectedResort]);
 
@@ -241,17 +277,16 @@ export function Map({
       offset: 15,
       keepInView: true, // This option ensures the popup stays in view
       closeOnClick: true,
-      closeButton: true,
+      closeButton: false,
       // closeOnMove: true,
       maxWidth: "none",
       // className: "",
     })
       .setLngLat(coordinates)
       .setHTML(
-        `<div style="padding:1%; max-width:90%; border-radius: 15px;">
-            <h1 style="color: black; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>
+        `<div style="padding:1%; text-align: center; border-radius: 100%;">
             <a href="resorts/${slug}" target="_blank">
-              <img src="${img_url}" style="max-width: 300px; max-height: 150px;"/>
+            <h1 style="color: black; min-width:100%; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>
             <a/>
             </div>`
       )

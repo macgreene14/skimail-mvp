@@ -42,7 +42,7 @@ body {
   z-index:10;
 }
 
-.mapboxgl-ctrl-group {
+/* .mapboxgl-ctrl-group {
   border: none;
   box-shadow: none;
   display: flex;
@@ -55,24 +55,25 @@ body {
   display: block;
   cursor: pointer;
   color: black;
+} */
+
+.control-content {
+    font-size: .75rem;
+    font-weight: 300;
+    color: #1a202c;
+    margin: .5rem;
 }
 
-/* .mapboxgl-ctrl-logo {
-  display: none !important;
+/* .custom-icon-flyto {
+  margin: auto; // adjusting flyto icon placement
 } */
 
 .mapbox-improve-map {
   display: none !important;
 }
 
-@media only screen and (max-width: 480px) {
-  .mapboxgl-popup-content {
-      max-width: 250px;
-  }
-  .mapboxgl-popup-content div {
-      padding:0em;
-  }
-  .mapboxgl-popup-content p {
-      margin: 0.5em 0.5em;
-  }
-}
+/* addds the class to stack containers in row */
+/* .mapboxgl-dropdown-icontrol {
+  display: flexbox;
+  flex-direction: row;
+} */

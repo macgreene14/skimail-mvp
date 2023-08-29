@@ -37,54 +37,46 @@ export default function Page({ params }) {
   ];
 
   return (
-    <div className="">
-      {/* <h1 className="text-3xl font-extrabold m-4">
-        {resort[0].properties.name}
-      </h1>
-      <div className="flex flex-col">
-        <div className="w-1/2 h-4/6 overflow-auto">
-          <img src={img_url} alt="" className="h-full" />
-        </div>
-        <div className="w-3/4 h-4/6 overflow-auto">
-          <div className="w-[600px] h-[300px] z-10">
-            <MapGuideBook resort={resort} />
-          </div>
-        </div>
-      </div> */}
-      <div className="mx-auto m-8 max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            {resort[0].properties.name}
-          </h2>
-          <p className="mt-6 text-lg leading-8 text-white">{description}</p>
-        </div>
-      </div>
-
-      {/* Values section */}
-      <div className="mx-auto m-8 max-w-7xl px-6 lg:px-8">
-        <dl className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-4 text-base leading-7 sm:grid-cols-2 lg:grid-cols-3">
-          {values.map((value) => (
-            <div key={value.name}>
-              <dt className="font-semibold text-white">{value.name}</dt>
-              <dd className="mt-1 text-white">{value.description}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-
-      <div className="min-h-screen w-3/4 mx-auto">
+    <div>
+      <div className="min-h-screen w-full md:first-letter:w-3/4 mx-auto">
         {/* Image section */}
-        <div className="xl:px-2 rounded-3xl">
+        <div className="xl:px-2 rounded-3xl relative min-h-full">
           <img
             src={img_url}
             alt=""
-            className="m-2 lg:w-3/4 mx-auto object-cover rounded-3xl"
+            className="m-2 lg:w-3/4 mx-auto object-cover rounded-3xl z-0"
           />
+
+          <div className="absolute inset-0 flex flex-col justify-center items-center z-10 min-h-full overflow-auto">
+            <div className="mx-auto max-w-2xl text-center bg-opacity-50 bg-black rounded-lg p-2">
+              <h2
+                className="text-3xl font-bold tracking-tight text-white sm:text-4xl"
+                style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)" }}
+              >
+                {resort[0].properties.name}
+              </h2>
+              <p
+                className="mt-6 text-lg leading-8 text-white"
+                style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.7)" }}
+              >
+                {description}
+              </p>
+
+              <dl className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-4 text-base leading-7 sm:grid-cols-2 lg:grid-cols-3">
+                {values.map((value) => (
+                  <div key={value.name} className="text-center">
+                    <dt className="font-semibold text-white">{value.name}</dt>
+                    <dd className="mt-1 text-white">{value.description}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
         </div>
 
         {/* Map section */}
         <div className="xl:px-2">
-          <div className=" aspect-[1/1] md:aspect-[3/2] lg:aspect-[4/2] w-full lg:w-3/4  mx-auto object-cover rounded-3xl overflow-auto">
+          <div className="aspect-[1/1] md:aspect-[3/2] lg:aspect-[4/2] w-full lg:w-3/4  mx-auto object-cover rounded-3xl overflow-auto">
             <MapGuideBook resort={resort} />
           </div>
         </div>
@@ -104,7 +96,8 @@ function MapGuideBook({ resort }) {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       // style: "mapbox://styles/mapbox/light-v11",
-      style: "mapbox://styles/macgreene14/clfcuoot6003l01nzn1hdf5mc",
+      // style: "mapbox://styles/macgreene14/clfcuoot6003l01nzn1hdf5mc",
+      style: "mapbox://styles/macgreene14/cllvvti2i007c01rc10lq2ohz",
       center: [lat, lon],
       zoom: 12,
       pitch: 55,
@@ -118,7 +111,7 @@ function MapGuideBook({ resort }) {
     map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
   });
   useEffect(() => {
-    map.current.on("mouseenter", ["road-path-bg"], (e) => {
+    map.current.on("click", ["road-path-bg"], (e) => {
       // Logging the feature for debugging
 
       const geometry = e.features[0].geometry;

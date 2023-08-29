@@ -2,7 +2,12 @@
 import React from "react";
 import { Card } from "./Card.jsx";
 
-export function ResultsContainer({ resorts, flights, setSelectedResort }) {
+export function ResultsContainer({
+  resorts,
+  flights,
+  setSelectedResort,
+  selectedResort,
+}) {
   return (
     <div className="overflow-auto rounded-lg bg-white shadow h-[32vh] lg:h-[80vh] flex flex-row lg:flex-col">
       {/* <h2 className="h-2 m-2 text-black font-bold">
@@ -12,7 +17,9 @@ export function ResultsContainer({ resorts, flights, setSelectedResort }) {
         return (
           <Card
             onClick={() => {
-              setSelectedResort(resort);
+              resort == selectedResort
+                ? window.open(`/resorts/${resort.properties.slug}`)
+                : setSelectedResort(resort);
             }}
             key={index}
             resort={resort}

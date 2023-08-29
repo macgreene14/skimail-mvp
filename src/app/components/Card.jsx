@@ -1,20 +1,27 @@
 "use client";
 export function Card({ resort, flight, onClick }) {
+  const slug = resort.properties.slug;
+  const img_url = `https://ik.imagekit.io/bamlnhgnz/maps/${slug}.png`;
   return (
-    <div className="snap-start m-2 hover:cursor-pointer" onClick={onClick}>
-      <div className="min-w-[250px] md:min-w-[400px] lg:min-w-full min-h-[100px] lg:w-full h-full shadow-md rounded-lg border-solid border-2 my-1">
-        <div className="px-4 py-2 md:px-6 md:p-4 block">
-          <span className="text-gray-700 font-semibold text-sm md:text-md mx-2 mb-2 block">
+    <div className="hover:cursor-pointer aspect-[4/3] m-2" onClick={onClick}>
+      <div className="min-w-full md:min-w-[400px] lg:min-w-full min-h-[100px] lg:w-full h-full shadow-md rounded-lg border-solid border-2 my-1">
+        <div className="px-2 py-2 block">
+          <span className="text-gray-700 font-semibold text-sm md:text-md block text-center">
             {resort.properties.name}
           </span>
-          <span className="text-gray-700 font-semibold text-sm md:text-md mx-2 mb-2 block">
-            {resort.properties.state !== "Unknown" &&
-              `${resort.properties.state}`}
-          </span>
-          <span className="flex h-5 justify-center bg-blue-200 rounded-full px-2 py-1 text-xs md:text-sm font-semibold text-gray-700 mr-2 mb-2">
-            {resort.properties.icon}
-          </span>
-          <span className="flex items-center bg-gray-200 rounded-full px-2 py-1 text-xs md:text-sm font-semibold text-gray-700 mr-2 mb-2">
+
+          {/* Other content here... */}
+
+          <div className="md:max-h-full max-h-[200px] overflow-y-auto overflow-x-auto min-h-full">
+            <img
+              src={img_url}
+              alt="Mountain Height Icon"
+              className=" object-cover md:object-scale-down "
+            />
+          </div>
+
+          {/* ski metric chips */}
+          {/* <span className="flex items-center bg-gray-200 rounded-full px-2 py-1 text-xs md:text-sm font-semibold text-gray-700 mr-2 mb-2">
             <img
               src="https://ik.imagekit.io/bamlnhgnz/mtn_height_icon.png"
               alt="Mountain Height Icon"
@@ -40,7 +47,7 @@ export function Card({ resort, flight, onClick }) {
             />
             {resort.properties.avg_snowfall !== "Unknown" &&
               `${resort.properties.avg_snowfall} in`}
-          </span>
+          </span> */}
         </div>
       </div>
     </div>
