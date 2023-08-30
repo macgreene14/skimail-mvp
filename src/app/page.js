@@ -4,6 +4,7 @@ import { Map } from "./components/Map.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
 import resortCollection from "../../assets/resorts.json";
+import NavBar from "../app/components/NavBar.jsx";
 
 export default function App() {
   const resorts = resortCollection.features;
@@ -13,6 +14,7 @@ export default function App() {
   return (
     <>
       <div className="">
+        <NavBar />
         <main className="p-2 lg:p-4">
           <div className="mx-auto px-1 lg:px-4">
             <h1 className="sr-only">Explore</h1>
@@ -22,7 +24,7 @@ export default function App() {
               {/* Left column - Results */}
               <div className="flex flex-col p-2">
                 {/* Search Bar */}
-                <section className="rounded-md">
+                <section className="rounded-md mb-1">
                   <SearchBar
                     data={resorts}
                     setRenderedResorts={setRenderedResorts}

@@ -5,7 +5,7 @@ import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-load
 import "mapbox-gl/dist/mapbox-gl.css";
 import resortCollection from "../../../../assets/resorts.json";
 import { BellIcon } from "@heroicons/react/24/outline";
-
+import NavBar from "../../components/NavBar";
 mapboxgl.accessToken =
   "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
 
@@ -21,40 +21,45 @@ export default function Page({ params }) {
   const skiable_acres = resort[0].properties.skiable_acres;
   const description = resort[0].properties.description;
 
-  const values = [
+  const metrics = [
     {
       name: "Average Snowfall",
-      description: avg_snowfall,
+      description: `✼ ${avg_snowfall}`,
     },
     {
       name: "Vertical Drop",
-      description: vertical_drop,
+      description: `⛰ ${vertical_drop}`,
     },
     {
       name: "Skiable Acres",
-      description: skiable_acres,
+      description: `⛷ ${skiable_acres}`,
     },
   ];
 
   return (
     <div>
-      <div className="min-h-screen w-full md:first-letter:w-3/4 mx-auto">
+      <NavBar />
+      <div className="min-h-screen w-full md:first-letter:w-3/4 mx-auto lg:w-5/6">
         {/* Image section */}
-        <div className="xl:px-2 rounded-3xl relative min-h-full">
+        <div className="relative w-full aspect-[6/2] bg-gray-500 backdrop-blur-lg rounded-3xl">
           <img
             src={img_url}
             alt=""
-            className="m-2 lg:w-3/4 mx-auto object-cover rounded-3xl z-0"
+            className="m-2 mx-auto object-cover rounded-3xl z-0 h-[120vh] max-h-[120vh]"
           />
+          {/* Change h-[50vh] and max-h-[50vh] to set the max height to half the screen */}
 
-          <div className="absolute inset-0 flex flex-col justify-center items-center z-10 min-h-full overflow-auto">
-            <div className="mx-auto max-w-2xl text-center bg-opacity-50 bg-black rounded-lg p-2">
+          <div className="absolute max-w-full inset-0 flex flex-col justify-center items-center z-10 min-h-full overflow-auto">
+            <div className="mx-auto max-w-2xl text-center bg-opacity-50 bg-black rounded-lg p-2 mb-20">
+              {/* Add mb-20 or your desired margin to the bottom */}
               <h2
                 className="text-3xl font-bold tracking-tight text-white sm:text-4xl"
                 style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)" }}
               >
                 {resort[0].properties.name}
               </h2>
+
+              {/* ... (rest of your code) */}
               <p
                 className="mt-6 text-lg leading-8 text-white"
                 style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.7)" }}
@@ -62,10 +67,10 @@ export default function Page({ params }) {
                 {description}
               </p>
 
-              <dl className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-4 text-base leading-7 sm:grid-cols-2 lg:grid-cols-3">
-                {values.map((value) => (
+              <dl className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-4 text-md leading-7 sm:grid-cols-2 lg:grid-cols-3">
+                {metrics.map((value) => (
                   <div key={value.name} className="text-center">
-                    <dt className="font-semibold text-white">{value.name}</dt>
+                    <dt className="font-bold text-white">{value.name}</dt>
                     <dd className="mt-1 text-white">{value.description}</dd>
                   </div>
                 ))}
@@ -75,8 +80,8 @@ export default function Page({ params }) {
         </div>
 
         {/* Map section */}
-        <div className="xl:px-2">
-          <div className="aspect-[1/1] md:aspect-[3/2] lg:aspect-[4/2] w-full lg:w-3/4  mx-auto object-cover rounded-3xl overflow-auto">
+        <div className="">
+          <div className="aspect-[1/1] md:aspect-[3/2] lg:aspect-[4/2] w-full mx-auto object-cover rounded-3xl overflow-auto">
             <MapGuideBook resort={resort} />
           </div>
         </div>
@@ -122,21 +127,6 @@ function MapGuideBook({ resort }) {
       if (e.features[0].properties.type !== "piste") {
         return;
       }
-
-      // // Check geometry type
-      // if (geometry.type === "LineString") {
-      //   coordinates = geometry.coordinates[0];
-      // } else {
-      //   coordinates = geometry.coordinates[0][0];
-      // }
-
-      // // Ensure that if the map is zoomed out such that multiple
-      // // copies of the feature are visible, the popup appears
-      // // over the copy being pointed to.
-      // while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-      //   coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-      // }
-      // map.current.flyTo({ center: coordinates });
 
       const popup = addPopup(coordinates, name);
 

@@ -219,16 +219,29 @@ export function Map({
         className="block"
       >
         <h1 className="text-black w-full text-lg font-bold m-1">
-          {selectedResort.properties.name} - {selectedResort.properties.state}
+          {selectedResort.properties.name !== "Unknown"
+            ? selectedResort.properties.name
+            : null}
+          {selectedResort.properties.name !== "Unknown" &&
+          selectedResort.properties.name !== "Unknown"
+            ? " - "
+            : null}
+          {selectedResort.properties.state !== "Unknown"
+            ? selectedResort.properties.state
+            : null}
+          {selectedResort.properties.state !== "Unknown" ? " - " : null}
+          {selectedResort.properties.country !== "Unknown"
+            ? selectedResort.properties.country
+            : null}{" "}
         </h1>
         <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-          {selectedResort.properties.vertical_drop} ft
+          ✼ {selectedResort.properties.avg_snowfall} in
         </span>
         <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-          {selectedResort.properties.skiable_acres} acres
+          ⛰ {selectedResort.properties.vertical_drop} ft
         </span>
         <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-          {selectedResort.properties.avg_snowfall} in
+          ⛷ {selectedResort.properties.skiable_acres} acres
         </span>
       </a>
     </div>
