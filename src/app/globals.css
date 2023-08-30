@@ -25,3 +25,61 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+/* .mapboxgl-popup {
+padding: -5px;
+} */
+
+.mapboxgl-popup-close-button {
+  margin-top: 12px;
+  margin-right: 17px;
+  color: black;
+  font-size: 20px;
+  line-height: 20px;
+  z-index:2;
+}
+
+/* .mapboxgl-ctrl-group {
+  border: none;
+  box-shadow: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 2%; 
+  margin: 2%;
+}
+
+.mapboxgl-ctrl-group label {
+  display: block;
+  cursor: pointer;
+  color: black;
+} */
+
+.control-content {
+    font-size: .75rem;
+    font-weight: 300;
+    color: #1a202c;
+    margin: .5rem;
+}
+
+/* .custom-icon-flyto {
+  margin: auto; // adjusting flyto icon placement
+} */
+
+.mapbox-improve-map {
+  display: none !important;
+}
+
+/* addds the class to stack containers in row */
+/* .mapboxgl-dropdown-icontrol {
+  display: flexbox;
+  flex-direction: row;
+} */
+
+.mapboxgl-popup-content {
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.mapboxgl-popup-tip {
+  display: none !important;
+}

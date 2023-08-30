@@ -1,24 +1,45 @@
-"use client";
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Card } from "./Card.jsx";
 
-export function ResultsContainer({ resorts, flights }) {
+export function ResultsContainer({
+  resorts,
+  setSelectedResort,
+  selectedResort,
+}) {
+  // create ref to hold card div for scrolling function
+  // const selectedCardRef = useRef();
+  // console.log("___results container reload___");
+
   return (
-    <div className="overflow-auto rounded-lg bg-white shadow h-[32vh] lg:h-[80vh] flex flex-row lg:flex-col snap-y">
-      {resorts.map((resort, index) => {
-        return (
-          <Card
-            key={index}
-            resort={resort}
-            flight={
-              flights[resort.properties.airport]?.data &&
-              flights[resort.properties.airport].data[0]?.price
-                ? flights[resort.properties.airport].data[0].price
-                : ""
-            }
-          />
-        );
-      })}
+    <div className="snap-both overflow-auto rounded-lg shadow h-[32vh] lg:h-[80vh] flex flex-row lg:flex-col">
+      {resorts
+        ?.sort((a, b) => {
+          const skiable_acresA = parseFloat(a.properties.skiable_acres) || 0; // handle undefined and convert to number
+          const skiable_acresB = parseFloat(b.properties.skiable_acres) || 0; // handle undefined and convert to number
+          return skiable_acresB - skiable_acresA;
+        })
+        .map((resort) =>
+          (() => {
+            return (
+              <Card
+                className="snap-mandatory snap-start"
+                resortsLength={resorts.length}
+                key={resort.properties.name}
+                resort={resort}
+                isSelected={
+                  resort?.properties.name === selectedResort?.properties.name
+                    ? true
+                    : false
+                }
+                onClick={() => {
+                  resort?.properties.name === selectedResort?.properties.name
+                    ? window.open(`/resorts/${resort.properties.slug}`)
+                    : setSelectedResort(resort);
+                }}
+              />
+            );
+          })()
+        )}
     </div>
   );
 }
