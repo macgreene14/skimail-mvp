@@ -1,12 +1,10 @@
 import React, { useRef, useEffect } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
-import { NavControl } from "./NavControl";
-import CustomControl from "../../../utils/CustomControl";
 import CheckboxControl from "../../../utils/Checkbox";
 import CollapsibleControl from "../../../utils/CollapsibleControl";
-import offsetCoords from "../../../utils/offsetCoords";
 import { Radar } from "./Radar";
+import ReactDOMServer from "react-dom/server";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
@@ -25,11 +23,11 @@ export function Map({
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      // style: "mapbox://styles/mapbox/light-v11",
+      style: "mapbox://styles/mapbox/light-v11",
       // style: "mapbox://styles/macgreene14/cllroyibd004c01ofcyv7eks3",
       // style: "mapbox://styles/macgreene14/cllb90sr900dj01ojf33a3w1b",
       // style: "mapbox://styles/macgreene14/clltty6cg004y01r91ooz74cm", //cali top
-      style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8", //unicorn
+      // style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8", //unicorn
       center: [-101, 41],
       zoom: 2.7,
     });
@@ -154,21 +152,6 @@ export function Map({
     });
   }, []);
 
-  // create function to update state of top rendered icon
-  // function setFeatureState(featureId, newState) {
-  //   // Assuming the source is named 'marker-source'
-  //   if (map.current.isStyleLoaded()) {
-  //     map.current.setFeatureState(
-  //       { source: "resorts", id: featureId },
-  //       { state: newState }
-  //     );
-  //     console.log(newState);
-  //     // Trigger the map to update its style
-  //     map.current.style._dirty = true;
-  //     map.current.style._recompute();
-  //   }
-  // }
-
   // update rendered features state
   useEffect(() => {
     map.current.on("moveend", () => {
@@ -181,19 +164,6 @@ export function Map({
         // pass rendered resorts to parent component via functional prop
         setRenderedResorts(features);
       }
-      //   // Retrieve the feature that was clicked
-
-      //   // Get the feature's current state
-      //   const currentState = features[0].state
-      //     ? features[0].state.state
-      //     : "normal";
-
-      //   // Compute the new state
-      //   const newState = currentState === "normal" ? "highlighted" : "normal";
-
-      //   // Update the feature's state and style
-      //   setFeatureState(feature.id, newState);
-      // }
 
       // Read out coordinates
       // var center = map.current.getCenter();
@@ -222,47 +192,15 @@ export function Map({
       while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
-      map.current.flyTo({ center: coordinates });
-
-      const popup = addPopup(coordinates, name, slug, img_url);
-
-      // map.current.on("mouseleave", "poi-mountain", function () {
-      //   map.current.getCanvas().style.cursor = "";
-      //   popup.remove();
-      // });
-
-      return () => {
-        popup.remove();
-      };
+      setSelectedResort(e.features[0]);
     });
   });
 
+  // when resort selected via card or marker click, add popup and center
   useEffect(() => {
     if (selectedResort) {
       // Copy coordinates array.
-      const coordinates = selectedResort.geometry.coordinates.slice();
-      const name = selectedResort.properties.name;
-      const website = selectedResort.properties.website;
-
-      // const description = e.features[0].properties.description;
-      const slug = selectedResort.properties.slug;
-      const img_url = `https://ik.imagekit.io/bamlnhgnz/maps/${slug}.png`;
-
-      // Ensure that if the map is zoomed out such that multiple
-      // copies of the feature are visible, the popup appears
-      // over the copy being pointed to.
-      // while (Math.abs(selectedResort.lngLat.lng - coordinates[0]) > 180) {
-      //   coordinates[0] += selectedResort.lngLat.lng > coordinates[0] ? 360 : -360;
-      // }
-
-      //mobile
-      // if (window.innerWidth <= 768) {
-      //   // This is a common breakpoint for mobile devices
-      //   window.open(`resorts/${slug}`);
-      // } else {
-      map.current.flyTo({ center: coordinates });
-
-      const popup = addPopup(coordinates, name, slug, img_url);
+      const popup = addPopup(selectedResort);
 
       return () => {
         popup.remove();
@@ -271,26 +209,58 @@ export function Map({
     }
   }, [selectedResort]);
 
-  function addPopup(coordinates, name, slug, img_url) {
+  // Create your React component with Tailwind CSS classes
+  const PopupContent = ({ selectedResort }) => (
+    <div className="p-2 text-center bg-white shadow-md rounded-lg border-solid border-2 ">
+      <a
+        href={`resorts/${selectedResort.properties.slug}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block"
+      >
+        <h1 className="text-black w-full text-lg font-bold m-1">
+          {selectedResort.properties.name} - {selectedResort.properties.state}
+        </h1>
+        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+          {selectedResort.properties.vertical_drop} ft
+        </span>
+        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+          {selectedResort.properties.skiable_acres} acres
+        </span>
+        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+          {selectedResort.properties.avg_snowfall} in
+        </span>
+      </a>
+    </div>
+  );
+
+  function addPopup(selectedResort) {
+    const popupNode = ReactDOMServer.renderToStaticMarkup(
+      <PopupContent selectedResort={selectedResort} />
+    );
+    const coordinates = selectedResort.geometry.coordinates.slice();
     const popup = new mapboxgl.Popup({
       anchor: "bottom",
-      offset: 15,
+      offset: 5,
       keepInView: true, // This option ensures the popup stays in view
       closeOnClick: true,
-      closeButton: false,
+      closeButton: true,
       // closeOnMove: true,
       maxWidth: "none",
+      focusAfterOpen: false,
       // className: "",
     })
       .setLngLat(coordinates)
-      .setHTML(
-        `<div style="padding:1%; text-align: center; border-radius: 100%;">
-            <a href="resorts/${slug}" target="_blank">
-            <h1 style="color: black; min-width:100%; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>
-            <a/>
-            </div>`
-      )
+      .setHTML(popupNode)
       .addTo(map.current);
+
+    // trying to clear selection when popup no longer needed
+    // but this clears selection when clicking a card
+    // popup.on("close", () => {
+    //   setSelectedResort();
+    // });
+
+    map.current.flyTo({ center: coordinates });
 
     return popup;
   }
@@ -298,7 +268,7 @@ export function Map({
   return (
     <div ref={mapContainer} className="w-full h-full z-1 rounded-lg">
       {/* <NavControl map={map} /> */}
-      <Radar map={map} />
+      {/* <Radar map={map} /> */}
     </div>
   );
 }

@@ -1,37 +1,39 @@
-"use client";
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Card } from "./Card.jsx";
 
 export function ResultsContainer({
   resorts,
-  flights,
   setSelectedResort,
   selectedResort,
 }) {
+  // create ref to hold card div for scrolling function
+  // const selectedCardRef = useRef();
+  // console.log("___results container reload___");
+
   return (
-    <div className="overflow-auto rounded-lg bg-white shadow h-[32vh] lg:h-[80vh] flex flex-row lg:flex-col">
-      {/* <h2 className="h-2 m-2 text-black font-bold">
-        Results: {resorts.length}
-      </h2> */}
-      {resorts.map((resort, index) => {
-        return (
-          <Card
-            onClick={() => {
-              resort == selectedResort
-                ? window.open(`/resorts/${resort.properties.slug}`)
-                : setSelectedResort(resort);
-            }}
-            key={index}
-            resort={resort}
-            flight={
-              flights[resort.properties.airport]?.data &&
-              flights[resort.properties.airport].data[0]?.price
-                ? flights[resort.properties.airport].data[0].price
-                : ""
-            }
-          />
-        );
-      })}
+    <div className="snap-both overflow-auto rounded-lg shadow h-[30vh] lg:h-[80vh] flex flex-row lg:flex-col">
+      {resorts.map((resort) =>
+        (() => {
+          return (
+            <Card
+              className="snap-center lg:snap-start"
+              resortsLength={resorts.length}
+              key={resort.properties.name}
+              resort={resort}
+              isSelected={
+                resort?.properties.name === selectedResort?.properties.name
+                  ? true
+                  : false
+              }
+              onClick={() => {
+                resort?.properties.name === selectedResort?.properties.name
+                  ? window.open(`/resorts/${resort.properties.slug}`)
+                  : setSelectedResort(resort);
+              }}
+            />
+          );
+        })()
+      )}
     </div>
   );
 }
