@@ -28,7 +28,7 @@ export default class CustomControl {
       <div data-lat="37.0" data-lng="-121.0" data-zoom="5.3" style="cursor: pointer; border-radius: 3px; margin: 2px;">
         California
       </div> 
-      <div data-lat="41.4" data-lng="-78.9" data-zoom="3.8" style="cursor: pointer; border-radius: 3px; margin: 2px;">
+      <div data-lat="41.4" data-lng="-78.9" data-zoom="4.5" style="cursor: pointer; border-radius: 3px; margin: 2px;">
         Eastern US
       </div> 
       <div data-lat="51.3" data-lng="-119.4" data-zoom="4.6" style="cursor: pointer; border-radius: 3px; margin: 2px;">

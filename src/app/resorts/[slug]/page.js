@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -39,18 +39,18 @@ export default function Page({ params }) {
   return (
     <div>
       <NavBar />
-      <div className="min-h-screen w-full md:first-letter:w-3/4 mx-auto lg:w-5/6">
+      <div className="min-h-screen w-full md:first-letter:w-3/4 mx-auto lg:w-5/6 pb-10">
         {/* Image section */}
-        <div className="relative w-full aspect-[6/2] bg-gray-500 backdrop-blur-lg rounded-3xl">
+        <div className="relative w-full bg-gray-900 rounded-3xl">
           <img
             src={img_url}
             alt=""
-            className="m-2 mx-auto object-cover rounded-3xl z-0 h-[120vh] max-h-[120vh]"
+            className="m-2 mx-auto object-cover rounded-3xl z-0"
           />
           {/* Change h-[50vh] and max-h-[50vh] to set the max height to half the screen */}
 
-          <div className="absolute max-w-full inset-0 flex flex-col justify-center items-center z-10 min-h-full overflow-auto">
-            <div className="mx-auto max-w-2xl text-center bg-opacity-50 bg-black rounded-lg p-2 mb-20">
+          <div className="absolute max-w-full inset-0 flex flex-col justify-start items-center z-10 min-h-full overflow-auto">
+            <div className="mx-auto max-w-full text-center bg-opacity-50 bg-black rounded-lg p-2 py-10">
               {/* Add mb-20 or your desired margin to the bottom */}
               <h2
                 className="text-3xl font-bold tracking-tight text-white sm:text-4xl"
@@ -61,17 +61,19 @@ export default function Page({ params }) {
 
               {/* ... (rest of your code) */}
               <p
-                className="mt-6 text-lg leading-8 text-white"
+                className="mt-6 px-24 text-lg leading-8 text-white"
                 style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.7)" }}
               >
                 {description}
               </p>
 
-              <dl className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-4 text-md leading-7 sm:grid-cols-2 lg:grid-cols-3">
+              <dl className="mx-auto mt-4 grid max-w-2xl gap-x-8 gap-y-4 text-md leading-7 grid-cols-3">
                 {metrics.map((value) => (
                   <div key={value.name} className="text-center">
                     <dt className="font-bold text-white">{value.name}</dt>
-                    <dd className="mt-1 text-white">{value.description}</dd>
+                    <dd className="mt-1 text-lg text-white">
+                      {value.description}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -95,6 +97,11 @@ function MapGuideBook({ resort }) {
   const map = useRef(null);
   const lat = resort[0].geometry.coordinates[0];
   const lon = resort[0].geometry.coordinates[1];
+  const [camLng, setCamLng] = useState();
+  const [camLat, setCamLat] = useState();
+  const [camZoom, setCamZoom] = useState();
+  const [camPitch, setCamPitch] = useState(0);
+  const [camBearing, setCamBearing] = useState(0);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -116,6 +123,14 @@ function MapGuideBook({ resort }) {
     map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
   });
   useEffect(() => {
+    map.current.on("move", () => {
+      setCamLng(map.current.getCenter().lng.toFixed(4));
+      setCamLat(map.current.getCenter().lat.toFixed(4));
+      setCamZoom(map.current.getZoom().toFixed(2));
+      setCamPitch(map.current.getPitch().toFixed(2));
+      setCamBearing(map.current.getBearing().toFixed(2));
+    });
+
     map.current.on("click", ["road-path-bg"], (e) => {
       // Logging the feature for debugging
 
@@ -162,5 +177,12 @@ function MapGuideBook({ resort }) {
     return popup;
   }
 
-  return <div ref={mapContainer} className="w-full h-full z-10"></div>;
+  return (
+    <div ref={mapContainer} className="w-full h-full z-10">
+      {" "}
+      <div className="fixed right-40 bottom-10 z-10 backdrop-blur-3xl px-44 rounded-md text-lg">
+        {camLng},{camLat},{camZoom},{camBearing},{camPitch}
+      </div>
+    </div>
+  );
 }

@@ -3,7 +3,7 @@ export default class CheckboxControl {
     this._options = options;
     this._container = document.createElement("div");
     this._container.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
-    this._isVisible = true; // Default visibility state
+    this._isVisible = this._options.defVis; // Default visibility state
 
     this._toggleButton = document.createElement("button");
     this._toggleButton.className = "mapboxgl-ctrl-icon";

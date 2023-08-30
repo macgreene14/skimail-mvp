@@ -37,7 +37,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
       onClick={onClick}
     >
       <div className="w-[350px] aspect-[5/3] mx-2 my-1 lg:mx-0 lg:w-full bg-white overflow-hidden shadow-md rounded-lg border-solid border-2 ">
-        <div className="object-cover relative">
+        <div className="relative">
           <img
             src={img_url}
             alt="Mountain Height Icon"

@@ -32,6 +32,19 @@ export function Map({
       zoom: 2.7,
     });
 
+    // // After the map has loaded, you can inspect its layers
+    // map.current.on("load", function () {
+    //   const layers = map.current.getStyle().layers;
+
+    //   // Loop through each layer to find the source layer name
+    //   layers.forEach(function (layer) {
+    //     if (layer["source-layer"]) {
+    //       console.log("Layer ID:", layer.id);
+    //       console.log("Source Layer Name:", layer["source-layer"]);
+    //     }
+    //   });
+    // });
+
     // Add geolocate control to the map.
     map.current.addControl(
       new mapboxgl.GeolocateControl({
@@ -56,6 +69,7 @@ export function Map({
       labelText: "Ikon",
       layerId: "Ikon",
       checkedColor: "#74a5f2",
+      defVis: true,
     });
     map.current.addControl(checkboxControlIkon, "top-right");
     // Epic toggle
@@ -63,16 +77,25 @@ export function Map({
       labelText: "Epic",
       layerId: "Epic",
       checkedColor: "orange",
+      defVis: true,
     });
     map.current.addControl(checkboxControlEpic, "top-right");
 
+    const checkboxControlAvgSnow = new CheckboxControl({
+      labelText: "Snow",
+      layerId: "data-driven-circles",
+      checkedColor: "rgb(225, 167, 230)",
+      defVis: false,
+    });
+
+    map.current.addControl(checkboxControlAvgSnow, "top-right");
     // Drop down
     const collapsibleControl = new CollapsibleControl((e) => {
       // coordinates from button data
       const lat = e.target.dataset.lat;
       const lng = e.target.dataset.lng;
       const zoom = e.target.dataset.zoom;
-      map.current.flyTo({ center: [lng, lat], zoom: zoom });
+      map.current.flyTo({ center: [lng, lat], zoom: zoom, bearing: 0 });
       // console.log(e.target.dataset);
     });
     map.current.addControl(collapsibleControl, "top-left");

@@ -11,7 +11,7 @@ export function ResultsContainer({
   // console.log("___results container reload___");
 
   return (
-    <div className="snap-both overflow-auto rounded-lg shadow h-[30vh] lg:h-[80vh] flex flex-row lg:flex-col">
+    <div className="snap-both overflow-auto rounded-lg shadow h-[32vh] lg:h-[80vh] flex flex-row lg:flex-col">
       {resorts
         ?.sort((a, b) => {
           const skiable_acresA = parseFloat(a.properties.skiable_acres) || 0; // handle undefined and convert to number
