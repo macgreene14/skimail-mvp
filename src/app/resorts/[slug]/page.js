@@ -50,7 +50,7 @@ export default function Page({ params }) {
           {/* Change h-[50vh] and max-h-[50vh] to set the max height to half the screen */}
 
           <div className="absolute max-w-full inset-0 flex flex-col justify-start items-center z-10 min-h-full overflow-auto">
-            <div className="mx-auto max-w-full text-center bg-opacity-50 bg-black rounded-lg p-2 py-10">
+            <div className="mx-auto max-w-full text-center bg-opacity-50 bg-black rounded-lg p-2 py-10 mb-48">
               {/* Add mb-20 or your desired margin to the bottom */}
               <h2
                 className="text-3xl font-bold tracking-tight text-white sm:text-4xl"

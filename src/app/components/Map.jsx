@@ -248,7 +248,7 @@ export function Map({
             ? selectedResort.properties.country
             : null}{" "}
         </h1>
-        <span className="inline-block bg-gray-200 rounded-full px-1 lg:px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+        <span className="inline-block bg-gray-200 rounded-full px-1 lg:px-3 py-1 text-xs lg:text-sm font-semibold text-gray-700 mr-2 mb-2">
           ✼ {selectedResort.properties.avg_snowfall} in
         </span>
         <span className="inline-block bg-gray-200 rounded-full px-1 lg:px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
