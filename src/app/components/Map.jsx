@@ -23,11 +23,11 @@ export function Map({
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/light-v11",
+      // style: "mapbox://styles/mapbox/light-v11",
       // style: "mapbox://styles/macgreene14/cllroyibd004c01ofcyv7eks3",
       // style: "mapbox://styles/macgreene14/cllb90sr900dj01ojf33a3w1b",
       // style: "mapbox://styles/macgreene14/clltty6cg004y01r91ooz74cm", //cali top
-      // style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8", //unicorn
+      style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8", //unicorn
       center: [-101, 41],
       zoom: 2.7,
     });
@@ -85,7 +85,7 @@ export function Map({
       // load icons
       // <a href="https://www.freepik.com/icon/mountains_762386#fromView=search&term=ski+mountain&page=1&position=12">Icon by Freepik</a>
       map.current.loadImage(
-        "https://ik.imagekit.io/bamlnhgnz/mountain-black.png?updatedAt=1693110148838",
+        "https://ik.imagekit.io/bamlnhgnz/mountain-blue.png?updatedAt=1693368553125",
         (error, image) => {
           if (error) throw error;
           map.current.addImage("Ikon", image); // Add the image to the map style.
@@ -125,22 +125,13 @@ export function Map({
               // "icon-image": "resort",
 
               "icon-allow-overlap": true,
-              // "icon-size": 0.0375,
+              "icon-size": 0.05,
               // "icon-color": "#0000FF",
               "icon-allow-overlap": true,
               "icon-ignore-placement": true,
               "text-field": ["get", "name"],
               "text-offset": [0, 1.2],
               "text-size": 14,
-              "icon-size": [
-                "match",
-                ["get", "state"],
-                "normal",
-                0.03,
-                "highlighted",
-                0.06,
-                0.03,
-              ],
               // "text-allow-overlap": true,
               // "text-ignore-placement": true,
               "text-optional": true,
@@ -218,7 +209,7 @@ export function Map({
         rel="noopener noreferrer"
         className="block"
       >
-        <h1 className="text-black w-full text-lg font-bold m-1">
+        <h1 className="text-black w-full text-md md:text-lg font-bold m-1">
           {selectedResort.properties.name !== "Unknown"
             ? selectedResort.properties.name
             : null}
@@ -234,13 +225,13 @@ export function Map({
             ? selectedResort.properties.country
             : null}{" "}
         </h1>
-        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+        <span className="inline-block bg-gray-200 rounded-full px-1 lg:px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
           ✼ {selectedResort.properties.avg_snowfall} in
         </span>
-        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+        <span className="inline-block bg-gray-200 rounded-full px-1 lg:px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
           ⛰ {selectedResort.properties.vertical_drop} ft
         </span>
-        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+        <span className="inline-block bg-gray-200 rounded-full px-1 lg:px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
           ⛷ {selectedResort.properties.skiable_acres} acres
         </span>
       </a>

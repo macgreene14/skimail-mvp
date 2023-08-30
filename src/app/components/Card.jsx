@@ -11,7 +11,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
 
   const metrics = [
     {
-      name: "Snowfall",
+      name: "Yearly Snowfall",
       description: `✼ ${avg_snowfall}`,
     },
     {
@@ -37,41 +37,46 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
       onClick={onClick}
     >
       <div className="w-[350px] aspect-[5/3] mx-2 my-1 lg:mx-0 lg:w-full bg-white overflow-hidden shadow-md rounded-lg border-solid border-2 ">
-        <div className="py-1 block">
-          <span className="text-gray-700 font-bold p-1 text-lg block text-center border-b">
-            {resort.properties.name !== "Unknown"
-              ? resort.properties.name
-              : null}
+        <div className="object-cover relative">
+          <img
+            src={img_url}
+            alt="Mountain Height Icon"
+            className="min-h-full"
+          />
 
-            {resort.properties.name !== "Unknown" &&
-            resort.properties.name !== "Unknown"
-              ? " - "
-              : null}
+          <div className="absolute max-w-full inset-0  min-h-full">
+            <div className="mx-auto max-w-2xl text-center bg-opacity-50 bg-black p-2 mb-20">
+              <span className="text-white font-semibold text-sm md:text-md z-10">
+                <span className="text-white-700 font-bold p-1 text-lg block text-center border-b">
+                  {resort.properties.name !== "Unknown"
+                    ? resort.properties.name
+                    : null}
 
-            {resort.properties.state !== "Unknown"
-              ? resort.properties.state
-              : null}
+                  {resort.properties.name !== "Unknown" &&
+                  resort.properties.name !== "Unknown"
+                    ? " - "
+                    : null}
 
-            {resort.properties.state !== "Unknown" ? " - " : null}
+                  {resort.properties.state !== "Unknown"
+                    ? resort.properties.state
+                    : null}
 
-            {resort.properties.country !== "Unknown"
-              ? resort.properties.country
-              : null}
-          </span>
+                  {resort.properties.state !== "Unknown" ? " - " : null}
 
-          <span className="text-gray-700 font-semibold text-sm md:text-md block text-center hidden md:block">
-            <dl className="mx-auto mt-1 grid max-w-2xl grid-cols-3 gap-x-8 gap-y-4 text-md leading-7">
-              {metrics.map((value) => (
-                <div key={value.name} className="text-center">
-                  <dt className="font-bold ">{value.name}</dt>
-                  <dd className="">{value.description}</dd>
-                </div>
-              ))}
-            </dl>
-          </span>
-
-          <div className="object-cover lg:object-scale-down max-w-full">
-            <img src={img_url} alt="Mountain Height Icon" />
+                  {resort.properties.country !== "Unknown"
+                    ? resort.properties.country
+                    : null}
+                </span>
+                <dl className="mx-auto mt-1 grid max-w-2xl grid-cols-3 gap-x-8 gap-y-4 text-md leading-7">
+                  {metrics.map((value) => (
+                    <div key={value.name} className="text-center">
+                      <dt className="font-bold">{value.name}</dt>
+                      <dd className="">{value.description}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </span>
+            </div>
           </div>
         </div>
       </div>

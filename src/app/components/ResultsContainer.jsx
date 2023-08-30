@@ -22,7 +22,7 @@ export function ResultsContainer({
           (() => {
             return (
               <Card
-                className="snap-center lg:snap-start"
+                className="snap-mandatory snap-start"
                 resortsLength={resorts.length}
                 key={resort.properties.name}
                 resort={resort}
