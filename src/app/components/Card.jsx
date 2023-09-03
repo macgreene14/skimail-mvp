@@ -24,11 +24,19 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
     },
   ];
 
+  // scroll to when card selected
   useEffect(() => {
     if (isSelected && cardRef.current) {
       cardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [isSelected, resortsLength]);
+
+  // // jump to card when new results rendered
+  // useEffect(() => {
+  //   if (resortsLength && cardRef.current) {
+  //     cardRef.current.scrollIntoView({ behavior: "instant", block: "start" });
+  //   }
+  // }, [resortsLength]);
 
   return (
     <div
@@ -36,7 +44,12 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
       className="hover:cursor-pointer max-h-[400px]"
       onClick={onClick}
     >
-      <div className="w-[350px] aspect-[5/3] mx-2 my-1 lg:mx-0 lg:w-full bg-white overflow-hidden shadow-md rounded-lg border-solid border-2 ">
+      <div
+        className={
+          "w-[350px] aspect-[5/3] mx-2 my-1 lg:mx-0 lg:w-full bg-white overflow-hidden shadow-md rounded-lg border-8" +
+          (isSelected ? ` border-sky-400` : "")
+        }
+      >
         <div className="relative">
           <img
             src={img_url}

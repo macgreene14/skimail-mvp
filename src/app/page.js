@@ -22,7 +22,7 @@ export default function App() {
             {/* Main 3 column grid */}
             <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-4 max-h-full">
               {/* Left column - Results */}
-              <div className="flex flex-col">
+              <div className="flex flex-col max-w-xl">
                 {/* Search Bar */}
                 <section className="rounded-md mb-1">
                   <SearchBar
@@ -47,7 +47,7 @@ export default function App() {
               </div>
 
               {/* Right column - Map */}
-              <div className="grid grid-cols-1 gap-4 lg:col-span-2 order-first lg:order-last h-[40vh] lg:h-[85vh]">
+              <div className="grid grid-cols-1 gap-4 lg:col-span-2 order-first lg:order-last h-[55vh] lg:h-[85vh]">
                 <section aria-labelledby="section-1-title">
                   <h2 className="sr-only" id="section-1-title">
                     Section title

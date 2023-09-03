@@ -5,6 +5,7 @@ import CheckboxControl from "../../../utils/Checkbox";
 import CollapsibleControl from "../../../utils/CollapsibleControl";
 import { Radar } from "./Radar";
 import ReactDOMServer from "react-dom/server";
+import { SnowDepth } from "../components/SnowDepth";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
@@ -44,6 +45,10 @@ export function Map({
     //     }
     //   });
     // });
+
+    // const search = new mapboxgl.MapboxSearchBox();
+    // search.accessToken = mapboxgl.accessToken;
+    // map.current.addControl(search);
 
     // Add geolocate control to the map.
     map.current.addControl(
@@ -225,7 +230,7 @@ export function Map({
 
   // Create your React component with Tailwind CSS classes
   const PopupContent = ({ selectedResort }) => (
-    <div className="p-2 text-center bg-white shadow-md rounded-lg border-solid border-2 ">
+    <div className="-m-4 p-2 text-center bg-white shadow-md rounded-lg border-solid border-2 ">
       <a
         href={`resorts/${selectedResort.properties.slug}`}
         target="_blank"
@@ -296,6 +301,7 @@ export function Map({
     <div ref={mapContainer} className="w-full h-full z-1 rounded-lg">
       {/* <NavControl map={map} /> */}
       {/* <Radar map={map} /> */}
+      <SnowDepth map={map} />
     </div>
   );
 }

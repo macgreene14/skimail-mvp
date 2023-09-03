@@ -6,6 +6,8 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import resortCollection from "../../../../assets/resorts.json";
 import { BellIcon } from "@heroicons/react/24/outline";
 import NavBar from "../../components/NavBar";
+import * as turf from "@turf/turf";
+import { Chart } from "chart.js";
 mapboxgl.accessToken =
   "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
 
@@ -20,6 +22,7 @@ export default function Page({ params }) {
   const vertical_drop = resort[0].properties.vertical_drop;
   const skiable_acres = resort[0].properties.skiable_acres;
   const description = resort[0].properties.description;
+  const website = resort[0].properties.website;
 
   const metrics = [
     {
@@ -66,6 +69,12 @@ export default function Page({ params }) {
               >
                 {description}
               </p>
+              <p
+                className="mt-6 px-24 text-lg leading-8 text-white"
+                style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.7)" }}
+              >
+                <a href={website}>{website}</a>
+              </p>
 
               <dl className="mx-auto mt-4 grid max-w-2xl gap-x-8 gap-y-4 text-md leading-7 grid-cols-3">
                 {metrics.map((value) => (
@@ -111,7 +120,7 @@ function MapGuideBook({ resort }) {
       // style: "mapbox://styles/macgreene14/clfcuoot6003l01nzn1hdf5mc",
       style: "mapbox://styles/macgreene14/cllvvti2i007c01rc10lq2ohz",
       center: [lat, lon],
-      zoom: 12,
+      zoom: 14,
       pitch: 55,
       bearing: 150,
     });
@@ -123,32 +132,58 @@ function MapGuideBook({ resort }) {
     map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
   });
   useEffect(() => {
-    map.current.on("move", () => {
-      setCamLng(map.current.getCenter().lng.toFixed(4));
-      setCamLat(map.current.getCenter().lat.toFixed(4));
-      setCamZoom(map.current.getZoom().toFixed(2));
-      setCamPitch(map.current.getPitch().toFixed(2));
-      setCamBearing(map.current.getBearing().toFixed(2));
-    });
+    // map.current.on("move", () => {
+    //   setCamLng(map.current.getCenter().lng.toFixed(4));
+    //   setCamLat(map.current.getCenter().lat.toFixed(4));
+    //   setCamZoom(map.current.getZoom().toFixed(2));
+    //   setCamPitch(map.current.getPitch().toFixed(2));
+    //   setCamBearing(map.current.getBearing().toFixed(2));
+    // });
 
+    map.current.on("mouseenter", ["road-path-bg"], (e) => {
+      let coordinates = e.lngLat; //click event coordinates
+      const name = e.features[0].properties.name;
+      const geometry = e.features[0].geometry;
+
+      // Check if feature property type is "piste"
+      console.log(e.features[0].properties);
+
+      if (e.features[0].properties.type !== "piste") {
+        return;
+      }
+      if (!e.features[0].properties.hasOwnProperty("name")) {
+        // Do something
+        return;
+      }
+
+      // access geojson coordinates and plot to
+      console.log(e.features[0]);
+      // plotElevationProfile(e.features[0]);
+
+      const popup = addPopup(coordinates, name);
+
+      map.current.on("mouseleave", "road-path-bg", () => {
+        map.current.getCanvas().style.cursor = "";
+        popup.remove();
+      });
+
+      return () => {
+        popup.remove();
+      };
+    });
     map.current.on("click", ["road-path-bg"], (e) => {
       // Logging the feature for debugging
 
-      const geometry = e.features[0].geometry;
-      let coordinates = e.lngLat;
+      let coordinates = e.lngLat; //click event coordinates
       const name = e.features[0].properties.name;
+      const geometry = e.features[0].geometry;
 
       // Check if feature property type is "piste"
       if (e.features[0].properties.type !== "piste") {
         return;
       }
 
-      const popup = addPopup(coordinates, name);
-
-      map.current.on("click", "road-path-bg", function () {
-        map.current.getCanvas().style.cursor = "";
-        popup.remove();
-      });
+      const popup = addPopupTrail(coordinates, name);
 
       return () => {
         popup.remove();
@@ -176,6 +211,135 @@ function MapGuideBook({ resort }) {
 
     return popup;
   }
+  function addPopupTrail(coordinates, name) {
+    // console.log(name);
+    const popup = new mapboxgl.Popup({
+      anchor: "left",
+      offset: 1,
+      keepInView: true, // This option ensures the popup stays in view
+      closeOnClick: true,
+      closeButton: true,
+      closeOnMove: true,
+      maxWidth: "none",
+      className: "",
+    })
+      .setHTML(
+        `<h1 style="color: black; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>`
+      )
+      // .setText(name)
+      .setLngLat(coordinates)
+      .addTo(map.current);
+
+    return popup;
+  }
+
+  // Elevation Profile
+  // Initialize Mapbox GL JS map (replace with your actual initialization)
+  // const map = new mapboxgl.Map({
+  //   // Map initialization here
+  // });
+
+  // Sample LineString or MultiLineString feature
+
+  // Function to query elevation and prepare data for Chart.js
+  // function plotElevationProfile(feature) {
+  //   const elevationData = [];
+  //   const distanceData = [];
+
+  //   let lineToPlot;
+
+  //   // Determine if the feature is a LineString or MultiLineString
+  //   if (feature.geometry.type === "LineString") {
+  //     lineToPlot = feature;
+  //   } else if (feature.geometry.type === "MultiLineString") {
+  //     let longestLine = null;
+  //     let longestLength = 0;
+
+  //     // Iterate through each line to find the longest
+  //     turf.coordEach(
+  //       feature,
+  //       (coord, coordIndex, multiFeatureIndex, multiPartIndex) => {
+  //         const line = turf.lineString(feature, multiPartIndex);
+  //         const length = turf.length(line, { units: "kilometers" });
+  //         if (length > longestLength) {
+  //           longestLength = length;
+  //           longestLine = line;
+  //         }
+  //       }
+  //     );
+
+  //     lineToPlot = longestLine;
+  //   }
+
+  //   // Total length of the line in kilometers
+  //   const totalLength = turf.length(lineToPlot, { units: "kilometers" });
+
+  //   // Step for each segment (in kilometers)
+  //   const step = 0.1;
+
+  //   for (let d = 0; d <= totalLength; d += step) {
+  //     // Get point along the line at distance 'd'
+  //     const point = turf.along(lineToPlot, d, { units: "kilometers" });
+
+  //     // Extract coordinates
+  //     const lngLat = {
+  //       lng: point.geometry.coordinates[0],
+  //       lat: point.geometry.coordinates[1],
+  //     };
+
+  //     // Query elevation using Mapbox's queryTerrainElevation
+  //     const elevation = Math.floor(
+  //       map.current.queryTerrainElevation(lngLat, { exaggerated: false })
+  //     );
+
+  //     // Prepare data for Chart.js
+  //     elevationData.push(elevation);
+  //     distanceData.push(d);
+  //   }
+
+  //   // Create Chart.js chart
+  //    const ctx = document.getElementById("myChart").getContext("2d");
+  //   new Chart(ctx, {
+  //     type: "line",
+  //     data: {
+  //       labels: distanceData,
+  //       datasets: [
+  //         {
+  //           label: "Elevation Profile",
+  //           data: elevationData,
+  //           fill: false,
+  //           borderColor: "rgb(75, 192, 192)",
+  //           tension: 0.1,
+  //         },
+  //       ],
+  //     },
+  //     // options: {
+  //     //   scales: {
+  //     //     x: {
+  //     //       title: {
+  //     //         display: true,
+  //     //         text: "Distance (km)",
+  //     //       },
+  //     //     },
+  //     //     y: {
+  //     //       title: {
+  //     //         display: true,
+  //     //         text: "Elevation (m)",
+  //     //       },
+  //     //     },
+  //     //   },
+  //     // },
+  //   });
+  // }
+
+  // Sample LineString feature
+  // const lineStringFeature = turf.lineString([
+  //   [7.271125316619873, 46.09632887913236],
+  //   [7.269223630428314, 46.095114303738455]
+  //   // ... more coordinates
+  // ]);
+
+  // Call the function to plot the elevation profile for a LineString
 
   return (
     <div ref={mapContainer} className="w-full h-full z-10">
@@ -183,6 +347,7 @@ function MapGuideBook({ resort }) {
       <div className="fixed right-40 bottom-10 z-10 backdrop-blur-3xl px-44 rounded-md text-lg">
         {camLng},{camLat},{camZoom},{camBearing},{camPitch}
       </div>
+      {/* <canvas id="myChart" width="400" height="400"></canvas> */}
     </div>
   );
 }
