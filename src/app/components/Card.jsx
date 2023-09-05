@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useEffect } from "react";
+import Image from "next/image";
 
 export function Card({ resort, isSelected, onClick, resortsLength }) {
   const cardRef = useRef(null);
@@ -18,26 +19,16 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
   // scroll to when card selected
   useEffect(() => {
     if (isSelected && cardRef.current) {
-      cardRef.current.scrollIntoView({ behavior: "instant", block: "start" });
-    }
-  }, [isSelected, resortsLength]);
-
-  // scroll to top of container
-  useEffect(() => {
-    if (!isSelected && !cardRef.current) {
-      cardRef.current.scrollIntoView({ behavior: "instant", block: "start" });
+      cardRef.current.scrollIntoView({ behavior: "instant", block: "nearest" });
     }
   }, [isSelected, resortsLength]);
 
   const header =
-    (resort.properties.name !== "Unknown" ? resort.properties.name : "") +
-    (resort.properties.name !== "Unknown" &&
-    resort.properties.name !== "Unknown"
-      ? " - "
-      : "") +
-    (resort.properties.state !== "Unknown" ? resort.properties.state : "") +
-    (resort.properties.state !== "Unknown" ? " - " : "") +
-    (resort.properties.country !== "Unknown" ? resort.properties.country : "");
+    (name !== "Unknown" ? name : "") +
+    (name !== "Unknown" && name !== "Unknown" ? " - " : "") +
+    (state !== "Unknown" ? state : "") +
+    (state !== "Unknown" ? " - " : "") +
+    (country !== "Unknown" ? country : "");
 
   return (
     <div
@@ -52,9 +43,12 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
         }
       >
         <div className="relative">
-          <img
+          <Image
             src={img_url}
             alt="ski map"
+            width="100"
+            height="100"
+            quality={100}
             className="w-full min-h-full object-cover object-center"
           />
 

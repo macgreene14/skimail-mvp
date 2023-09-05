@@ -1,13 +1,7 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
-import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
-import "mapbox-gl/dist/mapbox-gl.css";
 import resortCollection from "../../../../assets/resorts3.json";
-import NavBar from "../../components/NavBar";
-
-mapboxgl.accessToken =
-  "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
+import MapGuideBook from "../../components/MapGuidebook";
 
 export default function Page({ params }) {
   // fetch resort from slug prop
@@ -49,7 +43,6 @@ export default function Page({ params }) {
 
   return (
     <div>
-      <NavBar />
       <div className="min-h-screen w-full md:first-letter:w-3/4 mx-auto lg:w-5/6  bg-gray-900 p-6">
         <div className="relative w-full rounded-3xl">
           <div className="relative max-w-full inset-0 flex flex-col justify-start items-center z-10 min-h-full overflow-auto bg-gray-700 py-6 my-6 rounded-xl text-center">
@@ -100,7 +93,14 @@ export default function Page({ params }) {
             {/* todo replace img with Image */}
 
             <div className="w-full lg:w-4/6 rounded-3xl p-6">
-              <img src={img_url} alt="" className="w-full rounded-3xl" />
+              <Image
+                src={img_url}
+                alt=""
+                width="100"
+                height="100"
+                quality={100}
+                className="w-full rounded-3xl"
+              />
             </div>
           </div>
         </div>
@@ -114,129 +114,4 @@ export default function Page({ params }) {
       </div>
     </div>
   );
-}
-
-function MapGuideBook({ resort }) {
-  const mapContainer = useRef(null);
-  const map = useRef(null);
-
-  // assign camera settings
-  // todo remove zoom and pitch from dataset
-  const cam_resort_lat = resort[0].properties.cam_resort_lat;
-  const cam_resort_lng = resort[0].properties.cam_resort_lng;
-  const cam_resort_bearing = resort[0].properties.cam_resort_bearing;
-
-  useEffect(() => {
-    if (map.current) return; // initialize map only once
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/macgreene14/cllvvti2i007c01rc10lq2ohz",
-      center: [cam_resort_lng, cam_resort_lat],
-      zoom: 13,
-      pitch: 65,
-      bearing: cam_resort_bearing,
-    });
-
-    // Navigation map icon
-    map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
-
-    // Full Screen  map icon
-    map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
-  });
-
-  useEffect(() => {
-    map.current.on("mouseenter", ["road-path-bg"], (e) => {
-      let coordinates = e.lngLat; //click event coordinates
-      const name = e.features[0].properties.name;
-      const geometry = e.features[0].geometry;
-
-      // Check if feature property type is "piste"
-      if (e.features[0].properties.type !== "piste") {
-        return;
-      }
-
-      // Exit if name property not available
-      if (!e.features[0].properties.hasOwnProperty("name")) {
-        return;
-      }
-
-      // Create and add popup
-      const popup = addPopup(coordinates, name);
-
-      // Remove popup
-      map.current.on("mouseleave", "road-path-bg", () => {
-        map.current.getCanvas().style.cursor = "";
-        popup.remove();
-      });
-
-      // Clean up on dismount
-      return () => {
-        popup.remove();
-      };
-    });
-
-    map.current.on("click", ["road-path-bg"], (e) => {
-      let coordinates = e.lngLat; //click event coordinates
-      const name = e.features[0].properties.name;
-
-      // Check if feature property type is "piste"
-      if (e.features[0].properties.type !== "piste") {
-        return;
-      }
-
-      // Exit if name property not available
-      if (!e.features[0].properties.hasOwnProperty("name")) {
-        return;
-      }
-
-      // Create and add popup
-      const popup = addPopupTrail(coordinates, name);
-
-      return () => {
-        popup.remove();
-      };
-    });
-  });
-
-  function addPopup(coordinates, name) {
-    const popup = new mapboxgl.Popup({
-      anchor: "bottom-right",
-      offset: 15,
-      keepInView: true, // This option ensures the popup stays in view
-      closeOnClick: true,
-      closeButton: true,
-      closeOnMove: true,
-      maxWidth: "none",
-      // className: "",
-    })
-      .setHTML(
-        `<h1 style="color: black; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>`
-      )
-      .setLngLat(coordinates)
-      .addTo(map.current);
-
-    return popup;
-  }
-  function addPopupTrail(coordinates, name) {
-    const popup = new mapboxgl.Popup({
-      anchor: "left",
-      offset: 1,
-      keepInView: true, // This option ensures the popup stays in view
-      closeOnClick: true,
-      closeButton: true,
-      closeOnMove: true,
-      maxWidth: "none",
-      className: "",
-    })
-      .setHTML(
-        `<h1 style="color: black; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>`
-      )
-      // .setText(name)
-      .setLngLat(coordinates)
-      .addTo(map.current);
-
-    return popup;
-  }
-
-  return <div ref={mapContainer} className="w-full h-full z-10"></div>;
 }

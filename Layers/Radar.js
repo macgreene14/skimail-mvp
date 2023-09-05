@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 
 // radar api key
-const twcApiKey = "198629cb355145e68629cb3551d5e670";
+const twcApiKey = process.env.TWC_APIKEY;
 
 export function Radar({ map }) {
   // Latest Radar Timeslice
