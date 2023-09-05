@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { NavBar } from "./components/NavBar.jsx";
 import { MapExplore } from "./components/MapExplore.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
@@ -12,7 +13,9 @@ export default function App() {
 
   return (
     <>
-      <div className="">
+      <NavBar />
+
+      <div>
         <main className="p-2 lg:p-4">
           <div className="mx-auto px-1 lg:px-4">
             <h1 className="sr-only">Explore</h1>
