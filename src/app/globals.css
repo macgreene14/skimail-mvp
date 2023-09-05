@@ -26,16 +26,37 @@ body {
     rgb(var(--background-start-rgb));
 }
 
-
-/* .mapboxgl-popup {
-padding: -5px;
-} */
-
 .mapboxgl-popup-close-button {
   color: black;
   font-size: 20px;
   margin-top: -2px;
 }
+
+.control-content {
+    font-size: .75rem;
+    font-weight: 300;
+    color: #1a202c;
+    margin: .5rem;
+}
+
+.mapbox-improve-map {
+  display: none !important;
+}
+
+/* .mapboxgl-popup {
+padding: -5px;
+} */
+
+/* popup remove default card padding */
+/* .mapboxgl-popup-content {
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* popup remove default card arrow */
+/* .mapboxgl-popup-tip {
+  display: none !important;
+} */ 
 
 /* .mapboxgl-ctrl-group {
   border: none;
@@ -51,35 +72,3 @@ padding: -5px;
   cursor: pointer;
   color: black;
 } */
-
-.control-content {
-    font-size: .75rem;
-    font-weight: 300;
-    color: #1a202c;
-    margin: .5rem;
-}
-
-/* .custom-icon-flyto {
-  margin: auto; // adjusting flyto icon placement
-} */
-
-.mapbox-improve-map {
-  display: none !important;
-}
-
-/* addds the class to stack containers in row */
-/* .mapboxgl-dropdown-icontrol {
-  display: flexbox;
-  flex-direction: row;
-} */
-
-/* popup remove default card padding */
-/* .mapboxgl-popup-content {
-  background: none !important;
-  box-shadow: none !important;
-}
-
-/* popup remove default card arrow */
-/* .mapboxgl-popup-tip {
-  display: none !important;
-} */ 

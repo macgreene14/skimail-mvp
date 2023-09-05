@@ -1,16 +1,13 @@
 import React, { useRef, useEffect } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
-import CheckboxControl from "../../../utils/Checkbox";
+import CheckboxControl from "../../../utils/CheckboxControl";
 import CollapsibleControl from "../../../utils/CollapsibleControl";
-import { Radar } from "./Radar";
 import ReactDOMServer from "react-dom/server";
-import { SnowDepth } from "../components/SnowDepth";
 
-mapboxgl.accessToken =
-  "pk.eyJ1IjoibWFjZ3JlZW5lMTQiLCJhIjoiY2wxMDJ1ZHB3MGJyejNkcDluajZscTY5eCJ9.JYsxPQfGBu0u7sLy823-MA";
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
-export function Map({
+export function MapExplore({
   resortCollection,
   setRenderedResorts,
   selectedResort,
@@ -23,6 +20,7 @@ export function Map({
   useEffect(() => {
     if (map.current) return; // initialize map only once
 
+    // Adjust initial zoom level based on device size
     let zoomInit = 3;
     if (window.innerWidth <= 768) {
       zoomInit = zoomInit - 0.75;
@@ -30,33 +28,13 @@ export function Map({
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      // style: "mapbox://styles/mapbox/light-v11",
-      // style: "mapbox://styles/macgreene14/cllroyibd004c01ofcyv7eks3",
-      // style: "mapbox://styles/macgreene14/cllb90sr900dj01ojf33a3w1b",
-      // style: "mapbox://styles/macgreene14/clltty6cg004y01r91ooz74cm", //cali top
-      style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8", //unicorn
+      style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8",
       center: [-101, 41],
       zoom: zoomInit,
     });
 
-    // // After the map has loaded, you can inspect its layers
-    // map.current.on("load", function () {
-    //   const layers = map.current.getStyle().layers;
-
-    //   // Loop through each layer to find the source layer name
-    //   layers.forEach(function (layer) {
-    //     if (layer["source-layer"]) {
-    //       console.log("Layer ID:", layer.id);
-    //       console.log("Source Layer Name:", layer["source-layer"]);
-    //     }
-    //   });
-    // });
-
-    // const search = new mapboxgl.MapboxSearchBox();
-    // search.accessToken = mapboxgl.accessToken;
-    // map.current.addControl(search);
-
-    // Add geolocate control to the map.
+    // Mapbox Controls
+    // Geolocate
     map.current.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: {
@@ -72,9 +50,9 @@ export function Map({
       "top-left"
     );
 
-    // custom controls - top left
-    // Full Screen
+    // Full screen
     map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
+
     // Ikon toggle
     const checkboxControlIkon = new CheckboxControl({
       labelText: "Ikon",
@@ -83,6 +61,7 @@ export function Map({
       defVis: true,
     });
     map.current.addControl(checkboxControlIkon, "top-right");
+
     // Epic toggle
     const checkboxControlEpic = new CheckboxControl({
       labelText: "Epic",
@@ -92,6 +71,7 @@ export function Map({
     });
     map.current.addControl(checkboxControlEpic, "top-right");
 
+    // Snow circle toggle
     const checkboxControlAvgSnow = new CheckboxControl({
       labelText: "Snow",
       layerId: "data-driven-circles",
@@ -100,28 +80,28 @@ export function Map({
     });
 
     map.current.addControl(checkboxControlAvgSnow, "top-right");
-    // Drop down
+
+    // Navigation collapsible
     const collapsibleControl = new CollapsibleControl((e) => {
       // coordinates from button data
       const lat = e.target.dataset.lat;
       const lng = e.target.dataset.lng;
       let zoom = e.target.dataset.zoom;
+
       //if mobile, zoom reduced by 3
       if (window.innerWidth <= 768) {
         zoom = zoom - 0.75;
       }
       map.current.flyTo({ center: [lng, lat], zoom: zoom, bearing: 0 });
-      // console.log(e.target.dataset);
     });
     map.current.addControl(collapsibleControl, "top-left");
 
-    // Navigation
+    // Navigation compass
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
-    // Load feature set into symbole layer
+    // Load icons
+    // Mountain - blue
     map.current.on("load", () => {
-      // load icons
-      // <a href="https://www.freepik.com/icon/mountains_762386#fromView=search&term=ski+mountain&page=1&position=12">Icon by Freepik</a>
       map.current.loadImage(
         "https://ik.imagekit.io/bamlnhgnz/mountain-blue.png?updatedAt=1693368553125",
         (error, image) => {
@@ -130,6 +110,7 @@ export function Map({
         }
       );
 
+      // Mountain - orange
       map.current.loadImage(
         "https://ik.imagekit.io/bamlnhgnz/mountain-orange.png?updatedAt=1693110233960",
         (error, image) => {
@@ -138,30 +119,25 @@ export function Map({
         }
       );
 
+      // Add resorts as symbole layer
       map.current.addSource("resorts", {
         type: "geojson",
         data: resortCollection,
       });
 
       for (const feature of resorts) {
-        const layerID = feature.properties.pass;
+        const layerID = feature.properties.pass; // layer id based on pass type
 
-        // Add a layer for this symbol type if it hasn't been added already.
+        // Add a layer for this symbol type if it hasn't been added already
         if (!map.current.getLayer(layerID)) {
           map.current.addLayer({
             id: layerID,
             type: "symbol",
             source: "resorts",
             layout: {
-              // These icons are a part of the Mapbox Light style.
-              // To view all images available in a Mapbox style, open
-              // the style in Mapbox Studio and click the "Images" tab.
-              // To add a new image to the style at runtime see
-              // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
-              "icon-image": ["get", "pass"], // same as inserting feature.properties.icon, just picks it from featureset
+              "icon-image": ["get", "pass"], // same as inserting feature.properties.icon
               "icon-allow-overlap": true,
               "icon-size": 0.05,
-              // "icon-color": "#0000FF",
               "icon-allow-overlap": true,
               "icon-ignore-placement": true,
               "text-field": ["get", "name"],
@@ -178,10 +154,10 @@ export function Map({
     });
   }, []);
 
-  // update rendered features state
+  // update renderedFeatures state
   useEffect(() => {
     map.current.on("moveend", () => {
-      // on move, fetched rendered resorts
+      // on move end, fetched rendered resorts
       const features = map.current.queryRenderedFeatures({
         layers: ["Epic", "Ikon"],
       });
@@ -190,41 +166,19 @@ export function Map({
         // pass rendered resorts to parent component via functional prop
         setRenderedResorts(features);
       }
-      // Read out coordinates
-      // var center = map.current.getCenter();
-      // var zoom = map.current.getZoom().toFixed(2);
-
-      // console.log("Latitude:", center.lat);
-      // console.log("Longitude:", center.lng);
-      // console.log("Zoom:", zoom);
     });
   });
 
+  // Select resort from map marker
   useEffect(() => {
     map.current.on("click", ["Epic", "Ikon"], (e) => {
-      // Copy coordinates array.
-      const coordinates = e.features[0].geometry.coordinates.slice();
-      const name = e.features[0].properties.name;
-      const website = e.features[0].properties.website;
-
-      // const description = e.features[0].properties.description;
-      const slug = e.features[0].properties.slug;
-      const img_url = `https://ik.imagekit.io/bamlnhgnz/maps/${slug}.png`;
-
-      // // Ensure that if the map is zoomed out such that multiple
-      // // copies of the feature are visible, the popup appears
-      // // over the copy being pointed to.
-      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-      }
       setSelectedResort(e.features[0]);
     });
   });
 
-  // when resort selected via card or marker click, add popup and center
+  // when resort selected, add popup and center
   useEffect(() => {
     if (selectedResort) {
-      // Copy coordinates array.
       const popup = addPopup(selectedResort);
 
       return () => {
@@ -286,17 +240,10 @@ export function Map({
       // closeOnMove: true,
       maxWidth: "none",
       focusAfterOpen: false,
-      // className: "",
     })
       .setLngLat(coordinates)
       .setHTML(popupNode)
       .addTo(map.current);
-
-    // trying to clear selection when popup no longer needed
-    // but this clears selection when clicking a card
-    // popup.on("close", () => {
-    //   setSelectedResort();
-    // });
 
     map.current.flyTo({ center: coordinates });
 
@@ -304,10 +251,6 @@ export function Map({
   }
 
   return (
-    <div ref={mapContainer} className="w-full h-full z-1 rounded-lg">
-      {/* <NavControl map={map} /> */}
-      {/* <Radar map={map} /> */}
-      {/* <SnowDepth map={map} /> */}
-    </div>
+    <div ref={mapContainer} className="w-full h-full z-1 rounded-lg"></div>
   );
 }

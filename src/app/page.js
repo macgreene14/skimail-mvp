@@ -1,10 +1,9 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
-import { Map } from "./components/Map.jsx";
+import React, { useState } from "react";
+import { MapExplore } from "./components/MapExplore.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
 import resortCollection from "../../assets/resorts3.json";
-import NavBar from "../app/components/NavBar.jsx";
 
 export default function App() {
   const resorts = resortCollection.features;
@@ -14,7 +13,6 @@ export default function App() {
   return (
     <>
       <div className="">
-        <NavBar />
         <main className="p-2 lg:p-4">
           <div className="mx-auto px-1 lg:px-4">
             <h1 className="sr-only">Explore</h1>
@@ -53,7 +51,7 @@ export default function App() {
                     Section title
                   </h2>
                   <div className="overflow rounded-lg bg-white shadow h-full">
-                    <Map
+                    <MapExplore
                       resortCollection={resortCollection}
                       setRenderedResorts={setRenderedResorts}
                       selectedResort={selectedResort}
@@ -71,7 +69,7 @@ export default function App() {
             <div className="border-t border-gray-200 py-4 text-center text-sm text-gray-500 sm:text-left">
               <span className="block sm:inline">
                 &copy; 2023 Skimail, Inc. All rights reserved.
-              </span>{" "}
+              </span>
             </div>
           </div>
         </footer>
