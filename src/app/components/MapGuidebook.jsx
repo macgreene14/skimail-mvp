@@ -17,7 +17,7 @@ export default function MapGuideBook({ resort }) {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/macgreene14/cllvvti2i007c01rc10lq2ohz",
+      style: "mapbox://styles/macgreene14/clm6lozyf00k001r63ji9cfyv",
       center: [cam_resort_lng, cam_resort_lat],
       zoom: 13,
       pitch: 65,
