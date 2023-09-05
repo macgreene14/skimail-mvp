@@ -22,6 +22,12 @@ export function Map({
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
+
+    let zoomInit = 2.7;
+    if (window.innerWidth <= 768) {
+      zoomInit = zoomInit - 0.75;
+    }
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       // style: "mapbox://styles/mapbox/light-v11",
@@ -30,7 +36,7 @@ export function Map({
       // style: "mapbox://styles/macgreene14/clltty6cg004y01r91ooz74cm", //cali top
       style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8", //unicorn
       center: [-101, 41],
-      zoom: 2.7,
+      zoom: zoomInit,
     });
 
     // // After the map has loaded, you can inspect its layers
@@ -99,7 +105,11 @@ export function Map({
       // coordinates from button data
       const lat = e.target.dataset.lat;
       const lng = e.target.dataset.lng;
-      const zoom = e.target.dataset.zoom;
+      let zoom = e.target.dataset.zoom;
+      //if mobile, zoom reduced by 3
+      if (window.innerWidth <= 768) {
+        zoom = zoom - 0.75;
+      }
       map.current.flyTo({ center: [lng, lat], zoom: zoom, bearing: 0 });
       // console.log(e.target.dataset);
     });
@@ -134,8 +144,7 @@ export function Map({
       });
 
       for (const feature of resorts) {
-        const symbol = feature.properties.icon;
-        const layerID = `${symbol}`;
+        const layerID = feature.properties.pass;
 
         // Add a layer for this symbol type if it hasn't been added already.
         if (!map.current.getLayer(layerID)) {
@@ -149,9 +158,7 @@ export function Map({
               // the style in Mapbox Studio and click the "Images" tab.
               // To add a new image to the style at runtime see
               // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
-              "icon-image": ["get", "icon"], // same as inserting feature.properties.icon, just picks it from featureset
-              // "icon-image": "resort",
-
+              "icon-image": ["get", "pass"], // same as inserting feature.properties.icon, just picks it from featureset
               "icon-allow-overlap": true,
               "icon-size": 0.05,
               // "icon-color": "#0000FF",
@@ -164,7 +171,7 @@ export function Map({
               // "text-ignore-placement": true,
               "text-optional": true,
             },
-            filter: ["==", "icon", symbol],
+            filter: ["==", "pass", layerID],
           });
         }
       }
@@ -183,7 +190,6 @@ export function Map({
         // pass rendered resorts to parent component via functional prop
         setRenderedResorts(features);
       }
-
       // Read out coordinates
       // var center = map.current.getCenter();
       // var zoom = map.current.getZoom().toFixed(2);
@@ -301,7 +307,7 @@ export function Map({
     <div ref={mapContainer} className="w-full h-full z-1 rounded-lg">
       {/* <NavControl map={map} /> */}
       {/* <Radar map={map} /> */}
-      <SnowDepth map={map} />
+      {/* <SnowDepth map={map} /> */}
     </div>
   );
 }

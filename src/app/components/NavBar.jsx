@@ -5,7 +5,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 const navigation = [
-  { name: "Explore", href: "/", current: true },
+  { name: "Explore", href: "/", current: false },
   {
     name: "Share Feedback",
     href: "https://airtable.com/appa1Nkb8pG0dRNxk/shrJ1gvC7YwqziQwK",

@@ -4,19 +4,26 @@ import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 
 export function SearchBar({ data, setRenderedResorts }) {
   const [searchTerm, setSearchTerm] = useState("");
-  // const [results, setResults] = useState([]);
 
   useEffect(() => {
-    // if (searchTerm === "") {
-    //   setResults([]);
-    //   return;
-    // }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
 
-    const filteredResults = data.filter((item) =>
-      item.properties.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredResults = data.filter((resort) => {
+      const header =
+        (resort.properties.name !== "Unknown" ? resort.properties.name : "") +
+        (resort.properties.name !== "Unknown" &&
+        resort.properties.name !== "Unknown"
+          ? " - "
+          : "") +
+        (resort.properties.state !== "Unknown" ? resort.properties.state : "") +
+        (resort.properties.state !== "Unknown" ? " - " : "") +
+        (resort.properties.country !== "Unknown"
+          ? resort.properties.country
+          : "");
 
-    // setResults(filteredResults);
+      return header.toLowerCase().includes(lowerCaseSearchTerm.toLowerCase());
+    });
+
     setRenderedResorts(filteredResults);
   }, [searchTerm, data, setRenderedResorts]);
 

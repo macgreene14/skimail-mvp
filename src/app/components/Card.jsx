@@ -2,41 +2,42 @@
 import React, { useRef, useEffect } from "react";
 
 export function Card({ resort, isSelected, onClick, resortsLength }) {
-  const slug = resort.properties.slug;
-  const img_url = `https://ik.imagekit.io/bamlnhgnz/maps/${slug}.png`;
   const cardRef = useRef(null);
-  const avg_snowfall = resort.properties.avg_snowfall;
-  const vertical_drop = resort.properties.vertical_drop;
-  const skiable_acres = resort.properties.skiable_acres;
 
-  const metrics = [
-    {
-      name: "Yearly Snowfall",
-      description: `✼ ${avg_snowfall}`,
-    },
-    {
-      name: "Vertical Drop",
-      description: `⛰ ${vertical_drop}`,
-    },
-    {
-      name: "Skiable Acres",
-      description: `⛷ ${skiable_acres}`,
-    },
-  ];
+  const {
+    slug,
+    name,
+    state,
+    country,
+    avg_snowfall,
+    vertical_drop,
+    skiable_acres,
+  } = resort.properties;
+  const img_url = `https://ik.imagekit.io/bamlnhgnz/maps/${slug}.png`;
 
   // scroll to when card selected
   useEffect(() => {
     if (isSelected && cardRef.current) {
-      cardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      cardRef.current.scrollIntoView({ behavior: "instant", block: "start" });
     }
   }, [isSelected, resortsLength]);
 
-  // // jump to card when new results rendered
-  // useEffect(() => {
-  //   if (resortsLength && cardRef.current) {
-  //     cardRef.current.scrollIntoView({ behavior: "instant", block: "start" });
-  //   }
-  // }, [resortsLength]);
+  // scroll to top of container
+  useEffect(() => {
+    if (!isSelected && !cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "instant", block: "start" });
+    }
+  }, [isSelected, resortsLength]);
+
+  const header =
+    (resort.properties.name !== "Unknown" ? resort.properties.name : "") +
+    (resort.properties.name !== "Unknown" &&
+    resort.properties.name !== "Unknown"
+      ? " - "
+      : "") +
+    (resort.properties.state !== "Unknown" ? resort.properties.state : "") +
+    (resort.properties.state !== "Unknown" ? " - " : "") +
+    (resort.properties.country !== "Unknown" ? resort.properties.country : "");
 
   return (
     <div
@@ -53,40 +54,34 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
         <div className="relative">
           <img
             src={img_url}
-            alt="Mountain Height Icon"
-            className="min-h-full"
+            alt="ski map"
+            className="w-full min-h-full object-cover object-center"
           />
 
           <div className="absolute max-w-full inset-0  min-h-full">
             <div className="mx-auto max-w-2xl text-center bg-opacity-50 bg-black p-2 mb-20">
               <span className="text-white font-semibold text-sm md:text-md z-10">
-                <span className="text-white-700 font-bold p-1 text-lg block text-center border-b">
-                  {resort.properties.name !== "Unknown"
-                    ? resort.properties.name
-                    : null}
-
-                  {resort.properties.name !== "Unknown" &&
-                  resort.properties.name !== "Unknown"
-                    ? " - "
-                    : null}
-
-                  {resort.properties.state !== "Unknown"
-                    ? resort.properties.state
-                    : null}
-
-                  {resort.properties.state !== "Unknown" ? " - " : null}
-
-                  {resort.properties.country !== "Unknown"
-                    ? resort.properties.country
-                    : null}
+                {/* Header (name, country, state) */}
+                <span className="text-white-700 font-bold p-1 text-md xl:text-2xl block text-center border-b">
+                  {header}
                 </span>
-                <dl className="mx-auto mt-1 grid max-w-2xl grid-cols-3 gap-x-8 gap-y-4 text-md leading-7">
-                  {metrics.map((value) => (
-                    <div key={value.name} className="text-center">
-                      <dt className="font-bold">{value.name}</dt>
-                      <dd className="">{value.description}</dd>
-                    </div>
-                  ))}
+
+                {/* Metrics */}
+                <dl className="mx-auto mt-1 grid max-w-2xl grid-cols-3 gap-x-8 gap-y-4 text-md xl:text-lg leading-7">
+                  <div className="text-center">
+                    <dt className="font-md">✼ Snowfall</dt>
+                    <dd>{`${avg_snowfall} "`}</dd>
+                  </div>
+
+                  <div className="text-center">
+                    <dt className="font-bold">⛰ Vertical</dt>
+                    <dd>{`${vertical_drop} '`}</dd>
+                  </div>
+
+                  <div className="text-center">
+                    <dt className="font-bold">⛷ Size</dt>
+                    <dd>{`${skiable_acres}`} acres</dd>
+                  </div>
                 </dl>
               </span>
             </div>

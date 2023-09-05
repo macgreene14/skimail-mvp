@@ -26,17 +26,15 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+
 /* .mapboxgl-popup {
 padding: -5px;
 } */
 
 .mapboxgl-popup-close-button {
-  /* margin-top: 12px;
-  margin-right: 17px; */
   color: black;
   font-size: 20px;
-  line-height: 20px;
-  z-index:2;
+  margin-top: -2px;
 }
 
 /* .mapboxgl-ctrl-group {

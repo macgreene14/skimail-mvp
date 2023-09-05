@@ -6,23 +6,19 @@ export function ResultsContainer({
   setSelectedResort,
   selectedResort,
 }) {
-  // create ref to hold card div for scrolling function
-  // const selectedCardRef = useRef();
-  // console.log("___results container reload___");
-
   return (
-    <div className="snap-both overflow-auto rounded-lg shadow h-full lg:h-[80vh] flex flex-row lg:flex-col">
+    <div className="snap-x overflow-auto rounded-lg shadow h-full lg:h-[80vh] flex flex-row lg:flex-col">
       {resorts
         ?.sort((a, b) => {
-          const skiable_acresA = parseFloat(a.properties.skiable_acres) || 0; // handle undefined and convert to number
-          const skiable_acresB = parseFloat(b.properties.skiable_acres) || 0; // handle undefined and convert to number
-          return skiable_acresB - skiable_acresA;
+          const A = parseFloat(a.properties.avg_snowfall) || 0; // handle undefined and convert to number
+          const B = parseFloat(b.properties.avg_snowfall) || 0; // handle undefined and convert to number
+          return B - A;
         })
         .map((resort) =>
           (() => {
             return (
               <Card
-                className="snap-mandatory snap-start"
+                className="snap-center"
                 resortsLength={resorts.length}
                 key={resort.properties.name}
                 resort={resort}

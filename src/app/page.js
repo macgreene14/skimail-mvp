@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Map } from "./components/Map.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
-import resortCollection from "../../assets/resorts.json";
+import resortCollection from "../../assets/resorts3.json";
 import NavBar from "../app/components/NavBar.jsx";
 
 export default function App() {
@@ -22,7 +22,7 @@ export default function App() {
             {/* Main 3 column grid */}
             <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-4 max-h-full">
               {/* Left column - Results */}
-              <div className="flex flex-col max-w-xl">
+              <div className="flex flex-col">
                 {/* Search Bar */}
                 <section className="rounded-md mb-1">
                   <SearchBar
