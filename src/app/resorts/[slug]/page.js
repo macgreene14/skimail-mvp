@@ -52,23 +52,23 @@ export default function Page({ params }) {
       <NavBar />
       <div className="min-h-screen w-full md:first-letter:w-3/4 mx-auto lg:w-5/6  bg-gray-900 p-6">
         <div className="relative w-full rounded-3xl">
-          <div className="relative max-w-full inset-0 flex flex-col justify-start items-center z-10 min-h-full overflow-auto bg-gray-700 py-6 my-6 rounded-xl">
+          <div className="relative max-w-full inset-0 flex flex-col justify-start items-center z-10 min-h-full overflow-auto bg-gray-700 py-6 my-6 rounded-xl text-center">
             {/* Resort Name */}
             <h2
-              className="mt-6 px-24 text-3xl font-bold text-center tracking-tight text-white sm:text-4xl"
+              className="mt-6 px-4 md:px-24 text-3xl font-bold text-center tracking-tight text-white sm:text-4xl"
               style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)" }}
             >
               {name}
             </h2>
             <h2
-              className="mt-4 px-24 text-lg font-md text-center tracking-tight text-white sm:text-4xl"
+              className="mt-4 px-4 md:px-24 text-lg font-md text-center tracking-tight text-white sm:text-4xl"
               style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)" }}
             >
               {state !== "Unknown" ? state : ""}{" "}
             </h2>
 
             <h2
-              className="mt-2 px-24 text-lg font-md text-center tracking-tight text-white sm:text-4xl"
+              className="mt-4 px-4 md:px-24 text-lg font-md text-center tracking-tight text-white sm:text-4xl"
               style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)" }}
             >
               {country !== "Unknown" ? country : ""}
@@ -76,20 +76,20 @@ export default function Page({ params }) {
 
             {/* Resort Description */}
             <p
-              className="mt-6 px-24 text-lg leading-8 text-white"
+              className="mt-6 px-4 md:px-24 text-sm md:text-lg leading-6 md:leading-8 text-white"
               style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.7)" }}
             >
               {description}
             </p>
             {/* Website */}
             <p
-              className="mt-6 px-24 text-lg leading-8 text-white"
+              className="mt-6 px-4 md:px-24 text-sm md:text-lg leading-8 text-white hover:text-blue-500"
               style={{ textShadow: "1px 1px 2px rgba(0, 0, 0, 0.7)" }}
             >
               <a href={website}>{website}</a>
             </p>
             {/* metrics */}
-            <dl className="mx-auto mt-4 grid max-w-2xl gap-x-8 gap-y-4 text-md leading-7 grid-cols-3">
+            <dl className="mx-auto mt-6 grid max-w-2xl gap-x-8 gap-y-4 text-md leading-7 grid-cols-3">
               {metrics.map((metric) => (
                 <div key={metric.name} className="text-center">
                   <dt className="font-bold text-white">{metric.name}</dt>

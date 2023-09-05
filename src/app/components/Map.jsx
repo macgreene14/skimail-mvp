@@ -23,7 +23,7 @@ export function Map({
   useEffect(() => {
     if (map.current) return; // initialize map only once
 
-    let zoomInit = 2.7;
+    let zoomInit = 3;
     if (window.innerWidth <= 768) {
       zoomInit = zoomInit - 0.75;
     }
