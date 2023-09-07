@@ -48,7 +48,7 @@ export default function App() {
               </div>
 
               {/* Right column - Map */}
-              <div className="grid grid-cols-1 gap-4 lg:col-span-2 order-first lg:order-last h-[55vh] lg:h-[85vh]">
+              <div className="grid grid-cols-1 gap-4 lg:col-span-2 order-first lg:order-last h-[50vh] lg:h-[85vh]">
                 <section aria-labelledby="section-1-title">
                   <h2 className="sr-only" id="section-1-title">
                     Section title
