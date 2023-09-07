@@ -1,8 +1,7 @@
 import Script from "next/script";
 
-function GA() {
-  const NEXT_PUBLIC_GA_ID = process.env.NEXT_PUBLIC_GA;
-
+export default function GA() {
+  const NEXT_PUBLIC_GA_ID = process.env.NEXT_PUBLIC_GA_ID;
   return (
     <>
       <Script
@@ -26,5 +25,3 @@ function GA() {
     </>
   );
 }
-
-export default GA;
