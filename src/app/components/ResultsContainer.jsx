@@ -7,7 +7,7 @@ export function ResultsContainer({
   selectedResort,
 }) {
   return (
-    <div className="snap-x overflow-auto rounded-lg shadow h-full lg:h-[80vh] flex flex-row lg:flex-col">
+    <div className="flex h-[20vh] flex-row overflow-auto md:flex-col lg:h-[80vh]">
       {resorts
         ?.sort((a, b) => {
           const A = parseFloat(a.properties.avg_snowfall) || 0; // handle undefined and convert to number
@@ -34,7 +34,7 @@ export function ResultsContainer({
                 }}
               />
             );
-          })()
+          })(),
         )}
     </div>
   );

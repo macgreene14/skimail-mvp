@@ -19,18 +19,18 @@ export default function App() {
             <h1 className="sr-only">Explore</h1>
 
             {/* Main 3 column grid */}
-            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-4 max-h-full">
+            <div className="grid max-h-full grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-4">
               {/* Left column - Results */}
               <div className="flex flex-col">
                 {/* Search Bar */}
-                <section className="rounded-md mb-1">
+                <section className="mb-1 rounded-md">
                   <SearchBar
                     data={resorts}
                     setRenderedResorts={setRenderedResorts}
                   />
                 </section>
 
-                <div className="grid md:grid-cols-1 gap-4 min-h-max overflow-auto max-w-full rounded-md">
+                <div className="grid min-h-max max-w-full gap-4 overflow-auto rounded-md md:grid-cols-1">
                   {/* Results Container */}
                   <section aria-labelledby="section-2-title">
                     <h2 className="sr-only" id="section-2-title">
@@ -46,12 +46,12 @@ export default function App() {
               </div>
 
               {/* Right column - Map */}
-              <div className="grid grid-cols-1 gap-4 lg:col-span-2 order-first lg:order-last h-[50vh] lg:h-[85vh]">
+              <div className="order-first grid h-[50vh] grid-cols-1 gap-4 lg:order-last lg:col-span-2 lg:h-[85vh]">
                 <section aria-labelledby="section-1-title">
                   <h2 className="sr-only" id="section-1-title">
                     Section title
                   </h2>
-                  <div className="overflow rounded-lg bg-white shadow h-full">
+                  <div className="overflow h-full rounded-lg bg-white shadow">
                     <MapExplore
                       resortCollection={resortCollection}
                       setRenderedResorts={setRenderedResorts}
