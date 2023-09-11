@@ -35,7 +35,10 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
     // main Card div
     <div
       ref={cardRef}
-      className="relative m-2 aspect-[5/3] min-w-[250px]  rounded-lg border-4 hover:cursor-pointer"
+      className={
+        "relative m-2 aspect-[5/3] min-w-[250px] rounded-lg border-4 hover:cursor-pointer" +
+        (isSelected ? ` border-sky-400` : "")
+      }
       onClick={onClick}
     >
       {/* Map */}
@@ -45,10 +48,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
         width="100"
         height="100"
         quality={100}
-        className={
-          "aspect-[5/3] h-full w-full overflow-hidden rounded-sm bg-white opacity-90" +
-          (isSelected ? ` border-sky-400` : "")
-        }
+        className="aspect-[5/3] h-full w-full overflow-hidden rounded-sm bg-white opacity-90"
       />
 
       {/* Metrics */}
