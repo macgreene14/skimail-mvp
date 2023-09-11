@@ -35,7 +35,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
     // main Card div
     <div
       ref={cardRef}
-      className="relative m-1 aspect-[5/3] min-w-[250px] rounded-lg border-4 hover:cursor-pointer"
+      className="relative m-2 aspect-[5/3] max-h-[180px] min-w-[250px] rounded-lg border-4 hover:cursor-pointer"
       onClick={onClick}
     >
       {/* Map */}
@@ -52,10 +52,12 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
       />
 
       {/* Metrics */}
-      <div className="lg:text-md absolute inset-0 z-10 mx-auto h-1/2 rounded-sm bg-black bg-opacity-50 p-2 text-center text-sm font-semibold text-white xl:text-lg">
-        <span className="block border-b p-1 font-extrabold">{header}</span>
+      <div className="lg:text-md absolute inset-0 z-10 mx-auto bg-opacity-50 text-center text-sm font-semibold text-white xl:text-lg">
+        <span className="block rounded-sm border-b bg-black bg-opacity-50 p-1 font-extrabold">
+          {header}
+        </span>
 
-        <dl className="mt-1 grid grid-cols-3 gap-x-2 gap-y-4 text-center leading-6 ">
+        <dl className="grid grid-cols-3 gap-x-2 gap-y-4 rounded-sm bg-black bg-opacity-50 pt-1 text-center leading-6 ">
           <div>
             <dt className="font-md">✼ Snowfall</dt>
             <dd>{`${avg_snowfall} "`}</dd>

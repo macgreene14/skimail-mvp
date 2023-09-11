@@ -20,17 +20,17 @@ export default function App() {
 
             {/* Main 3 column grid */}
             <div className="grid max-h-full grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-4">
-              {/* Left column - Results */}
-              <div className="flex flex-col">
+              {/* Left column*/}
+              <div className="flex flex-col rounded-lg md:h-[85vh] ">
                 {/* Search Bar */}
-                <section className="mb-1 rounded-md">
+                <section className="rounded-md">
                   <SearchBar
                     data={resorts}
                     setRenderedResorts={setRenderedResorts}
                   />
                 </section>
 
-                <div className="grid min-h-max max-w-full gap-4 overflow-auto rounded-md md:grid-cols-1">
+                <div className="grid gap-4 overflow-auto rounded-md md:grid-cols-1">
                   {/* Results Container */}
                   <section aria-labelledby="section-2-title">
                     <h2 className="sr-only" id="section-2-title">
@@ -46,7 +46,7 @@ export default function App() {
               </div>
 
               {/* Right column - Map */}
-              <div className="order-first grid h-[50vh] grid-cols-1 gap-4 lg:order-last lg:col-span-2 lg:h-[85vh]">
+              <div className="order-first grid h-[50vh] grid-cols-1 gap-4 rounded-lg lg:order-last lg:col-span-2 lg:h-[85vh]">
                 <section aria-labelledby="section-1-title">
                   <h2 className="sr-only" id="section-1-title">
                     Section title
