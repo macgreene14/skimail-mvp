@@ -101,6 +101,7 @@ export function MapExplore({
 
     // Load icons
     // Mountain - blue
+    // todo add logic to check for images prior to queryRenderedFeatures
     map.current.on("load", () => {
       map.current.loadImage(
         "https://ik.imagekit.io/bamlnhgnz/mountain-blue.png?updatedAt=1693368553125",
