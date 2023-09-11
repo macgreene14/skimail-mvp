@@ -13,8 +13,6 @@ export default function App() {
 
   return (
     <>
-      <NavBar />
-
       <div>
         <main className="p-2 lg:p-4">
           <div className="mx-auto px-1 lg:px-4">

@@ -1,4 +1,5 @@
 import "./globals.css";
+import { NavBar } from "./components/NavBar.jsx";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import HotJar from "../../utils/HotJar";
@@ -17,7 +18,10 @@ export default function RootLayout({ children }) {
       <head>
         <GA />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <NavBar />
+        {children}
+      </body>
       <Analytics />
       <HotJar />
     </html>
