@@ -35,7 +35,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
     // main Card div
     <div
       ref={cardRef}
-      className="relative m-1 aspect-[5/3] min-w-[300px] rounded-lg border-4 hover:cursor-pointer"
+      className="relative m-1 aspect-[5/3] max-h-full min-w-[300px] rounded-lg border-4 hover:cursor-pointer"
       onClick={onClick}
     >
       {/* Map */}
