@@ -46,7 +46,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
         height="100"
         quality={100}
         className={
-          "aspect-[5/3] min-w-[300px] overflow-hidden rounded-sm bg-white opacity-90 lg:w-full" +
+          "h-full w-full overflow-hidden rounded-sm bg-white opacity-90 lg:w-full" +
           (isSelected ? ` border-sky-400` : "")
         }
       />
