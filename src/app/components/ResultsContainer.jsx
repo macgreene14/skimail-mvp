@@ -7,7 +7,7 @@ export function ResultsContainer({
   selectedResort,
 }) {
   return (
-    <div className="snap-x overflow-auto rounded-lg shadow h-full lg:h-[80vh] flex flex-row lg:flex-col">
+    <div className="flex flex-row overflow-auto lg:flex-col">
       {resorts
         ?.sort((a, b) => {
           const A = parseFloat(a.properties.avg_snowfall) || 0; // handle undefined and convert to number
@@ -18,7 +18,6 @@ export function ResultsContainer({
           (() => {
             return (
               <Card
-                className="snap-center"
                 resortsLength={resorts.length}
                 key={resort.properties.name}
                 resort={resort}
@@ -34,7 +33,7 @@ export function ResultsContainer({
                 }}
               />
             );
-          })()
+          })(),
         )}
     </div>
   );
