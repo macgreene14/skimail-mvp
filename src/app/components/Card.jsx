@@ -35,7 +35,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
     // main Card div
     <div
       ref={cardRef}
-      className="relative m-1 rounded-lg border-4 hover:cursor-pointer"
+      className="relative m-1 aspect-[5/3] min-w-[300px] rounded-lg border-4 hover:cursor-pointer"
       onClick={onClick}
     >
       {/* Map */}
@@ -46,13 +46,13 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
         height="100"
         quality={100}
         className={
-          "aspect-[5/3] min-w-[300px] overflow-hidden rounded-md bg-white opacity-90 lg:w-full" +
+          "aspect-[5/3] min-w-[300px] overflow-hidden rounded-sm bg-white opacity-90 lg:w-full" +
           (isSelected ? ` border-sky-400` : "")
         }
       />
 
       {/* Metrics */}
-      <div className="lg:text-md absolute inset-0 z-10 mx-auto h-1/2 rounded-md bg-black bg-opacity-50 p-2 text-center text-sm font-semibold text-white xl:text-lg">
+      <div className="lg:text-md absolute inset-0 z-10 mx-auto h-1/2 rounded-sm bg-black bg-opacity-50 p-2 text-center text-sm font-semibold text-white xl:text-lg">
         <span className="block border-b p-1 font-extrabold">{header}</span>
 
         <dl className="mt-1 grid grid-cols-3 gap-x-4 gap-y-4 text-center leading-6 ">
