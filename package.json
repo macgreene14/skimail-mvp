@@ -11,6 +11,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.16",
     "@heroicons/react": "^2.0.18",
+    "@hotjar/browser": "^1.0.9",
     "@tailwindcss/forms": "^0.5.4",
     "@vercel/analytics": "^1.0.2",
     "autoprefixer": "10.4.14",
@@ -21,7 +22,6 @@
     "postcss": "8.4.27",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
-    "react-hotjar": "^6.1.0",
     "tailwindcss": "3.3.3"
   },
   "devDependencies": {
