@@ -47,7 +47,7 @@ export function MapExplore({
         // fitBoundsOptions: { maxZoom: map.current.getZoom() },
         fitBoundsOptions: { maxZoom: 5 },
       }),
-      "top-left"
+      "top-left",
     );
 
     // Full screen
@@ -73,7 +73,7 @@ export function MapExplore({
 
     // Snow circle toggle
     const checkboxControlAvgSnow = new CheckboxControl({
-      labelText: "Snow",
+      labelText: "✼",
       layerId: "data-driven-circles",
       checkedColor: "rgb(225, 167, 230)",
       defVis: false,
@@ -108,7 +108,7 @@ export function MapExplore({
         (error, image) => {
           if (error) throw error;
           map.current.addImage("Ikon", image); // Add the image to the map style.
-        }
+        },
       );
 
       // Mountain - orange
@@ -117,7 +117,7 @@ export function MapExplore({
         (error, image) => {
           if (error) throw error;
           map.current.addImage("Epic", image); // Add the image to the map style.
-        }
+        },
       );
 
       // Add resorts as symbole layer
@@ -191,14 +191,14 @@ export function MapExplore({
 
   // Create your React component with Tailwind CSS classes
   const PopupContent = ({ selectedResort }) => (
-    <div className="-m-4 p-2 text-center bg-white shadow-md rounded-lg border-solid border-2 ">
+    <div className="-m-4 rounded-lg border-2 border-solid bg-white p-2 text-center shadow-md ">
       <a
         href={`resorts/${selectedResort.properties.slug}`}
         target="_blank"
         rel="noopener noreferrer"
         className="block"
       >
-        <h1 className="text-black w-full text-md md:text-lg font-bold m-1">
+        <h1 className="text-md m-1 w-full font-bold text-black md:text-lg">
           {selectedResort.properties.name !== "Unknown"
             ? selectedResort.properties.name
             : null}
@@ -214,13 +214,13 @@ export function MapExplore({
             ? selectedResort.properties.country
             : null}{" "}
         </h1>
-        <span className="inline-block bg-gray-200 rounded-full px-1 lg:px-3 py-1 text-xs lg:text-sm font-semibold text-gray-700 mr-2 mb-2">
+        <span className="mb-2 mr-2 inline-block rounded-full bg-gray-200 px-1 py-1 text-xs font-semibold text-gray-700 lg:px-3 lg:text-sm">
           ✼ {selectedResort.properties.avg_snowfall} in
         </span>
-        <span className="inline-block bg-gray-200 rounded-full px-1 lg:px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+        <span className="mb-2 mr-2 inline-block rounded-full bg-gray-200 px-1 py-1 text-sm font-semibold text-gray-700 lg:px-3">
           ⛰ {selectedResort.properties.vertical_drop} ft
         </span>
-        <span className="inline-block bg-gray-200 rounded-full px-1 lg:px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+        <span className="mb-2 mr-2 inline-block rounded-full bg-gray-200 px-1 py-1 text-sm font-semibold text-gray-700 lg:px-3">
           ⛷ {selectedResort.properties.skiable_acres} acres
         </span>
       </a>
@@ -229,7 +229,7 @@ export function MapExplore({
 
   function addPopup(selectedResort) {
     const popupNode = ReactDOMServer.renderToStaticMarkup(
-      <PopupContent selectedResort={selectedResort} />
+      <PopupContent selectedResort={selectedResort} />,
     );
     const coordinates = selectedResort.geometry.coordinates.slice();
     const popup = new mapboxgl.Popup({
@@ -252,6 +252,6 @@ export function MapExplore({
   }
 
   return (
-    <div ref={mapContainer} className="w-full h-full z-1 rounded-lg"></div>
+    <div ref={mapContainer} className="z-1 h-full w-full rounded-lg"></div>
   );
 }
