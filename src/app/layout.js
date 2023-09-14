@@ -13,17 +13,15 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  <HotJar />; // add HJ script to js
   return (
     <html lang="en">
-      <head>
-        <GA />
-      </head>
       <body className={inter.className}>
         <NavBar />
         {children}
       </body>
       <Analytics />
+      <GA />
+      <HotJar />
     </html>
   );
 }
