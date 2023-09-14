@@ -21,9 +21,9 @@ export default function App() {
             {/* Main 3 column grid */}
             <div className="grid max-h-full grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-4">
               {/* Left column*/}
-              <div className="flex h-[255px] flex-col rounded-lg lg:h-[85vh] ">
+              <div className="flex h-[240px] flex-col rounded-lg lg:h-[85vh] ">
                 {/* Search Bar */}
-                <section className="rounded-md">
+                <section className="m-2 rounded-md">
                   <SearchBar
                     data={resorts}
                     setRenderedResorts={setRenderedResorts}

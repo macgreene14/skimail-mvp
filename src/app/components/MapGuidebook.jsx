@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
+import LogCam from "../../../utils/LogCam";
 
 export default function MapGuideBook({ resort }) {
   mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
@@ -43,7 +44,7 @@ export default function MapGuideBook({ resort }) {
         console.log("Longitude:", center.lng);
         console.log("Zoom:", zoom);
       },
-      []
+      [],
     );
   });
 
@@ -113,7 +114,7 @@ export default function MapGuideBook({ resort }) {
       className: "",
     })
       .setHTML(
-        `<h1 style="color: black; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>`
+        `<h1 style="color: black; padding: 1%;font-size: 1.5rem;font-weight: 600;">${name}</h1>`,
       )
       // .setText(name)
       .setLngLat(coordinates)
@@ -122,5 +123,9 @@ export default function MapGuideBook({ resort }) {
     return popup;
   }
 
-  return <div ref={mapContainer} className="w-full h-full z-10"></div>;
+  return (
+    <div ref={mapContainer} className="z-10 h-full w-full">
+      {/* <LogCam map={map} /> */}
+    </div>
+  );
 }

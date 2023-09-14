@@ -5,12 +5,15 @@ export default function LogCam({ map }) {
     if (!map.current) {
       return;
     }
-    // Read out coordinates
-    var center = map.current.getCenter();
-    var zoom = map.current.getZoom().toFixed(2);
+    map.current.on("moveend", () => {
+      const center = map.current.getCenter();
+      const zoom = map.current.getZoom().toFixed(2);
+      const bearing = map.current.getBearing().toFixed(2);
 
-    console.log("Latitude:", center.lat);
-    console.log("Longitude:", center.lng);
-    console.log("Zoom:", zoom);
-  }, []);
+      console.log("Latitude: ", center.lat);
+      console.log("Longitude: ", center.lng);
+      console.log("Zoom: ", zoom);
+      console.log("Bearing: ", bearing);
+    });
+  }, [map]);
 }
