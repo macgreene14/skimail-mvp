@@ -36,7 +36,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
     <div
       ref={cardRef}
       className={
-        "relative m-2 aspect-[5/3] min-w-[250px] rounded-lg border-4 hover:cursor-pointer" +
+        "relative m-2 aspect-[5/3] min-w-[250px] max-w-[250px] rounded-lg border-4 hover:cursor-pointer lg:max-w-full" +
         (isSelected ? ` border-sky-400` : "")
       }
       onClick={onClick}
