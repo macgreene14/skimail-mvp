@@ -4,7 +4,7 @@ import { NavBar } from "./components/NavBar.jsx";
 import { MapExplore } from "./components/MapExplore.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
-import resortCollection from "../../assets/resorts3.json";
+import resortCollection from "../../assets/resorts.json";
 
 export default function App() {
   const resorts = resortCollection.features;
