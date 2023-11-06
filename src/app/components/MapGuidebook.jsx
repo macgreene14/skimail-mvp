@@ -161,6 +161,8 @@ export default function MapGuideBook({ resort }) {
         style={{
           top: "50%",
           left: "50%",
+          marginLeft: "-17.5px",
+          marginTop: "-17.5px",
           position: "absolute",
           zIndex: 1,
           fontSize: "35px",
