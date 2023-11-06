@@ -160,11 +160,12 @@ export default function MapGuideBook({ resort }) {
       <div
         style={{
           top: "50%",
-          left: "50%",
+          left: "48%",
           position: "absolute",
           zIndex: 1,
           fontSize: "35px",
-          colr: "gray",
+          color: "gray",
+          opacity: "75%",
         }}
       >
         +
@@ -176,6 +177,7 @@ export default function MapGuideBook({ resort }) {
           position: "absolute",
           zIndex: 1,
           fontSize: "35px",
+          color: "black",
         }}
       >
         {selected}
