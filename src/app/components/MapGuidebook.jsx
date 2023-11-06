@@ -123,7 +123,13 @@ export default function MapGuideBook({ resort }) {
       ];
 
       const features = map.current.queryRenderedFeatures(bbox, {
-        layers: ["road-path-bg"],
+        layers: [
+          "road-path-bg",
+          "lotte_arai-downhill",
+          "niseko-downhill",
+          "rusutsu-downhill",
+          "hakuba-downhill",
+        ],
       });
 
       if (features.length) {
