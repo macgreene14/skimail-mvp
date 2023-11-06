@@ -59,17 +59,17 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
 
         <dl className="grid grid-cols-3 gap-x-2 gap-y-4 rounded-sm bg-black bg-opacity-50 p-1 text-center leading-6 ">
           <div>
-            <dt className="font-md">✼ Snowfall</dt>
+            <dt className="font-md">Snowfall</dt>
             <dd>{`${avg_snowfall} "`}</dd>
           </div>
 
           <div>
-            <dt className="font-md">⛰ Vertical</dt>
+            <dt className="font-md">Vertical</dt>
             <dd>{`${vertical_drop} '`}</dd>
           </div>
 
           <div>
-            <dt className="font-md">⛷ Size</dt>
+            <dt className="font-md">Size</dt>
             <dd>{`${skiable_acres}`} ac</dd>
           </div>
         </dl>
