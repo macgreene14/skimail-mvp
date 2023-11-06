@@ -9,7 +9,7 @@ export default function MapGuideBook({ resort }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
 
-  const [selected, setSelected] = useState("init");
+  const [selected, setSelected] = useState();
 
   // assign camera settings
   const cam_resort_lat = resort[0].properties.cam_resort_lat;
