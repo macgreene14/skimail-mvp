@@ -112,6 +112,10 @@ export default function MapGuideBook({ resort }) {
 
       const padding = 10; // Increase this value to increase the box size
 
+      const offset = 35 / 2; // Take into account the size of the crosshair
+      centerProject.x = centerProject.x + offset;
+      centerProject.y = centerProject.y + offset;
+
       // Create a padded bounding box around the center point
       const bbox = [
         [centerProject.x - padding, centerProject.y - padding], // Bottom-left point
@@ -161,8 +165,8 @@ export default function MapGuideBook({ resort }) {
         style={{
           top: "50%",
           left: "50%",
-          marginLeft: "-17.5px",
-          marginTop: "-17.5px",
+          // marginLeft: "-17.5px",
+          // marginTop: "-17.5px",
           position: "absolute",
           zIndex: 1,
           fontSize: "35px",
