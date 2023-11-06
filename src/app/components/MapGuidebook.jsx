@@ -107,18 +107,28 @@ export default function MapGuideBook({ resort }) {
   useEffect(() => {
     map.current.on("moveend", () => {
       // Read out coordinates
-      var center = map.current.getCenter();
+      const center = map.current.getCenter();
+      const centerProject = map.current.project(center);
 
-      var features = map.current.queryRenderedFeatures(
-        map.current.project(center),
-        { layers: ["road-path-bg"] },
-      );
+      const padding = 10; // Increase this value to increase the box size
+
+      // Create a padded bounding box around the center point
+      const bbox = [
+        [centerProject.x - padding, centerProject.y - padding], // Bottom-left point
+        [centerProject.x + padding, centerProject.y + padding], // Top-right point
+      ];
+
+      const features = map.current.queryRenderedFeatures(bbox, {
+        layers: ["road-path-bg"],
+      });
 
       if (features.length) {
         // If there is a marker, select it.
-        // selectMarker(features[0]);
-        console.log(features[0]);
         setSelected(features[0].properties.name);
+
+        // const coordinates = features[0].geometry.coordinates[0]; //click event coordinates
+        // const name = features[0].properties.name;
+        // addPopupTrail(coordinates, name);
       }
     });
   });
@@ -153,18 +163,19 @@ export default function MapGuideBook({ resort }) {
           left: "50%",
           position: "absolute",
           zIndex: 1,
-          fontSize: "20px",
+          fontSize: "35px",
+          colr: "gray",
         }}
       >
         +
       </div>
       <div
         style={{
-          top: "10px",
-          left: "10px",
+          top: "15px",
+          left: "15px",
           position: "absolute",
           zIndex: 1,
-          fontSize: "20px",
+          fontSize: "35px",
         }}
       >
         {selected}
