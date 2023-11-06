@@ -160,7 +160,7 @@ export default function MapGuideBook({ resort }) {
       <div
         style={{
           top: "50%",
-          left: "48%",
+          left: "50%",
           position: "absolute",
           zIndex: 1,
           fontSize: "35px",
