@@ -4,7 +4,6 @@ import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import HotJar from "../../utils/HotJar";
 import GA from "../../utils/GA";
-import Head from "next/head";
 
 const font = Montserrat({ weight: "300", subsets: ["latin"] });
 
