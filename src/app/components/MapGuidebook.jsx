@@ -110,9 +110,9 @@ export default function MapGuideBook({ resort }) {
       const center = map.current.getCenter();
       const centerProject = map.current.project(center);
 
-      const padding = 10; // Increase this value to increase the box size
+      const padding = 15; // Increase this value to increase the box size
 
-      const offset = 35 / 2; // Take into account the size of the crosshair
+      const offset = 0; // 35 / 2; // Take into account the size of the crosshair
       centerProject.x = centerProject.x + offset;
       centerProject.y = centerProject.y + offset;
 
@@ -135,6 +135,7 @@ export default function MapGuideBook({ resort }) {
       if (features.length) {
         // If there is a marker, select it.
         setSelected(features[0].properties.name);
+        console.log(features[0]);
 
         // const coordinates = features[0].geometry.coordinates[0]; //click event coordinates
         // const name = features[0].properties.name;
@@ -171,8 +172,8 @@ export default function MapGuideBook({ resort }) {
         style={{
           top: "50%",
           left: "50%",
-          // marginLeft: "-17.5px",
-          // marginTop: "-17.5px",
+          marginLeft: "-17.5px",
+          marginTop: "-17.5px",
           position: "absolute",
           zIndex: 1,
           fontSize: "35px",
