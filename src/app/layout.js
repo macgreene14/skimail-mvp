@@ -1,11 +1,12 @@
 import "./globals.css";
 import { NavBar } from "./components/NavBar.jsx";
-import { Inter } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import HotJar from "../../utils/HotJar";
 import GA from "../../utils/GA";
+import Head from "next/head";
 
-const inter = Inter({ subsets: ["latin"] });
+const font = Montserrat({ weight: "300", subsets: ["latin"] });
 
 export const metadata = {
   title: "Skimail",
@@ -15,7 +16,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={font.className}>
         <NavBar />
         {children}
       </body>
