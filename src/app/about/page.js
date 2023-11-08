@@ -3,7 +3,7 @@ import "../globals.css";
 
 export default function Page() {
   return (
-    <div className="relative isolate h-screen overflow-hidden pt-14">
+    <div className="relative isolate min-h-screen overflow-hidden pt-14">
       <div
         className="absolute inset-y-0 right-1/2 -z-10 -mr-96 w-[200%]  bg-white shadow-xl sm:-mr-80 lg:-mr-96"
         aria-hidden="true"
@@ -33,7 +33,7 @@ export default function Page() {
           <img
             src="https://ik.imagekit.io/bamlnhgnz/skimail-hero.png"
             alt=""
-            className="my-8 mt-10 aspect-[1/1] w-full max-w-lg rounded-2xl object-cover sm:mt-16 lg:mt-0 lg:max-w-none xl:row-span-2 xl:row-end-2 xl:mt-36"
+            className="mx-auto my-8 mt-10 aspect-[1/1] w-full max-w-lg rounded-2xl object-cover sm:mt-16 lg:mt-0 lg:max-w-none xl:row-span-2 xl:row-end-2 xl:mt-36"
           />
         </div>
       </div>
