@@ -3,9 +3,9 @@ import "../globals.css";
 
 export default function Page() {
   return (
-    <div className="relative isolate overflow-hidden bg-gradient-to-b from-indigo-100/20 pt-14">
+    <div className="relative isolate h-screen overflow-hidden pt-14">
       <div
-        className="absolute inset-y-0 right-1/2 -z-10 -mr-96 w-[200%] origin-top-right skew-x-[-30deg] bg-white shadow-xl shadow-indigo-600/10 ring-1 ring-indigo-50 sm:-mr-80 lg:-mr-96"
+        className="absolute inset-y-0 right-1/2 -z-10 -mr-96 w-[200%]  bg-white shadow-xl sm:-mr-80 lg:-mr-96"
         aria-hidden="true"
       />
       <div className="mx-auto max-w-7xl px-6 py-4 sm:py-20 lg:px-8">
@@ -37,7 +37,7 @@ export default function Page() {
           />
         </div>
       </div>
-      <div className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-white sm:h-32" />
+      <div className="absolute inset-x-0 bottom-0 -z-10 h-24  from-white sm:h-32" />
     </div>
   );
 }
