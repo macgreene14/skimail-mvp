@@ -102,55 +102,66 @@ export function MapExplore({
     // Load icons
     // Mountain - blue
     // todo add logic to check for images prior to queryRenderedFeatures
-    map.current.on("load", () => {
-      map.current.loadImage(
-        "https://ik.imagekit.io/bamlnhgnz/mountain-blue.png?updatedAt=1693368553125",
-        (error, image) => {
-          if (error) throw error;
-          map.current.addImage("Ikon", image); // Add the image to the map style.
-        },
-      );
-
-      // Mountain - orange
-      map.current.loadImage(
-        "https://ik.imagekit.io/bamlnhgnz/mountain-orange.png?updatedAt=1693110233960",
-        (error, image) => {
-          if (error) throw error;
-          map.current.addImage("Epic", image); // Add the image to the map style.
-        },
-      );
-
-      // Add resorts as symbole layer
-      map.current.addSource("resorts", {
-        type: "geojson",
-        data: resortCollection,
-      });
-
-      for (const feature of resorts) {
-        const layerID = feature.properties.pass; // layer id based on pass type
-
-        // Add a layer for this symbol type if it hasn't been added already
-        if (!map.current.getLayer(layerID)) {
-          map.current.addLayer({
-            id: layerID,
-            type: "symbol",
-            source: "resorts",
-            layout: {
-              "icon-image": ["get", "pass"], // same as inserting feature.properties.icon
-              "icon-allow-overlap": true,
-              "icon-size": 0.05,
-              "icon-allow-overlap": true,
-              "icon-ignore-placement": true,
-              "text-field": ["get", "name"],
-              "text-offset": [0, 1.2],
-              "text-size": 14,
-              // "text-allow-overlap": true,
-              // "text-ignore-placement": true,
-              "text-optional": true,
+    map.current.on("load", async () => {
+      try {
+        const ikonImage = await new Promise((resolve, reject) => {
+          map.current.loadImage(
+            "https://ik.imagekit.io/bamlnhgnz/mountain-blue.png?updatedAt=1693368553125",
+            (error, image) => {
+              if (error) reject(error);
+              resolve(image);
             },
-            filter: ["==", "pass", layerID],
-          });
+          );
+        });
+
+        const epicImage = await new Promise((resolve, reject) => {
+          map.current.loadImage(
+            "https://ik.imagekit.io/bamlnhgnz/mountain-orange.png?updatedAt=1693110233960",
+            (error, image) => {
+              if (error) reject(error);
+              resolve(image);
+            },
+          );
+        });
+
+        // Add images to the map
+        map.current.addImage("Ikon", ikonImage);
+        map.current.addImage("Epic", epicImage);
+
+        // Add resorts as symbole layer
+        map.current.addSource("resorts", {
+          type: "geojson",
+          data: resortCollection,
+        });
+
+        for (const feature of resorts) {
+          const layerID = feature.properties.pass; // layer id based on pass type
+
+          // Add a layer for this symbol type if it hasn't been added already
+          if (!map.current.getLayer(layerID)) {
+            map.current.addLayer({
+              id: layerID,
+              type: "symbol",
+              source: "resorts",
+              layout: {
+                "icon-image": ["get", "pass"], // same as inserting feature.properties.icon
+                "icon-allow-overlap": true,
+                "icon-size": 0.05,
+                "icon-allow-overlap": true,
+                "icon-ignore-placement": true,
+                "text-field": ["get", "name"],
+                "text-offset": [0, 1.2],
+                "text-size": 14,
+                // "text-allow-overlap": true,
+                // "text-ignore-placement": true,
+                "text-optional": true,
+              },
+              filter: ["==", "pass", layerID],
+            });
+          }
         }
+      } catch (error) {
+        console.error("Failed to load images:", error);
       }
     });
   }, []);
