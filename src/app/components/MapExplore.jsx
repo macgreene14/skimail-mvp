@@ -4,6 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import CheckboxControl from "../../../utils/CheckboxControl";
 import CollapsibleControl from "../../../utils/CollapsibleControl";
 import ReactDOMServer from "react-dom/server";
+import { fetchAllSnowData, getTopSnowfall } from "../utils/fetchSnowData";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
@@ -17,6 +18,8 @@ export function MapExplore({
   const map = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const handlersAttached = useRef(false);
+  const spinEnabled = useRef(true);
+  const snowDataRef = useRef(null);
   const resorts = resortCollection.features;
 
   const toggleFullscreen = useCallback(() => {
@@ -38,19 +41,37 @@ export function MapExplore({
     return () => document.removeEventListener("keydown", handleKey);
   }, [isFullscreen]);
 
+  // Globe spin animation
+  const spinGlobe = useCallback(() => {
+    if (!map.current || !spinEnabled.current) return;
+    const zoom = map.current.getZoom();
+    if (zoom < 3.5) {
+      const center = map.current.getCenter();
+      center.lng -= 0.3;
+      map.current.easeTo({ center, duration: 50, easing: (t) => t });
+    }
+  }, []);
+
   useEffect(() => {
     if (map.current) return;
-
-    let zoomInit = 3;
-    if (window.innerWidth <= 768) {
-      zoomInit = zoomInit - 0.75;
-    }
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8",
-      center: [-101, 41],
-      zoom: zoomInit,
+      center: [10, 30],
+      zoom: 1.5,
+      projection: "globe",
+    });
+
+    // Atmosphere/fog for globe view
+    map.current.on("style.load", () => {
+      map.current.setFog({
+        color: "rgb(186, 210, 235)",
+        "high-color": "rgb(36, 92, 223)",
+        "horizon-blend": 0.02,
+        "space-color": "rgb(11, 11, 25)",
+        "star-intensity": 0.6,
+      });
     });
 
     map.current.addControl(
@@ -94,15 +115,23 @@ export function MapExplore({
       if (window.innerWidth <= 768) {
         zoom = zoom - 0.75;
       }
+      spinEnabled.current = false;
       map.current.flyTo({ center: [lng, lat], zoom: zoom, bearing: 0 });
     });
     map.current.addControl(collapsibleControl, "top-left");
 
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
+    // Stop spinning on user interaction
+    map.current.on("mousedown", () => { spinEnabled.current = false; });
+    map.current.on("touchstart", () => { spinEnabled.current = false; });
+    map.current.on("moveend", () => {
+      // Resume spinning only if zoomed out enough
+      if (map.current.getZoom() < 3) spinEnabled.current = true;
+    });
+
     map.current.on("load", async () => {
       try {
-        // Generate crisp SVG-based markers via canvas
         const createMarkerImage = (fillColor, strokeColor, snowflakeColor) => {
           const size = 64;
           const ratio = window.devicePixelRatio || 1;
@@ -112,12 +141,10 @@ export function MapExplore({
           const ctx = canvas.getContext("2d");
           ctx.scale(ratio, ratio);
 
-          // Drop shadow
           ctx.shadowColor = "rgba(0,0,0,0.3)";
           ctx.shadowBlur = 4;
           ctx.shadowOffsetY = 2;
 
-          // Pin body (rounded square)
           const x = 8, y = 4, w = 48, h = 44, r = 12;
           ctx.beginPath();
           ctx.moveTo(x + r, y);
@@ -125,7 +152,6 @@ export function MapExplore({
           ctx.quadraticCurveTo(x + w, y, x + w, y + r);
           ctx.lineTo(x + w, y + h - r);
           ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-          // Pin point
           ctx.lineTo(size / 2 + 6, y + h);
           ctx.lineTo(size / 2, y + h + 10);
           ctx.lineTo(size / 2 - 6, y + h);
@@ -142,7 +168,6 @@ export function MapExplore({
           ctx.lineWidth = 2;
           ctx.stroke();
 
-          // Mountain icon
           ctx.fillStyle = "white";
           ctx.beginPath();
           ctx.moveTo(22, 36);
@@ -151,7 +176,6 @@ export function MapExplore({
           ctx.closePath();
           ctx.fill();
 
-          // Snow cap
           ctx.fillStyle = snowflakeColor;
           ctx.beginPath();
           ctx.moveTo(27, 24);
@@ -163,9 +187,7 @@ export function MapExplore({
           return ctx.getImageData(0, 0, canvas.width, canvas.height);
         };
 
-        // Ikon: ski blue palette
         const ikonImg = createMarkerImage("#1b57f5", "#1443e1", "#bcd8ff");
-        // Epic: warm orange
         const epicImg = createMarkerImage("#f97316", "#ea580c", "#fed7aa");
 
         map.current.addImage("Ikon", ikonImg, { pixelRatio: window.devicePixelRatio || 1 });
@@ -174,6 +196,104 @@ export function MapExplore({
         map.current.addSource("resorts", {
           type: "geojson",
           data: resortCollection,
+        });
+
+        // Snow data source (empty initially, filled progressively)
+        map.current.addSource("snow-data", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] },
+        });
+
+        // Snow depth heatmap layer (visible at low zoom)
+        map.current.addLayer({
+          id: "snow-heatmap",
+          type: "heatmap",
+          source: "snow-data",
+          maxzoom: 6,
+          paint: {
+            "heatmap-weight": [
+              "interpolate", ["linear"], ["get", "snowfall_7d"],
+              0, 0,
+              10, 0.3,
+              50, 0.7,
+              150, 1,
+            ],
+            "heatmap-intensity": [
+              "interpolate", ["linear"], ["zoom"],
+              0, 0.5,
+              4, 1.5,
+            ],
+            "heatmap-color": [
+              "interpolate", ["linear"], ["heatmap-density"],
+              0, "rgba(0,0,0,0)",
+              0.1, "rgba(100,181,246,0.3)",
+              0.3, "rgba(66,165,245,0.5)",
+              0.5, "rgba(30,136,229,0.6)",
+              0.7, "rgba(21,101,192,0.7)",
+              1, "rgba(255,255,255,0.85)",
+            ],
+            "heatmap-radius": [
+              "interpolate", ["linear"], ["zoom"],
+              0, 15,
+              3, 30,
+              6, 50,
+            ],
+            "heatmap-opacity": [
+              "interpolate", ["linear"], ["zoom"],
+              4, 0.8,
+              7, 0,
+            ],
+          },
+        });
+
+        // Snow circles (visible at higher zoom)
+        map.current.addLayer({
+          id: "snow-circles",
+          type: "circle",
+          source: "snow-data",
+          minzoom: 3,
+          paint: {
+            "circle-radius": [
+              "interpolate", ["linear"], ["get", "snowfall_7d"],
+              0, 4,
+              20, 10,
+              80, 18,
+              200, 28,
+            ],
+            "circle-color": [
+              "interpolate", ["linear"], ["get", "snowfall_7d"],
+              0, "rgba(100,181,246,0.6)",
+              20, "rgba(66,165,245,0.7)",
+              60, "rgba(30,136,229,0.8)",
+              150, "rgba(255,255,255,0.9)",
+            ],
+            "circle-stroke-width": 1.5,
+            "circle-stroke-color": "rgba(255,255,255,0.5)",
+            "circle-opacity": [
+              "interpolate", ["linear"], ["zoom"],
+              3, 0,
+              4.5, 0.8,
+            ],
+          },
+        });
+
+        // Snow labels
+        map.current.addLayer({
+          id: "snow-labels",
+          type: "symbol",
+          source: "snow-data",
+          minzoom: 4,
+          layout: {
+            "text-field": ["concat", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
+            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+            "text-size": 10,
+            "text-allow-overlap": false,
+          },
+          paint: {
+            "text-color": "#ffffff",
+            "text-halo-color": "rgba(0,50,100,0.8)",
+            "text-halo-width": 1,
+          },
         });
 
         for (const feature of resorts) {
@@ -188,6 +308,7 @@ export function MapExplore({
                 "icon-allow-overlap": true,
                 "icon-size": [
                   "interpolate", ["linear"], ["zoom"],
+                  1, 0.25,
                   3, 0.5,
                   6, 0.7,
                   10, 1.0,
@@ -221,8 +342,38 @@ export function MapExplore({
           layers: ["Epic", "Ikon"],
         });
         if (features) setRenderedResorts(features);
+
+        // Start globe spin
+        const spinInterval = setInterval(spinGlobe, 50);
+
+        // Fetch snow data progressively
+        fetchAllSnowData(resorts, (batchResults) => {
+          snowDataRef.current = batchResults;
+          const snowGeoJSON = {
+            type: "FeatureCollection",
+            features: batchResults
+              .filter((d) => d.snowfall_7d > 0)
+              .map((d) => ({
+                type: "Feature",
+                geometry: { type: "Point", coordinates: d.coordinates },
+                properties: {
+                  slug: d.slug,
+                  name: d.name,
+                  snowfall_7d: d.snowfall_7d,
+                  snowfall_24h: d.snowfall_24h,
+                  snow_depth: d.snow_depth,
+                  temperature: d.temperature,
+                },
+              })),
+          };
+          if (map.current.getSource("snow-data")) {
+            map.current.getSource("snow-data").setData(snowGeoJSON);
+          }
+        });
+
+        return () => clearInterval(spinInterval);
       } catch (error) {
-        console.error("Failed to load marker images:", error);
+        console.error("Map initialization error:", error);
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -231,23 +382,49 @@ export function MapExplore({
     if (!map.current || handlersAttached.current) return;
 
     const onMoveEnd = () => {
-      const features = map.current.queryRenderedFeatures({
-        layers: ["Epic", "Ikon"],
-      });
+      const layers = [];
+      if (map.current.getLayer("Epic")) layers.push("Epic");
+      if (map.current.getLayer("Ikon")) layers.push("Ikon");
+      if (layers.length === 0) return;
+      const features = map.current.queryRenderedFeatures({ layers });
       if (features) setRenderedResorts(features);
     };
 
     const onClick = (e) => {
+      spinEnabled.current = false;
       setSelectedResort(e.features[0]);
+    };
+
+    // Click on snow circles to show snow info
+    const onSnowClick = (e) => {
+      if (!e.features?.[0]) return;
+      const props = e.features[0].properties;
+      const coords = e.features[0].geometry.coordinates.slice();
+      new mapboxgl.Popup({ className: "skimail-popup", maxWidth: "240px", offset: 10 })
+        .setLngLat(coords)
+        .setHTML(`
+          <div style="font-family:-apple-system,sans-serif;padding:4px">
+            <div style="font-size:13px;font-weight:700;color:#f8fafc;margin-bottom:4px">${props.name}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${props.snowfall_24h > 0 ? `<span style="padding:2px 6px;border-radius:5px;background:rgba(14,165,233,0.2);font-size:11px;font-weight:600;color:#7dd3fc">24h: ${Math.round(props.snowfall_24h)}cm</span>` : ""}
+              <span style="padding:2px 6px;border-radius:5px;background:rgba(14,165,233,0.2);font-size:11px;font-weight:600;color:#7dd3fc">7d: ${Math.round(props.snowfall_7d)}cm</span>
+              ${props.snow_depth > 0 ? `<span style="padding:2px 6px;border-radius:5px;background:rgba(255,255,255,0.1);font-size:11px;font-weight:600;color:#94a3b8">Base: ${Math.round(props.snow_depth)}cm</span>` : ""}
+              ${props.temperature !== null ? `<span style="padding:2px 6px;border-radius:5px;background:rgba(255,255,255,0.1);font-size:11px;font-weight:600;color:#94a3b8">${Math.round(props.temperature)}°C</span>` : ""}
+            </div>
+          </div>
+        `)
+        .addTo(map.current);
     };
 
     map.current.on("moveend", onMoveEnd);
     map.current.on("click", ["Epic", "Ikon"], onClick);
+    map.current.on("click", "snow-circles", onSnowClick);
     handlersAttached.current = true;
 
     return () => {
       map.current.off("moveend", onMoveEnd);
       map.current.off("click", ["Epic", "Ikon"], onClick);
+      map.current.off("click", "snow-circles", onSnowClick);
       handlersAttached.current = false;
     };
   }, [setRenderedResorts, setSelectedResort]);
@@ -255,15 +432,18 @@ export function MapExplore({
   useEffect(() => {
     if (selectedResort) {
       const popup = addPopup(selectedResort);
-      return () => {
-        popup.remove();
-      };
+      return () => { popup.remove(); };
     }
   }, [selectedResort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function addPopup(selectedResort) {
+    // Merge snow data if available
+    const snowInfo = snowDataRef.current?.find(
+      (d) => d.slug === selectedResort.properties.slug
+    );
+
     const popupNode = ReactDOMServer.renderToStaticMarkup(
-      <PopupContent selectedResort={selectedResort} />,
+      <PopupContent selectedResort={selectedResort} snowData={snowInfo} />,
     );
     const coordinates = selectedResort.geometry.coordinates.slice();
     const popup = new mapboxgl.Popup({
@@ -280,7 +460,8 @@ export function MapExplore({
       .setHTML(popupNode)
       .addTo(map.current);
 
-    map.current.flyTo({ center: coordinates });
+    spinEnabled.current = false;
+    map.current.flyTo({ center: coordinates, zoom: Math.max(map.current.getZoom(), 5) });
     return popup;
   }
 
@@ -299,7 +480,7 @@ export function MapExplore({
   );
 }
 
-const PopupContent = ({ selectedResort }) => {
+const PopupContent = ({ selectedResort, snowData }) => {
   const p = selectedResort.properties;
   const passColor = p.pass === "Ikon" ? "#1b57f5" : "#f97316";
   const location = [
@@ -315,7 +496,6 @@ const PopupContent = ({ selectedResort }) => {
         rel="noopener noreferrer"
         style={{ textDecoration: "none", color: "inherit", display: "block" }}
       >
-        {/* Pass badge + name */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
           <span style={{
             display: "inline-block", padding: "2px 8px", borderRadius: "999px",
@@ -327,20 +507,50 @@ const PopupContent = ({ selectedResort }) => {
           </span>
         </div>
 
-        {/* Location */}
         {location && (
           <div style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "6px" }}>
             📍 {location}
           </div>
         )}
 
-        {/* Stats row */}
+        {/* Live snow data */}
+        {snowData && (snowData.snowfall_24h > 0 || snowData.snow_depth > 0 || snowData.snowfall_7d > 0) && (
+          <div style={{
+            display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "6px",
+            padding: "6px", borderRadius: "8px", background: "rgba(14,165,233,0.1)",
+            border: "1px solid rgba(14,165,233,0.2)",
+          }}>
+            <span style={{ fontSize: "10px", fontWeight: "700", color: "#38bdf8", textTransform: "uppercase", width: "100%", marginBottom: "2px" }}>❄️ Live Snow</span>
+            {snowData.snowfall_24h > 0 && (
+              <span style={{ padding: "1px 5px", borderRadius: "4px", background: "rgba(56,189,248,0.2)", fontSize: "11px", fontWeight: "600", color: "#7dd3fc" }}>
+                24h: {Math.round(snowData.snowfall_24h)}cm
+              </span>
+            )}
+            {snowData.snowfall_7d > 0 && (
+              <span style={{ padding: "1px 5px", borderRadius: "4px", background: "rgba(56,189,248,0.2)", fontSize: "11px", fontWeight: "600", color: "#7dd3fc" }}>
+                7d: {Math.round(snowData.snowfall_7d)}cm
+              </span>
+            )}
+            {snowData.snow_depth > 0 && (
+              <span style={{ padding: "1px 5px", borderRadius: "4px", background: "rgba(255,255,255,0.1)", fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}>
+                Base: {Math.round(snowData.snow_depth)}cm
+              </span>
+            )}
+            {snowData.temperature !== null && (
+              <span style={{ padding: "1px 5px", borderRadius: "4px", background: "rgba(255,255,255,0.1)", fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}>
+                {Math.round(snowData.temperature)}°C
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Static stats */}
         <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "6px" }}>
           {p.avg_snowfall && p.avg_snowfall !== "Unknown" && (
             <span style={{
               padding: "2px 6px", borderRadius: "5px", backgroundColor: "rgba(14,165,233,0.15)",
               fontSize: "11px", fontWeight: "600", color: "#7dd3fc",
-            }}>❄️ {p.avg_snowfall}&quot;</span>
+            }}>Avg: {p.avg_snowfall}&quot;</span>
           )}
           {p.vertical_drop && p.vertical_drop !== "Unknown" && (
             <span style={{
@@ -356,7 +566,6 @@ const PopupContent = ({ selectedResort }) => {
           )}
         </div>
 
-        {/* CTA */}
         <div style={{
           fontSize: "11px", fontWeight: "600", color: passColor,
           display: "flex", alignItems: "center", gap: "4px",
