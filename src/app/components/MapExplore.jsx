@@ -22,6 +22,19 @@ export function MapExplore({
   const snowDataRef = useRef(null);
   const resorts = resortCollection.features;
 
+  // Precompute dataset stats for percentile charts
+  const datasetStats = React.useMemo(() => {
+    const vals = (key) => resorts
+      .map((r) => parseFloat(r.properties[key]))
+      .filter((v) => !isNaN(v) && v > 0)
+      .sort((a, b) => a - b);
+    return {
+      snowfall: vals("avg_snowfall"),
+      vertical: vals("vertical_drop"),
+      acres: vals("skiable_acres"),
+    };
+  }, [resorts]);
+
   const toggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => {
       const next = !prev;
@@ -450,7 +463,7 @@ export function MapExplore({
     );
 
     const popupNode = ReactDOMServer.renderToStaticMarkup(
-      <PopupContent selectedResort={selectedResort} snowData={snowInfo} />,
+      <PopupContent selectedResort={selectedResort} snowData={snowInfo} stats={datasetStats} />,
     );
     const coordinates = selectedResort.geometry.coordinates.slice();
     const popup = new mapboxgl.Popup({
@@ -487,7 +500,44 @@ export function MapExplore({
   );
 }
 
-const PopupContent = ({ selectedResort, snowData }) => {
+// SVG donut chart — percentile ring
+const DonutChart = ({ pct, color, bgColor, label, value, size = 52 }) => {
+  const r = 18;
+  const circ = 2 * Math.PI * r;
+  const filled = circ * (pct / 100);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+      <svg width={size} height={size} viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r={r} fill="none" stroke={bgColor} strokeWidth="5" />
+        <circle cx="24" cy="24" r={r} fill="none" stroke={color} strokeWidth="5"
+          strokeDasharray={`${filled} ${circ - filled}`}
+          strokeDashoffset={circ * 0.25}
+          strokeLinecap="round"
+        />
+        <text x="24" y="22" textAnchor="middle" dominantBaseline="middle"
+          style={{ fontSize: "10px", fontWeight: "700", fill: "#f8fafc" }}>
+          {Math.round(pct)}
+        </text>
+        <text x="24" y="31" textAnchor="middle" dominantBaseline="middle"
+          style={{ fontSize: "7px", fill: "#94a3b8" }}>
+          %ile
+        </text>
+      </svg>
+      <div style={{ fontSize: "10px", fontWeight: "600", color, lineHeight: "1.2", textAlign: "center" }}>{value}</div>
+      <div style={{ fontSize: "8px", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px" }}>{label}</div>
+    </div>
+  );
+};
+
+// Compute percentile of value within sorted array
+function percentile(sortedArr, val) {
+  if (!sortedArr.length || isNaN(val)) return 0;
+  let count = 0;
+  for (const v of sortedArr) { if (v <= val) count++; else break; }
+  return Math.round((count / sortedArr.length) * 100);
+}
+
+const PopupContent = ({ selectedResort, snowData, stats }) => {
   const p = selectedResort.properties;
   const passColor = p.pass === "Ikon" ? "#1b57f5" : "#f97316";
   const location = [
@@ -495,14 +545,25 @@ const PopupContent = ({ selectedResort, snowData }) => {
     p.country !== "Unknown" ? p.country : null,
   ].filter(Boolean).join(", ");
 
+  const snowVal = parseFloat(p.avg_snowfall);
+  const vertVal = parseFloat(p.vertical_drop);
+  const acresVal = parseFloat(p.skiable_acres);
+
+  const snowPct = stats ? percentile(stats.snowfall, snowVal) : 0;
+  const vertPct = stats ? percentile(stats.vertical, vertVal) : 0;
+  const acresPct = stats ? percentile(stats.acres, acresVal) : 0;
+
+  const hasCharts = stats && (!isNaN(snowVal) || !isNaN(vertVal) || !isNaN(acresVal));
+
   return (
-    <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", minWidth: "200px", maxWidth: "260px" }}>
+    <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", minWidth: "200px", maxWidth: "280px" }}>
       <a
         href={"/skimail-mvp/resorts/" + p.slug}
         target="_blank"
         rel="noopener noreferrer"
         style={{ textDecoration: "none", color: "inherit", display: "block" }}
       >
+        {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
           <span style={{
             display: "inline-block", padding: "2px 8px", borderRadius: "999px",
@@ -515,8 +576,30 @@ const PopupContent = ({ selectedResort, snowData }) => {
         </div>
 
         {location && (
-          <div style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "6px" }}>
+          <div style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "8px" }}>
             📍 {location}
+          </div>
+        )}
+
+        {/* Donut charts row */}
+        {hasCharts && (
+          <div style={{
+            display: "flex", justifyContent: "space-around", marginBottom: "8px",
+            padding: "8px 4px", borderRadius: "10px",
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
+          }}>
+            {!isNaN(snowVal) && snowVal > 0 && (
+              <DonutChart pct={snowPct} color="#38bdf8" bgColor="rgba(56,189,248,0.15)"
+                label="Snowfall" value={`${p.avg_snowfall}"`} />
+            )}
+            {!isNaN(vertVal) && vertVal > 0 && (
+              <DonutChart pct={vertPct} color="#4ade80" bgColor="rgba(74,222,128,0.15)"
+                label="Vert" value={`${p.vertical_drop}ft`} />
+            )}
+            {!isNaN(acresVal) && acresVal > 0 && (
+              <DonutChart pct={acresPct} color="#facc15" bgColor="rgba(250,204,21,0.15)"
+                label="Acres" value={`${p.skiable_acres}ac`} />
+            )}
           </div>
         )}
 
@@ -551,28 +634,7 @@ const PopupContent = ({ selectedResort, snowData }) => {
           </div>
         )}
 
-        {/* Static stats */}
-        <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "6px" }}>
-          {p.avg_snowfall && p.avg_snowfall !== "Unknown" && (
-            <span style={{
-              padding: "2px 6px", borderRadius: "5px", backgroundColor: "rgba(14,165,233,0.15)",
-              fontSize: "11px", fontWeight: "600", color: "#7dd3fc",
-            }}>Avg: {p.avg_snowfall}&quot;</span>
-          )}
-          {p.vertical_drop && p.vertical_drop !== "Unknown" && (
-            <span style={{
-              padding: "2px 6px", borderRadius: "5px", backgroundColor: "rgba(34,197,94,0.15)",
-              fontSize: "11px", fontWeight: "600", color: "#86efac",
-            }}>⛰️ {p.vertical_drop} ft</span>
-          )}
-          {p.skiable_acres && p.skiable_acres !== "Unknown" && (
-            <span style={{
-              padding: "2px 6px", borderRadius: "5px", backgroundColor: "rgba(234,179,8,0.15)",
-              fontSize: "11px", fontWeight: "600", color: "#fde047",
-            }}>⛷️ {p.skiable_acres} ac</span>
-          )}
-        </div>
-
+        {/* CTA */}
         <div style={{
           fontSize: "11px", fontWeight: "600", color: passColor,
           display: "flex", alignItems: "center", gap: "4px",
