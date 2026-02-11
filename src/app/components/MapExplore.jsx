@@ -8,7 +8,7 @@ import { SnowDataManager } from "../utils/fetchSnowData";
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
 // Generate hexagon polygon around [lng, lat]
-function makeHexagon(center, radiusDeg = 0.12) {
+function makeHexagon(center, radiusDeg = 0.04) {
   const [lng, lat] = center;
   const cosLat = Math.cos(lat * Math.PI / 180);
   const coords = [];
@@ -248,11 +248,11 @@ export function MapExplore({
             "fill-extrusion-height": [
               "interpolate", ["linear"], ["get", "snowfall_7d"],
               0, 0,
-              10, 2000,
-              30, 8000,
-              80, 20000,
-              150, 40000,
-              300, 60000,
+              10, 20000,
+              30, 80000,
+              80, 200000,
+              150, 400000,
+              300, 600000,
             ],
             "fill-extrusion-base": 0,
             "fill-extrusion-opacity": 0.8,
@@ -592,7 +592,7 @@ export function MapExplore({
             "fill-extrusion-color": ["interpolate", ["linear"], ["get", "snowfall_7d"],
               0, "#64b5f6", 15, "#42a5f5", 40, "#1e88e5", 80, "#0d47a1", 150, "#e0f7fa", 250, "#ffffff"],
             "fill-extrusion-height": ["interpolate", ["linear"], ["get", "snowfall_7d"],
-              0, 0, 10, 2000, 30, 8000, 80, 20000, 150, 40000, 300, 60000],
+              0, 0, 10, 20000, 30, 80000, 80, 200000, 150, 400000, 300, 600000],
             "fill-extrusion-base": 0,
             "fill-extrusion-opacity": 0.8,
           },
