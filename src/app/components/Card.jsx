@@ -80,7 +80,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
 
       {/* Right: link */}
       <Link
-        href={`/skimail-mvp/resorts/${slug}`}
+        href={`/resorts/${slug}`}
         target="_blank"
         onClick={(e) => e.stopPropagation()}
         className="shrink-0 rounded-lg bg-slate-100 p-2 transition-colors hover:bg-slate-200"
