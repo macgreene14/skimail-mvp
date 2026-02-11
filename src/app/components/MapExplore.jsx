@@ -810,24 +810,25 @@ export function MapExplore({
         {spinning ? "⏸ Pause" : "🌍 Spin Globe"}
       </button>
 
-      {/* Top-right: layer toggles */}
-      <div className="absolute right-3 top-3 z-10 flex flex-col gap-1.5">
+      {/* Top-right: layer toggles — horizontal row */}
+      <div className="absolute right-3 top-3 z-10 flex gap-1.5">
         {[
-          { label: "Ikon", active: showIkon, toggle: () => setShowIkon(!showIkon), color: "#74a5f2", icon: "🔵" },
-          { label: "Epic", active: showEpic, toggle: () => setShowEpic(!showEpic), color: "#f97316", icon: "🟠" },
-          { label: "Snow", active: showSnow, toggle: () => setShowSnow(!showSnow), color: "#38bdf8", icon: "❄️" },
+          { label: "Ikon", active: showIkon, toggle: () => setShowIkon(!showIkon), color: "#74a5f2" },
+          { label: "Epic", active: showEpic, toggle: () => setShowEpic(!showEpic), color: "#f97316" },
+          { label: "Snow", active: showSnow, toggle: () => setShowSnow(!showSnow), color: "#38bdf8" },
         ].map((ctrl) => (
           <button
             key={ctrl.label}
             onClick={ctrl.toggle}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-all"
+            className="rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur-sm transition-all"
             style={{
-              background: ctrl.active ? `${ctrl.color}22` : "rgba(0,0,0,0.4)",
-              border: `1.5px solid ${ctrl.active ? `${ctrl.color}66` : "rgba(255,255,255,0.15)"}`,
-              color: ctrl.active ? ctrl.color : "rgba(255,255,255,0.4)",
+              background: ctrl.active ? `${ctrl.color}33` : "rgba(0,0,0,0.5)",
+              border: `2px solid ${ctrl.active ? ctrl.color : "rgba(255,255,255,0.2)"}`,
+              color: ctrl.active ? "#fff" : "rgba(255,255,255,0.35)",
+              textShadow: ctrl.active ? `0 0 8px ${ctrl.color}` : "none",
             }}
           >
-            <span className="text-xs">{ctrl.icon}</span> {ctrl.label}
+            {ctrl.label}
           </button>
         ))}
       </div>
