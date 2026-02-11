@@ -44,6 +44,8 @@ export function MapExplore({
   const [showEpic, setShowEpic] = useState(true);
   const [showSnow, setShowSnow] = useState(true);
   const [regionsOpen, setRegionsOpen] = useState(false);
+  const [showClustering, setShowClustering] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const MAP_STYLES = {
     skimail: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8",
@@ -257,11 +259,11 @@ export function MapExplore({
             "fill-extrusion-height": [
               "interpolate", ["linear"], ["get", "snowfall_7d"],
               0, 0,
-              10, 8000,
-              30, 25000,
-              80, 60000,
-              150, 100000,
-              300, 160000,
+              10, 2000,
+              30, 8000,
+              80, 20000,
+              150, 40000,
+              300, 60000,
             ],
             "fill-extrusion-base": 0,
             "fill-extrusion-opacity": [
@@ -314,11 +316,12 @@ export function MapExplore({
           },
         });
 
-        // Snow circles (visible at higher zoom)
+        // Snow circles (visible at higher zoom, unclustered only)
         map.current.addLayer({
           id: "snow-circles",
           type: "circle",
           source: "snow-data",
+          filter: ["!", ["has", "point_count"]],
           minzoom: 3,
           paint: {
             "circle-radius": [
@@ -345,11 +348,12 @@ export function MapExplore({
           },
         });
 
-        // Snow labels (all resorts, higher zoom)
+        // Snow labels (unclustered resorts, higher zoom)
         map.current.addLayer({
           id: "snow-labels",
           type: "symbol",
           source: "snow-data",
+          filter: ["!", ["has", "point_count"]],
           minzoom: 5,
           layout: {
             "text-field": ["concat", "❄ ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
@@ -565,7 +569,19 @@ export function MapExplore({
     });
   }, [showSnow]);
 
-  // Snow clusters always visible when snow is toggled on (no longer tied to spinning)
+  // Toggle clustering vs individual snow display
+  useEffect(() => {
+    if (!map.current || !layersAdded.current) return;
+    const clusterVis = showClustering && showSnow ? "visible" : "none";
+    const unclusteredVis = showSnow ? "visible" : "none";
+    ["snow-cluster-circles", "snow-cluster-labels"].forEach((id) => {
+      if (map.current.getLayer(id)) map.current.setLayoutProperty(id, "visibility", clusterVis);
+    });
+    // When clustering is off, show circles/labels at all zoom levels
+    ["snow-circles", "snow-labels", "snow-unclustered-labels"].forEach((id) => {
+      if (map.current.getLayer(id)) map.current.setLayoutProperty(id, "visibility", unclusteredVis);
+    });
+  }, [showClustering, showSnow]);
 
   // Style switcher — swap style and wait for reload
   useEffect(() => {
@@ -688,7 +704,7 @@ export function MapExplore({
           },
         });
         map.current.addLayer({
-          id: "snow-circles", type: "circle", source: "snow-data", minzoom: 3,
+          id: "snow-circles", type: "circle", source: "snow-data", filter: ["!", ["has", "point_count"]], minzoom: 3,
           paint: {
             "circle-radius": ["interpolate", ["linear"], ["get", "snowfall_7d"], 0, 4, 20, 10, 80, 18, 200, 28],
             "circle-color": ["interpolate", ["linear"], ["get", "snowfall_7d"],
@@ -698,7 +714,7 @@ export function MapExplore({
           },
         });
         map.current.addLayer({
-          id: "snow-labels", type: "symbol", source: "snow-data", minzoom: 5,
+          id: "snow-labels", type: "symbol", source: "snow-data", filter: ["!", ["has", "point_count"]], minzoom: 5,
           layout: {
             "text-field": ["concat", "❄ ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
             "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"], "text-size": 10, "text-allow-overlap": false,
@@ -717,7 +733,7 @@ export function MapExplore({
             "fill-extrusion-color": ["interpolate", ["linear"], ["get", "snowfall_7d"],
               0, "#64b5f6", 15, "#42a5f5", 40, "#1e88e5", 80, "#0d47a1", 150, "#e0f7fa", 250, "#ffffff"],
             "fill-extrusion-height": ["interpolate", ["linear"], ["get", "snowfall_7d"],
-              0, 0, 10, 8000, 30, 25000, 80, 60000, 150, 100000, 300, 160000],
+              0, 0, 10, 2000, 30, 8000, 80, 20000, 150, 40000, 300, 60000],
             "fill-extrusion-base": 0,
             "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 7, 0.85],
           },
@@ -1014,8 +1030,8 @@ export function MapExplore({
       </div>
       </div>
 
-      {/* Top-right: layer toggles — horizontal row */}
-      <div className="pointer-events-auto absolute right-3 top-3 flex gap-1.5">
+      {/* Top-right: layer toggles + settings */}
+      <div className="pointer-events-auto absolute right-3 top-3 flex items-start gap-1.5">
         {[
           { label: "Ikon", active: showIkon, toggle: () => setShowIkon(!showIkon), color: "#74a5f2" },
           { label: "Epic", active: showEpic, toggle: () => setShowEpic(!showEpic), color: "#f97316" },
@@ -1035,6 +1051,55 @@ export function MapExplore({
             {ctrl.label}
           </button>
         ))}
+        {/* Settings gear */}
+        <div className="relative">
+          <button
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className="flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-sm transition-all"
+            style={{
+              background: settingsOpen ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.5)",
+              border: "2px solid rgba(255,255,255,0.2)",
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+          </button>
+          {settingsOpen && (
+            <div
+              className="absolute right-0 top-full mt-1.5 min-w-[160px] rounded-xl p-2 backdrop-blur-xl"
+              style={{
+                background: "rgba(15,23,42,0.92)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+              }}
+            >
+              <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-white/80 transition-colors hover:bg-white/10">
+                <input
+                  type="checkbox"
+                  checked={showClustering}
+                  onChange={() => setShowClustering(!showClustering)}
+                  className="h-3.5 w-3.5 rounded accent-sky-500"
+                />
+                Snow Clustering
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-white/80 transition-colors hover:bg-white/10">
+                <input
+                  type="checkbox"
+                  checked={showSnow && map.current?.getLayer("snow-extrusions") && map.current.getLayoutProperty("snow-extrusions", "visibility") !== "none"}
+                  onChange={() => {
+                    if (map.current?.getLayer("snow-extrusions")) {
+                      const current = map.current.getLayoutProperty("snow-extrusions", "visibility");
+                      map.current.setLayoutProperty("snow-extrusions", "visibility", current === "none" ? "visible" : "none");
+                    }
+                  }}
+                  className="h-3.5 w-3.5 rounded accent-sky-500"
+                />
+                3D Snow Columns
+              </label>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bottom bar: style switcher + fullscreen */}

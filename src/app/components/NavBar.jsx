@@ -5,15 +5,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import "../globals.css";
 
-const navigation = [
-  { name: "Explore", href: "/" },
-  { name: "About", href: "/about" },
-  {
-    name: "Feedback",
-    href: "https://airtable.com/appa1Nkb8pG0dRNxk/shrJ1gvC7YwqziQwK",
-    external: true,
-  },
-];
+const navigation = [];
 
 export function NavBar() {
   const [spinning, setSpinning] = useState(false);
