@@ -7,6 +7,21 @@ import { SnowDataManager } from "../utils/fetchSnowData";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
+// Generate a hexagon polygon around a [lng, lat] point
+function makeHexagon(center, radiusDeg = 0.15) {
+  const [lng, lat] = center;
+  const coords = [];
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI / 3) * i - Math.PI / 6;
+    coords.push([
+      lng + radiusDeg * Math.cos(angle) / Math.cos(lat * Math.PI / 180),
+      lat + radiusDeg * Math.sin(angle),
+    ]);
+  }
+  coords.push(coords[0]); // close the ring
+  return [coords];
+}
+
 export function MapExplore({
   resortCollection,
   setRenderedResorts,
@@ -214,6 +229,46 @@ export function MapExplore({
             max_snowfall: ["max", ["get", "snowfall_7d"]],
             total_snowfall: ["+", ["get", "snowfall_7d"]],
             point_count_snow: ["+", 1],
+          },
+        });
+
+        // 3D snow column source (non-clustered, polygon hexagons)
+        map.current.addSource("snow-columns", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] },
+        });
+
+        // 3D extruded columns — height = snowfall, color by intensity
+        map.current.addLayer({
+          id: "snow-extrusions",
+          type: "fill-extrusion",
+          source: "snow-columns",
+          minzoom: 3,
+          paint: {
+            "fill-extrusion-color": [
+              "interpolate", ["linear"], ["get", "snowfall_7d"],
+              0, "#64b5f6",
+              15, "#42a5f5",
+              40, "#1e88e5",
+              80, "#0d47a1",
+              150, "#e0f7fa",
+              250, "#ffffff",
+            ],
+            "fill-extrusion-height": [
+              "interpolate", ["linear"], ["get", "snowfall_7d"],
+              0, 0,
+              10, 8000,
+              30, 25000,
+              80, 60000,
+              150, 100000,
+              300, 160000,
+            ],
+            "fill-extrusion-base": 0,
+            "fill-extrusion-opacity": [
+              "interpolate", ["linear"], ["zoom"],
+              3, 0.7,
+              7, 0.85,
+            ],
           },
         });
 
@@ -459,6 +514,17 @@ export function MapExplore({
           if (map.current.getSource("snow-data")) {
             map.current.getSource("snow-data").setData(snowGeoJSON);
           }
+          // Update 3D column polygons
+          if (map.current.getSource("snow-columns")) {
+            map.current.getSource("snow-columns").setData({
+              type: "FeatureCollection",
+              features: withSnow.map((d) => ({
+                type: "Feature",
+                geometry: { type: "Polygon", coordinates: makeHexagon(d.coordinates) },
+                properties: { name: d.name, snowfall_7d: d.snowfall_7d },
+              })),
+            });
+          }
         };
 
         snowManagerRef.current = new SnowDataManager(resorts, updateSnowLayer);
@@ -494,7 +560,7 @@ export function MapExplore({
   useEffect(() => {
     if (!map.current || !layersAdded.current) return;
     const vis = showSnow ? "visible" : "none";
-    ["snow-heatmap", "snow-circles", "snow-labels", "snow-cluster-circles", "snow-cluster-labels", "snow-unclustered-labels"].forEach((id) => {
+    ["snow-heatmap", "snow-circles", "snow-labels", "snow-cluster-circles", "snow-cluster-labels", "snow-unclustered-labels", "snow-extrusions"].forEach((id) => {
       if (map.current.getLayer(id)) map.current.setLayoutProperty(id, "visibility", vis);
     });
   }, [showSnow]);
@@ -641,6 +707,22 @@ export function MapExplore({
           paint: { "text-color": "#ffffff", "text-halo-color": "rgba(0,50,100,0.8)", "text-halo-width": 1 },
         });
 
+        // 3D snow columns source + layer
+        if (!map.current.getSource("snow-columns")) {
+          map.current.addSource("snow-columns", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+        }
+        map.current.addLayer({
+          id: "snow-extrusions", type: "fill-extrusion", source: "snow-columns", minzoom: 3,
+          paint: {
+            "fill-extrusion-color": ["interpolate", ["linear"], ["get", "snowfall_7d"],
+              0, "#64b5f6", 15, "#42a5f5", 40, "#1e88e5", 80, "#0d47a1", 150, "#e0f7fa", 250, "#ffffff"],
+            "fill-extrusion-height": ["interpolate", ["linear"], ["get", "snowfall_7d"],
+              0, 0, 10, 8000, 30, 25000, 80, 60000, 150, 100000, 300, 160000],
+            "fill-extrusion-base": 0,
+            "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 3, 0.7, 7, 0.85],
+          },
+        });
+
         // Snow cluster layers
         map.current.addLayer({
           id: "snow-cluster-circles", type: "circle", source: "snow-data",
@@ -688,6 +770,17 @@ export function MapExplore({
               properties: { slug: d.slug, name: d.name, snowfall_7d: d.snowfall_7d, snowfall_24h: d.snowfall_24h, snow_depth: d.snow_depth, temperature: d.temperature },
             })),
           });
+          // Restore 3D columns
+          if (map.current.getSource("snow-columns")) {
+            map.current.getSource("snow-columns").setData({
+              type: "FeatureCollection",
+              features: withSnow.map((d) => ({
+                type: "Feature",
+                geometry: { type: "Polygon", coordinates: makeHexagon(d.coordinates) },
+                properties: { name: d.name, snowfall_7d: d.snowfall_7d },
+              })),
+            });
+          }
         }
       } catch (err) {
         console.error("Style switch layer restore error:", err);
