@@ -77,7 +77,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
 
       {/* Go to Guidebook Btn */}
       <Link
-        href={`/skimail-mvp/resorts/${slug}`}
+        href={`/resorts/${slug}`}
         target="_blank"
         className="absolute bottom-1 left-1 z-10 m-1 text-black"
       >

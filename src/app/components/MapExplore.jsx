@@ -221,7 +221,7 @@ export function MapExplore({
   const PopupContent = ({ selectedResort }) => (
     <div className="-m-4 rounded-lg border-2 border-solid bg-white p-2 text-center shadow-md ">
       <a
-        href={`/skimail-mvp/resorts/${selectedResort.properties.slug}`}
+        href={`/resorts/${selectedResort.properties.slug}`}
         target="_blank"
         rel="noopener noreferrer"
         className="block"
