@@ -19,6 +19,8 @@ export function MapExplore({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const handlersAttached = useRef(false);
   const spinEnabled = useRef(true);
+  const userOverride = useRef(false);
+  const [spinning, setSpinning] = useState(true);
   const snowDataRef = useRef(null);
   const resorts = resortCollection.features;
 
@@ -143,12 +145,13 @@ export function MapExplore({
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
     // Stop spinning on user interaction
-    map.current.on("mousedown", () => { spinEnabled.current = false; });
-    map.current.on("touchstart", () => { spinEnabled.current = false; });
-    map.current.on("moveend", () => {
-      // Resume spinning only if zoomed out enough
-      if (map.current.getZoom() < 3) spinEnabled.current = true;
-    });
+    const stopSpin = () => {
+      spinEnabled.current = false;
+      userOverride.current = true;
+      setSpinning(false);
+    };
+    map.current.on("mousedown", stopSpin);
+    map.current.on("touchstart", stopSpin);
 
     map.current.on("load", async () => {
       try {
@@ -488,6 +491,25 @@ export function MapExplore({
   return (
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
       <div ref={mapContainer} className="z-1 h-full w-full" />
+      {/* Spin toggle */}
+      <button
+        onClick={() => {
+          if (spinning) {
+            spinEnabled.current = false;
+            userOverride.current = true;
+            setSpinning(false);
+          } else {
+            spinEnabled.current = true;
+            userOverride.current = false;
+            setSpinning(true);
+          }
+        }}
+        className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white"
+        style={{ minHeight: "36px" }}
+        aria-label={spinning ? "Stop rotation" : "Resume rotation"}
+      >
+        <span aria-hidden="true">{spinning ? "⏸ Pause" : "🌍 Spin"}</span>
+      </button>
       <button
         onClick={toggleFullscreen}
         className="absolute bottom-3 left-3 z-10 hidden items-center gap-1.5 rounded-xl bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:shadow-xl sm:flex"
