@@ -31,7 +31,7 @@ export function MapExplore({
   const [showEpic, setShowEpic] = useState(true);
   const [showSnow, setShowSnow] = useState(true);
   const [regionsOpen, setRegionsOpen] = useState(false);
-  const [showClustering, setShowClustering] = useState(true);
+  // clustering removed — using collision detection instead
 
   const MAP_STYLES = {
     skimail: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8",
@@ -206,18 +206,10 @@ export function MapExplore({
           data: resortCollection,
         });
 
-        // Snow data source with clustering for low-zoom readability
+        // Snow data source (simple, no clustering)
         map.current.addSource("snow-data", {
           type: "geojson",
           data: { type: "FeatureCollection", features: [] },
-          cluster: true,
-          clusterRadius: 60,
-          clusterMaxZoom: 5,
-          clusterProperties: {
-            max_snowfall: [["max", ["accumulated"], ["get", "max_snowfall"]], ["get", "snowfall_7d"]],
-            total_snowfall: ["+", ["get", "snowfall_7d"]],
-            point_count_snow: ["+", 1],
-          },
         });
 
         // Snow depth heatmap layer (visible at low zoom)
@@ -262,12 +254,11 @@ export function MapExplore({
           },
         });
 
-        // Snow circles (visible at higher zoom, unclustered only)
+        // Snow circles (visible at higher zoom)
         map.current.addLayer({
           id: "snow-circles",
           type: "circle",
           source: "snow-data",
-          filter: ["!", ["has", "point_count"]],
           minzoom: 3,
           paint: {
             "circle-radius": [
@@ -294,101 +285,29 @@ export function MapExplore({
           },
         });
 
-        // Snow labels (unclustered resorts, higher zoom)
+        // Snow labels — collision detection + sort ensures top snowfall wins
         map.current.addLayer({
           id: "snow-labels",
           type: "symbol",
           source: "snow-data",
-          filter: ["!", ["has", "point_count"]],
-          minzoom: 5,
+          minzoom: 2,
           layout: {
-            "text-field": ["concat", "❄ ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
+            "text-field": ["concat", "❄ ", ["get", "name"], "\n", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
             "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
-            "text-size": 10,
+            "text-size": ["interpolate", ["linear"], ["zoom"], 2, 11, 4, 13, 7, 14],
             "text-allow-overlap": false,
-            "text-offset": [0, -2.2],
-          },
-          paint: {
-            "text-color": "#ffffff",
-            "text-halo-color": "rgba(0,50,100,0.8)",
-            "text-halo-width": 1,
-          },
-        });
-
-        // Snow cluster circles — show at low zoom when points are clustered
-        map.current.addLayer({
-          id: "snow-cluster-circles",
-          type: "circle",
-          source: "snow-data",
-          filter: ["has", "point_count"],
-          maxzoom: 6,
-          paint: {
-            "circle-radius": [
-              "interpolate", ["linear"], ["get", "max_snowfall"],
-              5, 18, 30, 26, 80, 36, 200, 48,
-            ],
-            "circle-color": [
-              "interpolate", ["linear"], ["get", "max_snowfall"],
-              5, "rgba(56,189,248,0.5)",
-              30, "rgba(14,165,233,0.6)",
-              80, "rgba(2,132,199,0.7)",
-              200, "rgba(255,255,255,0.8)",
-            ],
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "rgba(255,255,255,0.6)",
-            "circle-blur": 0.15,
-          },
-        });
-
-        // Snow cluster labels — "❄ XXcm · N resorts"
-        map.current.addLayer({
-          id: "snow-cluster-labels",
-          type: "symbol",
-          source: "snow-data",
-          filter: ["has", "point_count"],
-          maxzoom: 6,
-          layout: {
-            "text-field": [
-              "concat",
-              "❄ ", ["to-string", ["round", ["get", "max_snowfall"]]], "cm\n",
-              ["to-string", ["get", "point_count_snow"]], " resorts"
-            ],
-            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
-            "text-size": [
-              "interpolate", ["linear"], ["zoom"],
-              0, 11, 2, 13, 4, 15,
-            ],
-            "text-allow-overlap": false,
-            "text-line-height": 1.3,
-            "symbol-sort-key": ["*", -1, ["get", "max_snowfall"]],
-          },
-          paint: {
-            "text-color": "#ffffff",
-            "text-halo-color": "rgba(14,165,233,0.7)",
-            "text-halo-width": 2,
-            "text-halo-blur": 1,
-          },
-        });
-
-        // Unclustered snow points (individual resorts visible at higher zoom)
-        map.current.addLayer({
-          id: "snow-unclustered-labels",
-          type: "symbol",
-          source: "snow-data",
-          filter: ["!", ["has", "point_count"]],
-          minzoom: 4,
-          layout: {
-            "text-field": ["concat", "❄ ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
-            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
-            "text-size": 11,
-            "text-allow-overlap": false,
-            "text-offset": [0, -2.2],
+            "text-ignore-placement": false,
+            "text-offset": [0, -2.5],
+            "text-line-height": 1.2,
+            "text-max-width": 12,
+            "text-padding": 8,
             "symbol-sort-key": ["*", -1, ["get", "snowfall_7d"]],
           },
           paint: {
             "text-color": "#ffffff",
-            "text-halo-color": "rgba(0,50,100,0.8)",
-            "text-halo-width": 1.5,
+            "text-halo-color": "rgba(14,165,233,0.6)",
+            "text-halo-width": 2,
+            "text-halo-blur": 1,
           },
         });
 
@@ -499,24 +418,12 @@ export function MapExplore({
   useEffect(() => {
     if (!map.current || !layersAdded.current) return;
     const vis = showSnow ? "visible" : "none";
-    ["snow-heatmap", "snow-circles", "snow-labels", "snow-cluster-circles", "snow-cluster-labels", "snow-unclustered-labels"].forEach((id) => {
+    ["snow-heatmap", "snow-circles", "snow-labels"].forEach((id) => {
       if (map.current.getLayer(id)) map.current.setLayoutProperty(id, "visibility", vis);
     });
   }, [showSnow]);
 
-  // Toggle clustering vs individual snow display
-  useEffect(() => {
-    if (!map.current || !layersAdded.current) return;
-    const clusterVis = showClustering && showSnow ? "visible" : "none";
-    const unclusteredVis = showSnow ? "visible" : "none";
-    ["snow-cluster-circles", "snow-cluster-labels"].forEach((id) => {
-      if (map.current.getLayer(id)) map.current.setLayoutProperty(id, "visibility", clusterVis);
-    });
-    // When clustering is off, show circles/labels at all zoom levels
-    ["snow-circles", "snow-labels", "snow-unclustered-labels"].forEach((id) => {
-      if (map.current.getLayer(id)) map.current.setLayoutProperty(id, "visibility", unclusteredVis);
-    });
-  }, [showClustering, showSnow]);
+  // Clustering state reserved for future use
 
   // Style switcher — swap style and wait for reload
   useEffect(() => {
@@ -556,14 +463,6 @@ export function MapExplore({
           map.current.addSource("snow-data", {
             type: "geojson",
             data: { type: "FeatureCollection", features: [] },
-            cluster: true,
-            clusterRadius: 60,
-            clusterMaxZoom: 5,
-            clusterProperties: {
-              max_snowfall: [["max", ["accumulated"], ["get", "max_snowfall"]], ["get", "snowfall_7d"]],
-              total_snowfall: ["+", ["get", "snowfall_7d"]],
-              point_count_snow: ["+", 1],
-            },
           });
         }
 
@@ -639,7 +538,7 @@ export function MapExplore({
           },
         });
         map.current.addLayer({
-          id: "snow-circles", type: "circle", source: "snow-data", filter: ["!", ["has", "point_count"]], minzoom: 3,
+          id: "snow-circles", type: "circle", source: "snow-data", minzoom: 3,
           paint: {
             "circle-radius": ["interpolate", ["linear"], ["get", "snowfall_7d"], 0, 4, 20, 10, 80, 18, 200, 28],
             "circle-color": ["interpolate", ["linear"], ["get", "snowfall_7d"],
@@ -649,49 +548,16 @@ export function MapExplore({
           },
         });
         map.current.addLayer({
-          id: "snow-labels", type: "symbol", source: "snow-data", filter: ["!", ["has", "point_count"]], minzoom: 5,
+          id: "snow-labels", type: "symbol", source: "snow-data", minzoom: 2,
           layout: {
-            "text-field": ["concat", "❄ ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
-            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"], "text-size": 10, "text-allow-overlap": false,
-            "text-offset": [0, -2.2],
-          },
-          paint: { "text-color": "#ffffff", "text-halo-color": "rgba(0,50,100,0.8)", "text-halo-width": 1 },
-        });
-
-        // Snow cluster layers
-        map.current.addLayer({
-          id: "snow-cluster-circles", type: "circle", source: "snow-data",
-          filter: ["has", "point_count"], maxzoom: 6,
-          paint: {
-            "circle-radius": ["interpolate", ["linear"], ["get", "max_snowfall"], 5, 18, 30, 26, 80, 36, 200, 48],
-            "circle-color": ["interpolate", ["linear"], ["get", "max_snowfall"],
-              5, "rgba(56,189,248,0.5)", 30, "rgba(14,165,233,0.6)", 80, "rgba(2,132,199,0.7)", 200, "rgba(255,255,255,0.8)"],
-            "circle-stroke-width": 2, "circle-stroke-color": "rgba(255,255,255,0.6)", "circle-blur": 0.15,
-          },
-        });
-        map.current.addLayer({
-          id: "snow-cluster-labels", type: "symbol", source: "snow-data",
-          filter: ["has", "point_count"], maxzoom: 6,
-          layout: {
-            "text-field": ["concat", "❄ ", ["to-string", ["round", ["get", "max_snowfall"]]], "cm\n",
-              ["to-string", ["get", "point_count_snow"]], " resorts"],
+            "text-field": ["concat", "❄ ", ["get", "name"], "\n", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
             "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
-            "text-size": ["interpolate", ["linear"], ["zoom"], 0, 11, 2, 13, 4, 15],
-            "text-allow-overlap": false, "text-line-height": 1.3,
-            "symbol-sort-key": ["*", -1, ["get", "max_snowfall"]],
-          },
-          paint: { "text-color": "#ffffff", "text-halo-color": "rgba(14,165,233,0.7)", "text-halo-width": 2, "text-halo-blur": 1 },
-        });
-        map.current.addLayer({
-          id: "snow-unclustered-labels", type: "symbol", source: "snow-data",
-          filter: ["!", ["has", "point_count"]], minzoom: 4,
-          layout: {
-            "text-field": ["concat", "❄ ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
-            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"], "text-size": 11,
-            "text-allow-overlap": false, "text-offset": [0, -2.2],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 2, 11, 4, 13, 7, 14],
+            "text-allow-overlap": false, "text-ignore-placement": false,
+            "text-offset": [0, -2.5], "text-line-height": 1.2, "text-max-width": 12, "text-padding": 8,
             "symbol-sort-key": ["*", -1, ["get", "snowfall_7d"]],
           },
-          paint: { "text-color": "#ffffff", "text-halo-color": "rgba(0,50,100,0.8)", "text-halo-width": 1.5 },
+          paint: { "text-color": "#ffffff", "text-halo-color": "rgba(14,165,233,0.6)", "text-halo-width": 2, "text-halo-blur": 1 },
         });
 
         // Re-apply snow data if available
@@ -773,31 +639,15 @@ export function MapExplore({
         .addTo(map.current);
     };
 
-    // Click on snow cluster to zoom in
-    const onClusterClick = (e) => {
-      const features = map.current.queryRenderedFeatures(e.point, { layers: ["snow-cluster-circles"] });
-      if (!features.length) return;
-      const clusterId = features[0].properties.cluster_id;
-      map.current.getSource("snow-data").getClusterExpansionZoom(clusterId, (err, zoom) => {
-        if (err) return;
-        spinEnabled.current = false;
-        userOverride.current = true;
-        setSpinning(false);
-        map.current.easeTo({ center: features[0].geometry.coordinates, zoom: zoom + 0.5 });
-      });
-    };
-
     map.current.on("moveend", onMoveEnd);
     map.current.on("click", ["Epic", "Ikon"], onClick);
     map.current.on("click", "snow-circles", onSnowClick);
-    map.current.on("click", "snow-cluster-circles", onClusterClick);
     handlersAttached.current = true;
 
     return () => {
       map.current.off("moveend", onMoveEnd);
       map.current.off("click", ["Epic", "Ikon"], onClick);
       map.current.off("click", "snow-circles", onSnowClick);
-      map.current.off("click", "snow-cluster-circles", onClusterClick);
       handlersAttached.current = false;
     };
   }, [setRenderedResorts, setSelectedResort]);
@@ -960,18 +810,7 @@ export function MapExplore({
             {ctrl.label}
           </button>
         ))}
-        <button
-          onClick={() => setShowClustering(!showClustering)}
-          className="rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur-sm transition-all"
-          style={{
-            background: showClustering ? "rgba(168,85,247,0.2)" : "rgba(0,0,0,0.5)",
-            border: `2px solid ${showClustering ? "#a855f7" : "rgba(255,255,255,0.2)"}`,
-            color: showClustering ? "#fff" : "rgba(255,255,255,0.35)",
-            textShadow: showClustering ? "0 0 8px #a855f7" : "none",
-          }}
-        >
-          Cluster
-        </button>
+        {/* Cluster toggle removed — collision detection handles overlap */}
       </div>
 
       {/* Bottom bar: style switcher + fullscreen */}
