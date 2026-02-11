@@ -94,12 +94,58 @@ html {
   box-shadow: none !important;
 }
 
-.mapboxgl-ctrl-top-right .skimail-ctrl {
-  margin-bottom: 4px !important;
+.mapboxgl-ctrl-top-right {
+  top: 8px !important;
+  right: 8px !important;
 }
 
-.mapboxgl-ctrl-top-left .skimail-ctrl {
-  margin-bottom: 4px !important;
+.mapboxgl-ctrl-top-right .skimail-ctrl,
+.mapboxgl-ctrl-top-right .mapboxgl-ctrl-group {
+  margin-bottom: 6px !important;
+}
+
+.mapboxgl-ctrl-top-left {
+  top: 8px !important;
+  left: 8px !important;
+}
+
+.mapboxgl-ctrl-top-left .skimail-ctrl,
+.mapboxgl-ctrl-top-left .mapboxgl-ctrl-group {
+  margin-bottom: 6px !important;
+}
+
+.mapboxgl-ctrl-bottom-right {
+  bottom: 48px !important;
+}
+
+/* Make default mapbox controls match dark theme */
+.mapboxgl-ctrl-group {
+  background: rgba(0,0,0,0.4) !important;
+  border: 1.5px solid rgba(255,255,255,0.15) !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.mapboxgl-ctrl-group button {
+  border: none !important;
+}
+
+.mapboxgl-ctrl-group button + button {
+  border-top: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+.mapboxgl-ctrl-icon {
+  filter: invert(1) brightness(0.8);
+}
+
+.mapboxgl-ctrl-attrib {
+  background: rgba(0,0,0,0.3) !important;
+  backdrop-filter: blur(4px);
+}
+
+.mapboxgl-ctrl-attrib a {
+  color: rgba(255,255,255,0.5) !important;
 }
 
 .control-content {
