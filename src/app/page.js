@@ -9,16 +9,47 @@ export default function App() {
   const resorts = resortCollection.features;
   const [renderedResorts, setRenderedResorts] = useState(resorts);
   const [selectedResort, setSelectedResort] = useState(null);
+  const [showResults, setShowResults] = useState(false);
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col">
-      <main className="flex-1 p-2 lg:p-3">
-        <div className="mx-auto max-w-[1600px]">
+    <div className="flex h-[calc(100dvh-4rem)] flex-col overflow-hidden">
+      <main className="flex flex-1 flex-col overflow-hidden p-2 lg:p-3">
+        <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col overflow-hidden">
           <h1 className="sr-only">Explore</h1>
 
-          <div className="grid h-[calc(100vh-5rem)] grid-cols-1 gap-3 lg:grid-cols-3">
-            {/* Left — search + results */}
-            <div className="flex h-[200px] flex-col gap-3 lg:h-full">
+          {/* Desktop: side-by-side grid */}
+          <div className="flex flex-1 flex-col gap-2 overflow-hidden lg:flex-row lg:gap-3">
+
+            {/* Map — takes all available space on mobile */}
+            <div className="relative flex-1 overflow-hidden lg:order-last lg:flex-[2]">
+              <div className="h-full overflow-hidden rounded-xl border border-slate-200 shadow-lg">
+                <MapExplore
+                  resortCollection={resortCollection}
+                  setRenderedResorts={setRenderedResorts}
+                  selectedResort={selectedResort}
+                  setSelectedResort={setSelectedResort}
+                />
+              </div>
+
+              {/* Mobile toggle for results panel */}
+              <button
+                onClick={() => setShowResults(!showResults)}
+                className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-md hover:bg-gray-100 active:bg-gray-200 lg:hidden"
+                style={{ minHeight: "44px" }}
+              >
+                {showResults ? "✕ Hide" : `📋 Resorts (${renderedResorts.length})`}
+              </button>
+            </div>
+
+            {/* Results panel — slide up on mobile, always visible on desktop */}
+            <div className={`
+              flex flex-col gap-2 overflow-hidden transition-all duration-300 ease-in-out
+              lg:order-first lg:flex-1 lg:max-h-none lg:opacity-100
+              ${showResults
+                ? "max-h-[45vh] opacity-100"
+                : "max-h-0 opacity-0 lg:max-h-none lg:opacity-100"
+              }
+            `}>
               <SearchBar
                 data={resorts}
                 setRenderedResorts={setRenderedResorts}
@@ -33,22 +64,12 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right — Map */}
-            <div className="order-first h-[55vh] lg:order-last lg:col-span-2 lg:h-full">
-              <div className="h-full overflow-hidden rounded-xl border border-slate-200 shadow-lg">
-                <MapExplore
-                  resortCollection={resortCollection}
-                  setRenderedResorts={setRenderedResorts}
-                  selectedResort={selectedResort}
-                  setSelectedResort={setSelectedResort}
-                />
-              </div>
-            </div>
           </div>
         </div>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white">
+      {/* Footer — hidden on mobile to save space */}
+      <footer className="hidden border-t border-slate-200 bg-white lg:block">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <span className="text-xs text-slate-400">
             &copy; {new Date().getFullYear()} Skimail
