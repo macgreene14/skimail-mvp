@@ -55,6 +55,8 @@ export function MapExplore({
   useEffect(() => {
     if (map.current) return;
 
+    const isMobile = window.innerWidth < 1024;
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8",
@@ -62,6 +64,11 @@ export function MapExplore({
       zoom: 1.5,
       projection: "globe",
     });
+
+    // Shift map center up on mobile to account for bottom sheet overlap (~56px collapsed)
+    if (isMobile) {
+      map.current.setPadding({ top: 0, right: 0, bottom: 80, left: 0 });
+    }
 
     // Atmosphere/fog for globe view
     map.current.on("style.load", () => {
