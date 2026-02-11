@@ -15,7 +15,7 @@ export function ResultsContainer({
     });
 
   return (
-    <div className="results-scroll flex flex-row gap-3 overflow-auto px-1 py-2 lg:flex-col lg:gap-2">
+    <div className="results-scroll flex flex-col gap-2 overflow-auto px-1 py-2">
       {sorted?.map((resort) => (
         <Card
           resortsLength={resorts.length}
