@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { Disclosure } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -15,6 +16,13 @@ const navigation = [
 ];
 
 export function NavBar() {
+  const [spinning, setSpinning] = useState(false);
+
+  const handleLogoClick = () => {
+    setSpinning(true);
+    setTimeout(() => setSpinning(false), 600);
+  };
+
   return (
     <Disclosure as="nav" className="sticky top-0 z-50 border-b border-white/10 bg-ski-950/95 backdrop-blur-md">
       {({ open }) => (
@@ -39,9 +47,9 @@ export function NavBar() {
 
               {/* Center: logo (centered on mobile, left on desktop) */}
               <div className="flex items-center justify-center sm:flex-1 sm:justify-start">
-                <Link href="/" className="flex items-center gap-2">
+                <Link href="/" className="flex items-center gap-2" onClick={handleLogoClick}>
                   <img
-                    className="h-8 w-auto sm:h-9"
+                    className={`h-8 w-auto sm:h-9 transition-transform duration-500 ${spinning ? "rotate-[360deg]" : "rotate-0"}`}
                     src="https://ik.imagekit.io/bamlnhgnz/logo_invert.png?updatedAt=1673031278735"
                     alt="Skimail"
                     width={36}

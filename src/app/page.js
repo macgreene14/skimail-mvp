@@ -12,7 +12,7 @@ export default function App() {
   const [showResults, setShowResults] = useState(false);
 
   return (
-    <div className="flex h-[calc(100dvh-4rem)] flex-col overflow-hidden">
+    <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
       <main className="flex flex-1 flex-col overflow-hidden p-2 lg:p-3">
         <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col overflow-hidden">
           <h1 className="sr-only">Explore</h1>
