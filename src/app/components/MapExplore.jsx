@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
-import CollapsibleControl from "../../../utils/CollapsibleControl";
+// CollapsibleControl replaced by React regions dropdown below
 import ReactDOMServer from "react-dom/server";
 import { SnowDataManager, getTopSnowfall } from "../utils/fetchSnowData";
 
@@ -28,6 +28,7 @@ export function MapExplore({
   const [showIkon, setShowIkon] = useState(true);
   const [showEpic, setShowEpic] = useState(true);
   const [showSnow, setShowSnow] = useState(true);
+  const [regionsOpen, setRegionsOpen] = useState(false);
 
   const MAP_STYLES = {
     skimail: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8",
@@ -121,17 +122,7 @@ export function MapExplore({
 
     // Pass/snow toggles handled via React state + effects below
 
-    const collapsibleControl = new CollapsibleControl((e) => {
-      const lat = e.target.dataset.lat;
-      const lng = e.target.dataset.lng;
-      let zoom = e.target.dataset.zoom;
-      if (window.innerWidth <= 768) {
-        zoom = zoom - 0.75;
-      }
-      spinEnabled.current = false;
-      map.current.flyTo({ center: [lng, lat], zoom: zoom, bearing: 0 });
-    });
-    map.current.addControl(collapsibleControl, "top-left");
+    // Regions dropdown is now a React component in the overlay
 
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
@@ -812,6 +803,62 @@ export function MapExplore({
       >
         {spinning ? "⏸ Pause" : "🌍 Spin Globe"}
       </button>
+
+      {/* Top-left: regions dropdown */}
+      <div className="pointer-events-auto absolute left-3 top-3" style={{ position: "relative" }}>
+        <button
+          onClick={() => setRegionsOpen(!regionsOpen)}
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-all"
+          style={{
+            background: regionsOpen ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.4)",
+            border: "1.5px solid rgba(255,255,255,0.15)",
+            color: "rgba(255,255,255,0.8)",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          Regions
+        </button>
+        {regionsOpen && (
+          <div
+            className="absolute left-0 top-full mt-1 min-w-[140px] rounded-xl p-1 backdrop-blur-xl"
+            style={{
+              background: "rgba(15,23,42,0.92)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+              zIndex: 100,
+            }}
+          >
+            {[
+              { label: "🌎 Global", lat: 20, lng: -30, zoom: 1.2 },
+              { label: "🇺🇸 USA", lat: 41.0, lng: -101.0, zoom: 2.7 },
+              { label: "⛰️ Rockies", lat: 40.7, lng: -109.7, zoom: 4.9 },
+              { label: "🌲 PNW", lat: 45.6, lng: -120.7, zoom: 5.5 },
+              { label: "☀️ California", lat: 37.0, lng: -121.0, zoom: 5.3 },
+              { label: "🏔️ Eastern US", lat: 41.4, lng: -78.9, zoom: 4.5 },
+              { label: "🍁 Canada", lat: 51.3, lng: -119.4, zoom: 4.6 },
+              { label: "🇪🇺 Europe", lat: 45.6, lng: 6.6, zoom: 4.4 },
+              { label: "🗾 Japan", lat: 38.4, lng: 136.2, zoom: 3.8 },
+              { label: "🌏 Oceania", lat: -38.1, lng: 156.2, zoom: 2.5 },
+              { label: "🏔️ S. America", lat: -34.9, lng: -72.4, zoom: 5.0 },
+            ].map((region) => (
+              <button
+                key={region.label}
+                onClick={() => {
+                  const zoom = window.innerWidth <= 768 ? region.zoom - 0.75 : region.zoom;
+                  spinEnabled.current = false;
+                  userOverride.current = true;
+                  setSpinning(false);
+                  map.current.flyTo({ center: [region.lng, region.lat], zoom, bearing: 0 });
+                  setRegionsOpen(false);
+                }}
+                className="block w-full rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-white/80 transition-colors hover:bg-white/10"
+              >
+                {region.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Top-right: layer toggles — horizontal row */}
       <div className="pointer-events-auto absolute right-3 top-3 flex gap-1.5">
