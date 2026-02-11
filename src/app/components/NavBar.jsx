@@ -143,6 +143,11 @@ export function NavBar() {
                   </Transition>
                 </Menu> */}
               {/* </div>  */}
+              <div className="absolute inset-y-0 right-0 hidden items-center pr-2 sm:flex">
+                <span className="text-xs text-gray-500">
+                  {process.env.NEXT_PUBLIC_BUILD_VERSION}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -164,6 +169,9 @@ export function NavBar() {
                   {item.name}
                 </Disclosure.Button>
               ))}
+              <span className="block px-3 py-2 text-xs text-gray-500">
+                {process.env.NEXT_PUBLIC_BUILD_VERSION}
+              </span>
             </div>
           </Disclosure.Panel>
         </>
