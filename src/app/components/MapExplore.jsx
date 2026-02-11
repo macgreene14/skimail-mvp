@@ -785,7 +785,7 @@ export function MapExplore({
 
   return (
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
-      <div ref={mapContainer} className="absolute inset-0" />
+      <div ref={mapContainer} className="!absolute inset-0" />
 
       {/* UI overlay — above all Mapbox internals */}
       <div className="pointer-events-none absolute inset-0" style={{ zIndex: 10 }}>
