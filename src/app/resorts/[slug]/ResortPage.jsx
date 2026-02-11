@@ -1,8 +1,51 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import resortCollection from "../../../../assets/resorts.json";
 import MapGuideBook from "../../components/MapGuidebook";
+import { getPercentile } from "../../utils/percentiles";
+
+const WEBCAM_LINKS = {
+  vail: "https://www.vail.com/the-mountain/mountain-conditions/mountain-cams.aspx",
+  breckenridge: "https://www.breckenridge.com/the-mountain/mountain-conditions/mountain-cams.aspx",
+  park_city: "https://www.parkcitymountain.com/the-mountain/mountain-conditions/mountain-cams.aspx",
+  mammoth_mountain: "https://www.mammothmountain.com/mountain-information/mountain-cams",
+  jackson_hole: "https://www.jacksonhole.com/webcams",
+  big_sky_resort: "https://www.bigskyresort.com/the-mountain/mountain-cams",
+  steamboat: "https://www.steamboat.com/the-mountain/mountain-conditions/mountain-cams",
+  aspen_snowmass: "https://www.aspensnowmass.com/our-mountains/mountain-cams",
+  whistler_blackcomb: "https://www.whistlerblackcomb.com/the-mountain/mountain-conditions/mountain-cams.aspx",
+  telluride: "https://www.tellurideskiresort.com/the-mountain/mountain-conditions/mountain-cams",
+};
+
+// Known YouTube live embed URLs
+const YOUTUBE_EMBEDS = {
+  jackson_hole: "https://www.youtube.com/embed/HR3GFCVj4sI?autoplay=1&mute=1",
+  mammoth_mountain: "https://www.youtube.com/embed/Gu1CzBg6qDQ?autoplay=1&mute=1",
+  big_sky_resort: "https://www.youtube.com/embed/U9GKHeHhS2U?autoplay=1&mute=1",
+};
+
+function DonutChart({ pct, color, value, label, size = 72 }) {
+  const stroke = 6;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  return (
+    <div className="flex flex-col items-center">
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#e2e8f0" strokeWidth={stroke} />
+        <circle
+          cx={size / 2} cy={size / 2} r={r} fill="none"
+          stroke={color} strokeWidth={stroke}
+          strokeDasharray={circ} strokeDashoffset={offset}
+          strokeLinecap="round"
+        />
+      </svg>
+      <span className="relative -mt-[48px] text-base font-bold text-slate-800">{pct}%</span>
+      <p className="mt-6 text-sm font-semibold text-slate-700">{value}</p>
+      <p className="text-xs text-slate-500">{label}</p>
+    </div>
+  );
+}
 
 export default function ResortPage({ slug }) {
   const resort = resortCollection.features.filter(
@@ -33,11 +76,12 @@ export default function ResortPage({ slug }) {
 
   const passColor = pass === "Ikon" ? "bg-sky-500" : "bg-orange-500";
 
-  const metrics = [
-    { label: "Avg Snowfall", value: `${avg_snowfall}"`, icon: "❄" },
-    { label: "Vertical Drop", value: `${vertical_drop}'`, icon: "⛰" },
-    { label: "Skiable Acres", value: `${skiable_acres} ac`, icon: "⛷" },
-  ];
+  const snowPct = getPercentile("avg_snowfall", avg_snowfall);
+  const vertPct = getPercentile("vertical_drop", vertical_drop);
+  const acresPct = getPercentile("skiable_acres", skiable_acres);
+
+  const webcamLink = WEBCAM_LINKS[slug];
+  const youtubeEmbed = YOUTUBE_EMBEDS[slug];
 
   return (
     <div className="min-h-screen bg-snow-50">
@@ -60,14 +104,10 @@ export default function ResortPage({ slug }) {
         <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
           {/* Hero image */}
           <div className="relative aspect-[21/9] w-full overflow-hidden">
-            <Image
+            <img
               src={img_url}
               alt={`${name} trail map`}
-              width={1200}
-              height={514}
-              quality={90}
               className="h-full w-full object-cover"
-              priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 p-6 sm:p-8">
@@ -83,15 +123,11 @@ export default function ResortPage({ slug }) {
             </div>
           </div>
 
-          {/* Stats row */}
-          <div className="grid grid-cols-3 divide-x divide-slate-100 border-b border-slate-100">
-            {metrics.map((m) => (
-              <div key={m.label} className="px-4 py-5 text-center sm:px-6">
-                <span className="text-lg">{m.icon}</span>
-                <p className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">{m.value}</p>
-                <p className="mt-0.5 text-xs font-medium text-slate-500 sm:text-sm">{m.label}</p>
-              </div>
-            ))}
+          {/* Stats donut charts */}
+          <div className="grid grid-cols-3 border-b border-slate-100 py-6">
+            <DonutChart pct={snowPct} color="#38bdf8" value={`${avg_snowfall}"`} label="Avg Snowfall" />
+            <DonutChart pct={vertPct} color="#4ade80" value={`${vertical_drop}'`} label="Vertical Drop" />
+            <DonutChart pct={acresPct} color="#facc15" value={`${skiable_acres} ac`} label="Skiable Acres" />
           </div>
 
           {/* Content */}
@@ -136,6 +172,42 @@ export default function ResortPage({ slug }) {
           <MapGuideBook resort={resort} />
         </div>
       </div>
+
+      {/* Webcam Section */}
+      {(webcamLink || youtubeEmbed) && (
+        <div className="mx-auto max-w-5xl px-4 pb-12 sm:px-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-900">📹 Live Webcams</h2>
+
+          {youtubeEmbed && (
+            <div className="mb-4 overflow-hidden rounded-2xl border border-slate-200 shadow-lg">
+              <div className="relative aspect-video w-full">
+                <iframe
+                  src={youtubeEmbed}
+                  title={`${name} Live Webcam`}
+                  className="h-full w-full"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          )}
+
+          {webcamLink && (
+            <a
+              href={webcamLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-semibold text-slate-700 shadow-md border border-slate-200 transition-all hover:shadow-lg hover:border-slate-300"
+              style={{ minHeight: "44px" }}
+            >
+              🎥 View Live Webcams
+              <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+          )}
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white">

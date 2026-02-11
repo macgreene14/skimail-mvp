@@ -133,13 +133,42 @@ export function MapExplore({
     });
     map.current.addControl(checkboxControlEpic, "top-right");
 
-    const checkboxControlAvgSnow = new CheckboxControl({
-      labelText: "✼",
-      layerId: "data-driven-circles",
-      checkedColor: "rgb(225, 167, 230)",
-      defVis: false,
-    });
-    map.current.addControl(checkboxControlAvgSnow, "top-right");
+    // Snow toggle — controls multiple snow layers
+    const snowLayers = ["snow-heatmap", "snow-circles", "snow-labels", "top-snow-badges"];
+    let snowVisible = true;
+    const snowCtrl = {
+      onAdd(map) {
+        const div = document.createElement("div");
+        div.className = "skimail-ctrl";
+        const btn = document.createElement("button");
+        btn.title = "Toggle snow data";
+        const updateBtn = () => {
+          const color = snowVisible ? "#38bdf8" : "rgba(255,255,255,0.4)";
+          const bg = snowVisible ? "rgba(56,189,248,0.12)" : "transparent";
+          const border = snowVisible ? "rgba(56,189,248,0.3)" : "rgba(255,255,255,0.15)";
+          Object.assign(btn.style, {
+            display: "flex", alignItems: "center", gap: "5px",
+            padding: "5px 10px", border: `1.5px solid ${border}`, borderRadius: "8px",
+            background: bg, color, fontSize: "11px", fontWeight: "600",
+            fontFamily: "-apple-system, sans-serif", cursor: "pointer",
+            transition: "all 0.2s", backdropFilter: "blur(8px)", lineHeight: "1", whiteSpace: "nowrap",
+          });
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span>Snow</span>`;
+        };
+        updateBtn();
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          snowVisible = !snowVisible;
+          const vis = snowVisible ? "visible" : "none";
+          snowLayers.forEach((id) => { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis); });
+          updateBtn();
+        });
+        div.appendChild(btn);
+        return div;
+      },
+      onRemove() {},
+    };
+    map.current.addControl(snowCtrl, "top-right");
 
     const collapsibleControl = new CollapsibleControl((e) => {
       const lat = e.target.dataset.lat;
@@ -755,53 +784,51 @@ export function MapExplore({
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
       <div ref={mapContainer} className="z-1 h-full w-full" />
 
-      {/* Map style switcher */}
-      <div className="absolute left-3 top-3 z-10 flex rounded-lg bg-black/50 p-0.5 backdrop-blur-sm sm:left-auto sm:right-3">
-        {Object.entries(styleLabels).map(([key, label]) => (
+      {/* Bottom bar: style switcher + spin toggle + fullscreen */}
+      <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
+        {/* Style switcher */}
+        <div className="flex rounded-lg bg-black/50 p-0.5 backdrop-blur-sm">
+          {Object.entries(styleLabels).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setMapStyle(key)}
+              className={`rounded-md px-2 py-1 text-[10px] font-semibold transition-all ${
+                mapStyle === key
+                  ? "bg-white/20 text-white"
+                  : "text-white/50 hover:text-white/80"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Right: spin + fullscreen */}
+        <div className="flex gap-1.5">
           <button
-            key={key}
-            onClick={() => setMapStyle(key)}
-            className={`rounded-md px-2 py-1 text-[10px] font-semibold transition-all ${
-              mapStyle === key
-                ? "bg-white/20 text-white"
-                : "text-white/50 hover:text-white/80"
-            }`}
+            onClick={() => {
+              if (spinning) {
+                spinEnabled.current = false;
+                userOverride.current = true;
+                setSpinning(false);
+              } else {
+                spinEnabled.current = true;
+                userOverride.current = false;
+                setSpinning(true);
+              }
+            }}
+            className="flex items-center rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white"
           >
-            {label}
+            {spinning ? "⏸" : "🌍"}
           </button>
-        ))}
+          <button
+            onClick={toggleFullscreen}
+            className="hidden items-center rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white sm:flex"
+          >
+            {isFullscreen ? "✕" : "⛶"}
+          </button>
+        </div>
       </div>
-
-      {/* Controls row */}
-      <div className="absolute bottom-3 right-3 z-10 flex gap-2">
-        <button
-          onClick={() => {
-            if (spinning) {
-              spinEnabled.current = false;
-              userOverride.current = true;
-              setSpinning(false);
-            } else {
-              spinEnabled.current = true;
-              userOverride.current = false;
-              setSpinning(true);
-            }
-          }}
-          className="flex items-center gap-1.5 rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white"
-          style={{ minHeight: "36px" }}
-          aria-label={spinning ? "Stop rotation" : "Resume rotation"}
-        >
-          <span aria-hidden="true">{spinning ? "⏸" : "🌍"}</span>
-        </button>
-      </div>
-
-      <button
-        onClick={toggleFullscreen}
-        className="absolute bottom-3 left-3 z-10 hidden items-center gap-1.5 rounded-xl bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:shadow-xl sm:flex"
-        style={{ minHeight: "44px", minWidth: "44px" }}
-        aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-      >
-        <span aria-hidden="true">{isFullscreen ? "✕ Exit" : "⛶ Fullscreen"}</span>
-      </button>
     </div>
   );
 }

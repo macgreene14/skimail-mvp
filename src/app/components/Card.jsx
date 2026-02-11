@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useEffect } from "react";
 import Link from "next/link";
+import { getPercentile } from "../utils/percentiles";
 
 export function Card({ resort, isSelected, onClick, resortsLength }) {
   const cardRef = useRef(null);
@@ -57,6 +58,23 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
           <span>❄ {avg_snowfall}&quot;</span>
           <span>⛰ {vertical_drop}&apos;</span>
           <span>⛷ {skiable_acres}ac</span>
+        </div>
+        <div className="mt-1 flex items-center gap-2">
+          {[
+            { stat: "avg_snowfall", val: avg_snowfall, color: "#38bdf8" },
+            { stat: "vertical_drop", val: vertical_drop, color: "#4ade80" },
+            { stat: "skiable_acres", val: skiable_acres, color: "#facc15" },
+          ].map(({ stat, val, color }) => {
+            const pct = getPercentile(stat, val);
+            return (
+              <div key={stat} className="flex items-center gap-0.5">
+                <div style={{ width: 40, height: 4, borderRadius: 2, background: "#e2e8f0" }}>
+                  <div style={{ width: `${pct}%`, height: 4, borderRadius: 2, background: color }} />
+                </div>
+                <span style={{ fontSize: 9, color: "#94a3b8", lineHeight: 1 }}>{pct}%</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
