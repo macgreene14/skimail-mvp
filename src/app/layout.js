@@ -8,8 +8,29 @@ import GA from "../../utils/GA";
 const font = Montserrat({ weight: "300", subsets: ["latin"] });
 
 export const metadata = {
-  title: "Skimail",
-  description: "The Powder Processor",
+  title: "Skimail — The Powder Processor",
+  description:
+    "Explore Epic and Ikon ski resorts on an interactive map. Compare snowfall, vertical drop, and skiable acres at a glance.",
+  metadataBase: new URL("https://macgreene14.github.io/skimail-mvp"),
+  openGraph: {
+    title: "Skimail — The Powder Processor",
+    description:
+      "Explore Epic and Ikon ski resorts on an interactive map. Compare snowfall, vertical drop, and skiable acres.",
+    url: "https://macgreene14.github.io/skimail-mvp",
+    siteName: "Skimail",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Skimail — The Powder Processor",
+    description:
+      "Explore Epic and Ikon ski resorts on an interactive map.",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
 };
 
 export default function RootLayout({ children }) {

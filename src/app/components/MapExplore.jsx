@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
 import CheckboxControl from "../../../utils/CheckboxControl";
@@ -15,7 +15,8 @@ export function MapExplore({
 }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const handlersAttached = useRef(false);
   const resorts = resortCollection.features;
 
   // Listen for native fullscreen changes to sync state
@@ -32,6 +33,30 @@ export function MapExplore({
       document.removeEventListener("fullscreenchange", handleFsChange);
       document.removeEventListener("webkitfullscreenchange", handleFsChange);
     };
+  }, []);
+
+  // Toggle fullscreen programmatically
+  const toggleFullscreen = useCallback(() => {
+    const container = mapContainer.current;
+    if (!container) return;
+
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      }
+      setIsFullscreen(true);
+      container.classList.add("map-fullscreen");
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+      setIsFullscreen(false);
+      container.classList.remove("map-fullscreen");
+    }
   }, []);
 
   useEffect(() => {
@@ -51,26 +76,18 @@ export function MapExplore({
     });
 
     // Mapbox Controls
-    // Geolocate
     map.current.addControl(
       new mapboxgl.GeolocateControl({
-        positionOptions: {
-          enableHighAccuracy: true,
-        },
-        // When active the map will receive updates to the device's location as it changes.
+        positionOptions: { enableHighAccuracy: true },
         trackUserLocation: false,
-        // Draw an arrow next to the location dot to indicate which direction the device is heading.
         showUserHeading: true,
-        // fitBoundsOptions: { maxZoom: map.current.getZoom() },
         fitBoundsOptions: { maxZoom: 5 },
       }),
       "top-left",
     );
 
-    // Full screen
     map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
 
-    // Ikon toggle
     const checkboxControlIkon = new CheckboxControl({
       labelText: "Ikon",
       layerId: "Ikon",
@@ -79,7 +96,6 @@ export function MapExplore({
     });
     map.current.addControl(checkboxControlIkon, "top-right");
 
-    // Epic toggle
     const checkboxControlEpic = new CheckboxControl({
       labelText: "Epic",
       layerId: "Epic",
@@ -88,24 +104,18 @@ export function MapExplore({
     });
     map.current.addControl(checkboxControlEpic, "top-right");
 
-    // Snow circle toggle
     const checkboxControlAvgSnow = new CheckboxControl({
       labelText: "✼",
       layerId: "data-driven-circles",
       checkedColor: "rgb(225, 167, 230)",
       defVis: false,
     });
-
     map.current.addControl(checkboxControlAvgSnow, "top-right");
 
-    // Navigation collapsible
     const collapsibleControl = new CollapsibleControl((e) => {
-      // coordinates from button data
       const lat = e.target.dataset.lat;
       const lng = e.target.dataset.lng;
       let zoom = e.target.dataset.zoom;
-
-      //if mobile, zoom reduced by 3
       if (window.innerWidth <= 768) {
         zoom = zoom - 0.75;
       }
@@ -113,12 +123,9 @@ export function MapExplore({
     });
     map.current.addControl(collapsibleControl, "top-left");
 
-    // Navigation compass
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
-    // Load icons
-    // Mountain - blue
-    // todo add logic to check for images prior to queryRenderedFeatures
+    // Load icons and layers
     map.current.on("load", async () => {
       try {
         const ikonImage = await new Promise((resolve, reject) => {
@@ -141,119 +148,82 @@ export function MapExplore({
           );
         });
 
-        // Add images to the map
         map.current.addImage("Ikon", ikonImage);
         map.current.addImage("Epic", epicImage);
 
-        // Add resorts as symbole layer
         map.current.addSource("resorts", {
           type: "geojson",
           data: resortCollection,
         });
 
         for (const feature of resorts) {
-          const layerID = feature.properties.pass; // layer id based on pass type
-
-          // Add a layer for this symbol type if it hasn't been added already
+          const layerID = feature.properties.pass;
           if (!map.current.getLayer(layerID)) {
             map.current.addLayer({
               id: layerID,
               type: "symbol",
               source: "resorts",
               layout: {
-                "icon-image": ["get", "pass"], // same as inserting feature.properties.icon
+                "icon-image": ["get", "pass"],
                 "icon-allow-overlap": true,
                 "icon-size": 0.05,
-                "icon-allow-overlap": true,
                 "icon-ignore-placement": true,
                 "text-field": ["get", "name"],
                 "text-offset": [0, 1.2],
                 "text-size": 14,
-                // "text-allow-overlap": true,
-                // "text-ignore-placement": true,
                 "text-optional": true,
               },
               filter: ["==", "pass", layerID],
             });
           }
         }
+
+        // Fire initial rendered features after layers load
+        const features = map.current.queryRenderedFeatures({
+          layers: ["Epic", "Ikon"],
+        });
+        if (features) setRenderedResorts(features);
       } catch (error) {
         console.error("Failed to load images:", error);
       }
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // update renderedFeatures state
+  // Attach moveend and click handlers ONCE
   useEffect(() => {
-    map.current.on("moveend", () => {
-      // on move end, fetched rendered resorts
+    if (!map.current || handlersAttached.current) return;
+
+    const onMoveEnd = () => {
       const features = map.current.queryRenderedFeatures({
         layers: ["Epic", "Ikon"],
       });
+      if (features) setRenderedResorts(features);
+    };
 
-      if (features) {
-        // pass rendered resorts to parent component via functional prop
-        setRenderedResorts(features);
-      }
-    });
-  });
-
-  // Select resort from map marker
-  useEffect(() => {
-    map.current.on("click", ["Epic", "Ikon"], (e) => {
+    const onClick = (e) => {
       setSelectedResort(e.features[0]);
-    });
-  });
+    };
 
-  // when resort selected, add popup and center
+    map.current.on("moveend", onMoveEnd);
+    map.current.on("click", ["Epic", "Ikon"], onClick);
+    handlersAttached.current = true;
+
+    return () => {
+      map.current.off("moveend", onMoveEnd);
+      map.current.off("click", ["Epic", "Ikon"], onClick);
+      handlersAttached.current = false;
+    };
+  }, [setRenderedResorts, setSelectedResort]);
+
+  // When resort selected, add popup and center
   useEffect(() => {
     if (selectedResort) {
       const popup = addPopup(selectedResort);
-
       return () => {
         popup.remove();
       };
-      // }
     }
-  }, [selectedResort]);
-
-  // Create your React component with Tailwind CSS classes
-  const PopupContent = ({ selectedResort }) => (
-    <div className="-m-4 rounded-lg border-2 border-solid bg-white p-2 text-center shadow-md ">
-      <a
-        href={`/skimail-mvp/resorts/${selectedResort.properties.slug}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block"
-      >
-        <h1 className="text-md m-1 w-full font-bold text-black md:text-lg">
-          {selectedResort.properties.name !== "Unknown"
-            ? selectedResort.properties.name
-            : null}
-          {selectedResort.properties.name !== "Unknown" &&
-          selectedResort.properties.name !== "Unknown"
-            ? " - "
-            : null}
-          {selectedResort.properties.state !== "Unknown"
-            ? selectedResort.properties.state
-            : null}
-          {selectedResort.properties.state !== "Unknown" ? " - " : null}
-          {selectedResort.properties.country !== "Unknown"
-            ? selectedResort.properties.country
-            : null}{" "}
-        </h1>
-        <span className="mb-2 mr-2 inline-block rounded-full bg-gray-200 px-1 py-1 text-xs font-semibold text-gray-700 lg:px-3 lg:text-sm">
-          ✼ {selectedResort.properties.avg_snowfall} in
-        </span>
-        <span className="mb-2 mr-2 inline-block rounded-full bg-gray-200 px-1 py-1 text-sm font-semibold text-gray-700 lg:px-3">
-          ⛰ {selectedResort.properties.vertical_drop} ft
-        </span>
-        <span className="mb-2 mr-2 inline-block rounded-full bg-gray-200 px-1 py-1 text-sm font-semibold text-gray-700 lg:px-3">
-          ⛷ {selectedResort.properties.skiable_acres} acres
-        </span>
-      </a>
-    </div>
-  );
+  }, [selectedResort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function addPopup(selectedResort) {
     const popupNode = ReactDOMServer.renderToStaticMarkup(
@@ -263,11 +233,10 @@ export function MapExplore({
     const popup = new mapboxgl.Popup({
       anchor: "bottom",
       offset: 5,
-      keepInView: true, // This option ensures the popup stays in view
+      keepInView: true,
       closeOnClick: true,
       closeButton: true,
-      // closeOnMove: true,
-      maxWidth: "none",
+      maxWidth: "320px",
       focusAfterOpen: false,
     })
       .setLngLat(coordinates)
@@ -275,11 +244,61 @@ export function MapExplore({
       .addTo(map.current);
 
     map.current.flyTo({ center: coordinates });
-
     return popup;
   }
 
   return (
-    <div ref={mapContainer} className="z-1 h-full w-full rounded-lg"></div>
+    <div className="relative h-full w-full">
+      <div ref={mapContainer} className="z-1 h-full w-full rounded-lg" />
+      {/* Mobile-friendly fullscreen toggle */}
+      <button
+        onClick={toggleFullscreen}
+        className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-md active:bg-gray-100 sm:hidden"
+        style={{ minHeight: "44px", minWidth: "44px" }}
+        aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+      >
+        <span aria-hidden="true">{isFullscreen ? "✕" : "⛶"}</span>
+        {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+      </button>
+    </div>
   );
 }
+
+const PopupContent = ({ selectedResort }) => (
+  <div className="rounded-lg border-2 border-solid bg-white p-3 text-center shadow-md">
+    <a
+      href={`/skimail-mvp/resorts/${selectedResort.properties.slug}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block"
+    >
+      <h1 className="m-1 w-full text-base font-bold text-black">
+        {selectedResort.properties.name !== "Unknown"
+          ? selectedResort.properties.name
+          : null}
+        {selectedResort.properties.name !== "Unknown" &&
+        selectedResort.properties.state !== "Unknown"
+          ? " — "
+          : null}
+        {selectedResort.properties.state !== "Unknown"
+          ? selectedResort.properties.state
+          : null}
+        {selectedResort.properties.state !== "Unknown" ? " — " : null}
+        {selectedResort.properties.country !== "Unknown"
+          ? selectedResort.properties.country
+          : null}
+      </h1>
+      <div className="mt-1 flex flex-wrap justify-center gap-1">
+        <span className="inline-block rounded-full bg-gray-200 px-2 py-1 text-xs font-semibold text-gray-700">
+          ✼ {selectedResort.properties.avg_snowfall} in
+        </span>
+        <span className="inline-block rounded-full bg-gray-200 px-2 py-1 text-xs font-semibold text-gray-700">
+          ⛰ {selectedResort.properties.vertical_drop} ft
+        </span>
+        <span className="inline-block rounded-full bg-gray-200 px-2 py-1 text-xs font-semibold text-gray-700">
+          ⛷ {selectedResort.properties.skiable_acres} acres
+        </span>
+      </div>
+    </a>
+  </div>
+);

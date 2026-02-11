@@ -30,9 +30,13 @@ export default function Page() {
             </div>
           </div>
 
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="https://ik.imagekit.io/bamlnhgnz/skimail-hero.png"
-            alt=""
+            alt="Skimail app showing ski resorts on a map"
+            width={600}
+            height={600}
+            loading="lazy"
             className="mx-auto my-8 mt-10 aspect-[1/1] w-full max-w-lg rounded-2xl object-cover sm:mt-16 lg:mt-0 lg:max-w-none xl:row-span-2 xl:row-end-2 xl:mt-36"
           />
         </div>
