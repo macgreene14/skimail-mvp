@@ -751,28 +751,28 @@ export function MapExplore({
     );
     const coordinates = selectedResort.geometry.coordinates.slice();
     const popup = new mapboxgl.Popup({
-      offset: 25,
+      offset: -5, // Overlap with marker for seamless look
       keepInView: true,
       closeOnClick: true,
       closeButton: true,
       maxWidth: "300px",
       focusAfterOpen: false,
       className: "skimail-popup",
+      anchor: "bottom",
     })
       .setLngLat(coordinates)
       .setHTML(popupNode)
       .addTo(map.current);
 
     spinEnabled.current = false;
-    // Pan to show popup fully — offset upward to account for popup height
+    // Pan map down so popup is fully visible — offset the center below the marker
     const point = map.current.project(coordinates);
     const mapH = map.current.getContainer().clientHeight;
-    // If the marker is in the upper third, use a lower center to avoid popup clipping at top
-    const targetLat = point.y < mapH * 0.35
-      ? map.current.unproject([point.x, point.y + 80]).lat
-      : coordinates[1];
+    // Shift viewport so marker sits in the lower 60% of screen, giving popup room above
+    const targetPoint = [point.x, point.y + mapH * 0.2];
+    const targetCoords = map.current.unproject(targetPoint);
     map.current.flyTo({
-      center: [coordinates[0], targetLat],
+      center: targetCoords,
       zoom: Math.max(map.current.getZoom(), 5),
     });
     return popup;
