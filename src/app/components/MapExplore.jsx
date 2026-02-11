@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
-import CheckboxControl from "../../../utils/CheckboxControl";
 import CollapsibleControl from "../../../utils/CollapsibleControl";
 import ReactDOMServer from "react-dom/server";
 import { SnowDataManager, getTopSnowfall } from "../utils/fetchSnowData";
@@ -26,6 +25,9 @@ export function MapExplore({
   // snowBanner removed
   const [mapStyle, setMapStyle] = useState("skimail"); // skimail | dark | satellite | outdoors
   const layersAdded = useRef(false);
+  const [showIkon, setShowIkon] = useState(true);
+  const [showEpic, setShowEpic] = useState(true);
+  const [showSnow, setShowSnow] = useState(true);
 
   const MAP_STYLES = {
     skimail: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8",
@@ -117,58 +119,7 @@ export function MapExplore({
       "top-left",
     );
 
-    const checkboxControlIkon = new CheckboxControl({
-      labelText: "Ikon",
-      layerId: "Ikon",
-      checkedColor: "#74a5f2",
-      defVis: true,
-    });
-    map.current.addControl(checkboxControlIkon, "top-right");
-
-    const checkboxControlEpic = new CheckboxControl({
-      labelText: "Epic",
-      layerId: "Epic",
-      checkedColor: "orange",
-      defVis: true,
-    });
-    map.current.addControl(checkboxControlEpic, "top-right");
-
-    // Snow toggle — controls multiple snow layers
-    const snowLayers = ["snow-heatmap", "snow-circles", "snow-labels", "top-snow-badges"];
-    let snowVisible = true;
-    const snowCtrl = {
-      onAdd(map) {
-        const div = document.createElement("div");
-        div.className = "skimail-ctrl";
-        const btn = document.createElement("button");
-        btn.title = "Toggle snow data";
-        const updateBtn = () => {
-          const color = snowVisible ? "#38bdf8" : "rgba(255,255,255,0.4)";
-          const bg = snowVisible ? "rgba(56,189,248,0.12)" : "transparent";
-          const border = snowVisible ? "rgba(56,189,248,0.3)" : "rgba(255,255,255,0.15)";
-          Object.assign(btn.style, {
-            display: "flex", alignItems: "center", gap: "5px",
-            padding: "5px 10px", border: `1.5px solid ${border}`, borderRadius: "8px",
-            background: bg, color, fontSize: "11px", fontWeight: "600",
-            fontFamily: "-apple-system, sans-serif", cursor: "pointer",
-            transition: "all 0.2s", backdropFilter: "blur(8px)", lineHeight: "1", whiteSpace: "nowrap",
-          });
-          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span>Snow</span>`;
-        };
-        updateBtn();
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          snowVisible = !snowVisible;
-          const vis = snowVisible ? "visible" : "none";
-          snowLayers.forEach((id) => { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", vis); });
-          updateBtn();
-        });
-        div.appendChild(btn);
-        return div;
-      },
-      onRemove() {},
-    };
-    map.current.addControl(snowCtrl, "top-right");
+    // Pass/snow toggles handled via React state + effects below
 
     const collapsibleControl = new CollapsibleControl((e) => {
       const lat = e.target.dataset.lat;
@@ -366,31 +317,37 @@ export function MapExplore({
           data: { type: "FeatureCollection", features: [] },
         });
 
-        // Top snow badges — always visible, even at globe zoom
+        // Top snow badges — large, glowing, visible during rotation
         map.current.addLayer({
           id: "top-snow-badges",
           type: "symbol",
           source: "top-snow",
           minzoom: 0,
+          maxzoom: 5,
           layout: {
-            "text-field": ["concat", "❄️ ", ["get", "name"], " ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
+            "text-field": ["concat",
+              "❄️  ", ["get", "name"], "\n",
+              ["to-string", ["round", ["get", "snowfall_7d"]]], "cm this week"
+            ],
             "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
             "text-size": [
               "interpolate", ["linear"], ["zoom"],
-              0, 9,
-              3, 11,
-              6, 12,
+              0, 13,
+              2, 16,
+              4, 18,
             ],
             "text-allow-overlap": true,
             "text-ignore-placement": true,
-            "text-offset": [0, -2.5],
-            "text-max-width": 15,
+            "text-offset": [0, -3],
+            "text-max-width": 20,
+            "text-line-height": 1.3,
             "symbol-sort-key": ["*", -1, ["get", "snowfall_7d"]],
           },
           paint: {
-            "text-color": "#7dd3fc",
-            "text-halo-color": "rgba(15,23,42,0.9)",
-            "text-halo-width": 2,
+            "text-color": "#ffffff",
+            "text-halo-color": "rgba(14,165,233,0.7)",
+            "text-halo-width": 3,
+            "text-halo-blur": 2,
           },
         });
 
@@ -501,6 +458,36 @@ export function MapExplore({
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Layer visibility toggles
+  useEffect(() => {
+    if (!map.current || !layersAdded.current) return;
+    const vis = showIkon ? "visible" : "none";
+    if (map.current.getLayer("Ikon")) map.current.setLayoutProperty("Ikon", "visibility", vis);
+  }, [showIkon]);
+
+  useEffect(() => {
+    if (!map.current || !layersAdded.current) return;
+    const vis = showEpic ? "visible" : "none";
+    if (map.current.getLayer("Epic")) map.current.setLayoutProperty("Epic", "visibility", vis);
+  }, [showEpic]);
+
+  useEffect(() => {
+    if (!map.current || !layersAdded.current) return;
+    const vis = showSnow ? "visible" : "none";
+    ["snow-heatmap", "snow-circles", "snow-labels", "top-snow-badges"].forEach((id) => {
+      if (map.current.getLayer(id)) map.current.setLayoutProperty(id, "visibility", vis);
+    });
+  }, [showSnow]);
+
+  // Top snow badges: only visible during auto-rotation
+  useEffect(() => {
+    if (!map.current || !layersAdded.current) return;
+    const vis = spinning && showSnow ? "visible" : "none";
+    if (map.current.getLayer("top-snow-badges")) {
+      map.current.setLayoutProperty("top-snow-badges", "visibility", vis);
+    }
+  }, [spinning, showSnow]);
 
   // Style switcher — swap style and wait for reload
   useEffect(() => {
@@ -636,16 +623,16 @@ export function MapExplore({
           map.current.addSource("top-snow", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
         }
         map.current.addLayer({
-          id: "top-snow-badges", type: "symbol", source: "top-snow", minzoom: 0,
+          id: "top-snow-badges", type: "symbol", source: "top-snow", minzoom: 0, maxzoom: 5,
           layout: {
-            "text-field": ["concat", "❄️ ", ["get", "name"], " ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
+            "text-field": ["concat", "❄️  ", ["get", "name"], "\n", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm this week"],
             "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
-            "text-size": ["interpolate", ["linear"], ["zoom"], 0, 9, 3, 11, 6, 12],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 0, 13, 2, 16, 4, 18],
             "text-allow-overlap": true, "text-ignore-placement": true,
-            "text-offset": [0, -2.5], "text-max-width": 15,
+            "text-offset": [0, -3], "text-max-width": 20, "text-line-height": 1.3,
             "symbol-sort-key": ["*", -1, ["get", "snowfall_7d"]],
           },
-          paint: { "text-color": "#7dd3fc", "text-halo-color": "rgba(15,23,42,0.9)", "text-halo-width": 2 },
+          paint: { "text-color": "#ffffff", "text-halo-color": "rgba(14,165,233,0.7)", "text-halo-width": 3, "text-halo-blur": 2 },
         });
 
         // Re-apply snow data if available
@@ -783,6 +770,28 @@ export function MapExplore({
   return (
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
       <div ref={mapContainer} className="z-1 h-full w-full" />
+
+      {/* Top-right: layer toggles */}
+      <div className="absolute right-3 top-3 z-10 flex flex-col gap-1.5">
+        {[
+          { label: "Ikon", active: showIkon, toggle: () => setShowIkon(!showIkon), color: "#74a5f2", icon: "🔵" },
+          { label: "Epic", active: showEpic, toggle: () => setShowEpic(!showEpic), color: "#f97316", icon: "🟠" },
+          { label: "Snow", active: showSnow, toggle: () => setShowSnow(!showSnow), color: "#38bdf8", icon: "❄️" },
+        ].map((ctrl) => (
+          <button
+            key={ctrl.label}
+            onClick={ctrl.toggle}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-all"
+            style={{
+              background: ctrl.active ? `${ctrl.color}22` : "rgba(0,0,0,0.4)",
+              border: `1.5px solid ${ctrl.active ? `${ctrl.color}66` : "rgba(255,255,255,0.15)"}`,
+              color: ctrl.active ? ctrl.color : "rgba(255,255,255,0.4)",
+            }}
+          >
+            <span className="text-xs">{ctrl.icon}</span> {ctrl.label}
+          </button>
+        ))}
+      </div>
 
       {/* Bottom bar: style switcher + spin toggle + fullscreen */}
       <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
