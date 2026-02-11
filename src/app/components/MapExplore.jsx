@@ -23,7 +23,7 @@ export function MapExplore({
   const [spinning, setSpinning] = useState(true);
   const snowDataRef = useRef(null);
   const snowManagerRef = useRef(null);
-  const [snowBanner, setSnowBanner] = useState(null); // { count, top }
+  // snowBanner removed
   const [mapStyle, setMapStyle] = useState("skimail"); // skimail | dark | satellite | outdoors
   const layersAdded = useRef(false);
 
@@ -418,7 +418,6 @@ export function MapExplore({
         const spinInterval = setInterval(spinGlobe, 50);
 
         // Initialize snow data manager
-        let bannerShown = false;
         const updateSnowLayer = (allResults) => {
           snowDataRef.current = allResults;
           const withSnow = allResults.filter((d) => d.snowfall_7d > 0);
@@ -454,13 +453,7 @@ export function MapExplore({
               })),
             });
           }
-          // Show banner on first batch with snow
-          if (!bannerShown && withSnow.length > 0) {
-            bannerShown = true;
-            const top = [...withSnow].sort((a, b) => (b.snowfall_7d || 0) - (a.snowfall_7d || 0)).slice(0, 3);
-            setSnowBanner({ count: withSnow.length, top });
-            setTimeout(() => setSnowBanner(null), 8000);
-          }
+          // banner removed
         };
 
         snowManagerRef.current = new SnowDataManager(resorts, updateSnowLayer);
@@ -761,28 +754,6 @@ export function MapExplore({
   return (
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
       <div ref={mapContainer} className="z-1 h-full w-full" />
-
-      {/* Snow data banner */}
-      {snowBanner && (
-        <div
-          className="absolute left-1/2 top-3 z-20 -translate-x-1/2 animate-fade-in rounded-xl bg-gradient-to-r from-sky-600/90 to-blue-700/90 px-4 py-2.5 shadow-lg backdrop-blur-sm"
-          style={{ maxWidth: "min(90vw, 360px)" }}
-        >
-          <div className="flex items-center gap-2 text-white">
-            <span className="text-lg">❄️</span>
-            <div>
-              <div className="text-xs font-bold">Live Snow Data Loaded</div>
-              <div className="text-[10px] text-white/80">
-                {snowBanner.count} resorts reporting snow
-                {snowBanner.top.length > 0 && (
-                  <span> — Top: {snowBanner.top.map((r) => `${r.name} (${Math.round(r.snowfall_7d)}cm)`).join(", ")}</span>
-                )}
-              </div>
-            </div>
-            <button onClick={() => setSnowBanner(null)} className="ml-auto text-white/60 hover:text-white">✕</button>
-          </div>
-        </div>
-      )}
 
       {/* Map style switcher */}
       <div className="absolute left-3 top-3 z-10 flex rounded-lg bg-black/50 p-0.5 backdrop-blur-sm sm:left-auto sm:right-3">
