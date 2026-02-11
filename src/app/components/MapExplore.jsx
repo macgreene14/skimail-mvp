@@ -783,7 +783,10 @@ export function MapExplore({
 
   return (
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
-      <div ref={mapContainer} className="z-1 h-full w-full" />
+      <div ref={mapContainer} className="absolute inset-0" />
+
+      {/* UI overlay — above all Mapbox internals */}
+      <div className="pointer-events-none absolute inset-0" style={{ zIndex: 10 }}>
 
       {/* Spin toggle — prominent when stopped */}
       <button
@@ -796,13 +799,12 @@ export function MapExplore({
             spinEnabled.current = true;
             userOverride.current = false;
             setSpinning(true);
-            // Zoom out if needed for rotation
             if (map.current && map.current.getZoom() >= 3.5) {
               map.current.flyTo({ center: map.current.getCenter(), zoom: 1.2 });
             }
           }
         }}
-        className={`absolute z-10 flex items-center gap-1.5 rounded-full backdrop-blur-sm transition-all ${
+        className={`pointer-events-auto absolute flex items-center gap-1.5 rounded-full backdrop-blur-sm transition-all ${
           spinning
             ? "bottom-14 right-3 bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90"
             : "bottom-14 right-3 bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500"
@@ -812,7 +814,7 @@ export function MapExplore({
       </button>
 
       {/* Top-right: layer toggles — horizontal row */}
-      <div className="absolute right-3 top-3 z-10 flex gap-1.5">
+      <div className="pointer-events-auto absolute right-3 top-3 flex gap-1.5">
         {[
           { label: "Ikon", active: showIkon, toggle: () => setShowIkon(!showIkon), color: "#74a5f2" },
           { label: "Epic", active: showEpic, toggle: () => setShowEpic(!showEpic), color: "#f97316" },
@@ -834,9 +836,8 @@ export function MapExplore({
         ))}
       </div>
 
-      {/* Bottom bar: style switcher + spin toggle + fullscreen */}
-      <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between">
-        {/* Style switcher */}
+      {/* Bottom bar: style switcher + fullscreen */}
+      <div className="pointer-events-auto absolute bottom-3 left-3 right-3 flex items-center justify-between">
         <div className="flex rounded-lg bg-black/50 p-0.5 backdrop-blur-sm">
           {Object.entries(styleLabels).map(([key, label]) => (
             <button
@@ -853,7 +854,6 @@ export function MapExplore({
           ))}
         </div>
 
-        {/* Right: fullscreen (desktop) */}
         <button
           onClick={toggleFullscreen}
           className="hidden items-center rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white sm:flex"
@@ -861,6 +861,8 @@ export function MapExplore({
           {isFullscreen ? "✕" : "⛶"}
         </button>
       </div>
+
+      </div>{/* end UI overlay */}
     </div>
   );
 }
