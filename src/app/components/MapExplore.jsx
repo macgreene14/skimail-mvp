@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import "mapbox-gl/dist/mapbox-gl.css";
 import CheckboxControl from "../../../utils/CheckboxControl";
@@ -15,7 +15,24 @@ export function MapExplore({
 }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
   const resorts = resortCollection.features;
+
+  // Listen for native fullscreen changes to sync state
+  useEffect(() => {
+    const handleFsChange = () => {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        setIsFullscreen(false);
+        mapContainer.current?.classList.remove("map-fullscreen");
+      }
+    };
+    document.addEventListener("fullscreenchange", handleFsChange);
+    document.addEventListener("webkitfullscreenchange", handleFsChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFsChange);
+      document.removeEventListener("webkitfullscreenchange", handleFsChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -50,8 +67,8 @@ export function MapExplore({
       "top-left",
     );
 
-    // Full screen
-    map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
+    // Full screen - uses native Fullscreen API with CSS fallback
+    map.current.addControl(new mapboxgl.FullscreenControl({ container: mapContainer.current }), "top-right");
 
     // Ikon toggle
     const checkboxControlIkon = new CheckboxControl({

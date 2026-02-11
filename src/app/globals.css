@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mapbox fullscreen support */
+.mapboxgl-map:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+}
+.mapboxgl-map:fullscreen {
+  width: 100%;
+  height: 100%;
+}
+
+/* Custom fullscreen map mode */
+.map-fullscreen {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999;
+  border-radius: 0 !important;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
