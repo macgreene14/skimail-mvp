@@ -83,6 +83,22 @@ html {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
+/* Custom map controls */
+.skimail-ctrl {
+  margin: 0 !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.mapboxgl-ctrl-top-right .skimail-ctrl {
+  margin-bottom: 4px !important;
+}
+
+.mapboxgl-ctrl-top-left .skimail-ctrl {
+  margin-bottom: 4px !important;
+}
+
 .control-content {
   font-size: 0.75rem;
   font-weight: 300;
