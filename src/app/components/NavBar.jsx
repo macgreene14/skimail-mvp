@@ -21,7 +21,7 @@ export function NavBar() {
         <>
           <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
             {/* Mobile: 3-column grid for true centering. Desktop: flex layout */}
-            <div className="grid h-12 grid-cols-[40px_1fr_40px] items-center sm:flex sm:h-14 sm:justify-between">
+            <div className="grid h-12 grid-cols-3 items-center sm:flex sm:h-14 sm:justify-between">
               {/* Left: hamburger (mobile) */}
               <div className="flex items-center sm:hidden">
                 <Disclosure.Button
