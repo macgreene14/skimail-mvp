@@ -20,9 +20,10 @@ export function NavBar() {
       {({ open }) => (
         <>
           <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-            <div className="relative flex h-12 items-center justify-center sm:h-14 sm:justify-between">
-              {/* Mobile menu button — absolute left so logo stays centered */}
-              <div className="absolute left-0 flex items-center sm:hidden">
+            {/* Mobile: 3-column grid for true centering. Desktop: flex layout */}
+            <div className="grid h-12 grid-cols-[40px_1fr_40px] items-center sm:flex sm:h-14 sm:justify-between">
+              {/* Left: hamburger (mobile) */}
+              <div className="flex items-center sm:hidden">
                 <Disclosure.Button
                   className="inline-flex items-center justify-center rounded-lg p-1.5 text-snow-200/70 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/20"
                   style={{ minHeight: "40px", minWidth: "40px" }}
@@ -36,8 +37,8 @@ export function NavBar() {
                 </Disclosure.Button>
               </div>
 
-              {/* Logo — centered on mobile, left-aligned on desktop */}
-              <div className="flex items-center sm:flex-1">
+              {/* Center: logo (centered on mobile, left on desktop) */}
+              <div className="flex items-center justify-center sm:flex-1 sm:justify-start">
                 <Link href="/about" className="flex items-center gap-2">
                   <img
                     className="h-8 w-auto sm:h-9"
@@ -66,7 +67,8 @@ export function NavBar() {
                 </div>
               </div>
 
-              {/* Build version */}
+              {/* Right: empty spacer on mobile, build version on desktop */}
+              <div className="sm:hidden" />
               <div className="hidden items-center sm:flex">
                 <span className="text-xs text-white/30">
                   {process.env.NEXT_PUBLIC_BUILD_VERSION}
