@@ -1,11 +1,11 @@
 import "./globals.css";
 import { NavBar } from "./components/NavBar.jsx";
-import { Montserrat } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import HotJar from "../../utils/HotJar";
 import GA from "../../utils/GA";
 
-const font = Montserrat({ weight: "300", subsets: ["latin"] });
+const font = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 export const metadata = {
   title: "Skimail — The Powder Processor",
@@ -36,7 +36,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={font.className}>
+      <body className={`${font.className} antialiased`}>
         <NavBar />
         {children}
       </body>

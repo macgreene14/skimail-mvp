@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React from "react";
 import { Card } from "./Card.jsx";
 
 export function ResultsContainer({
@@ -6,35 +6,36 @@ export function ResultsContainer({
   setSelectedResort,
   selectedResort,
 }) {
+  const sorted = resorts
+    ?.slice()
+    .sort((a, b) => {
+      const A = parseFloat(a.properties.avg_snowfall) || 0;
+      const B = parseFloat(b.properties.avg_snowfall) || 0;
+      return B - A;
+    });
+
   return (
-    <div className="flex flex-row overflow-auto lg:flex-col">
-      {resorts
-        ?.sort((a, b) => {
-          const A = parseFloat(a.properties.avg_snowfall) || 0; // handle undefined and convert to number
-          const B = parseFloat(b.properties.avg_snowfall) || 0; // handle undefined and convert to number
-          return B - A;
-        })
-        .map((resort) =>
-          (() => {
-            return (
-              <Card
-                resortsLength={resorts.length}
-                key={resort.properties.name}
-                resort={resort}
-                isSelected={
-                  resort?.properties.name === selectedResort?.properties.name
-                    ? true
-                    : false
-                }
-                onClick={() => {
-                  resort?.properties.name === selectedResort?.properties.name
-                    ? window.open(`/skimail-mvp/resorts/${resort.properties.slug}`)
-                    : setSelectedResort(resort);
-                }}
-              />
-            );
-          })(),
-        )}
+    <div className="results-scroll flex flex-row gap-3 overflow-auto px-1 py-2 lg:flex-col lg:gap-2">
+      {sorted?.map((resort) => (
+        <Card
+          resortsLength={resorts.length}
+          key={resort.properties.name}
+          resort={resort}
+          isSelected={
+            resort?.properties.name === selectedResort?.properties.name
+          }
+          onClick={() => {
+            resort?.properties.name === selectedResort?.properties.name
+              ? window.open(`/skimail-mvp/resorts/${resort.properties.slug}`)
+              : setSelectedResort(resort);
+          }}
+        />
+      ))}
+      {sorted?.length === 0 && (
+        <p className="px-4 py-8 text-center text-sm text-slate-400">
+          No resorts found. Try adjusting your search or map view.
+        </p>
+      )}
     </div>
   );
 }

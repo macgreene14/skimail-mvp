@@ -11,67 +11,54 @@ export default function App() {
   const [selectedResort, setSelectedResort] = useState(null);
 
   return (
-    <>
-      <div>
-        <main className="p-2 lg:p-4">
-          <div className="mx-auto px-1 lg:px-4">
-            <h1 className="sr-only">Explore</h1>
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col">
+      <main className="flex-1 p-2 lg:p-3">
+        <div className="mx-auto max-w-[1600px]">
+          <h1 className="sr-only">Explore</h1>
 
-            {/* Main grid */}
-            <div className="grid max-h-full grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-4">
-              {/* Left column — search + results */}
-              <div className="flex h-[200px] flex-col rounded-lg lg:h-[85vh]">
-                <section className="m-2 rounded-md">
-                  <SearchBar
-                    data={resorts}
-                    setRenderedResorts={setRenderedResorts}
-                  />
-                </section>
+          <div className="grid h-[calc(100vh-5rem)] grid-cols-1 gap-3 lg:grid-cols-3">
+            {/* Left — search + results */}
+            <div className="flex h-[200px] flex-col gap-3 lg:h-full">
+              <SearchBar
+                data={resorts}
+                setRenderedResorts={setRenderedResorts}
+              />
 
-                <div className="grid gap-4 overflow-auto rounded-md md:grid-cols-1">
-                  <section aria-labelledby="section-2-title">
-                    <h2 className="sr-only" id="section-2-title">
-                      Results
-                    </h2>
-                    <ResultsContainer
-                      resorts={renderedResorts}
-                      setSelectedResort={setSelectedResort}
-                      selectedResort={selectedResort}
-                    />
-                  </section>
-                </div>
+              <div className="min-h-0 flex-1 overflow-auto rounded-xl">
+                <ResultsContainer
+                  resorts={renderedResorts}
+                  setSelectedResort={setSelectedResort}
+                  selectedResort={selectedResort}
+                />
               </div>
+            </div>
 
-              {/* Right column — Map (taller on mobile) */}
-              <div className="order-first grid h-[60vh] grid-cols-1 gap-4 rounded-lg lg:order-last lg:col-span-2 lg:h-[85vh]">
-                <section aria-labelledby="section-1-title">
-                  <h2 className="sr-only" id="section-1-title">
-                    Map
-                  </h2>
-                  <div className="h-full overflow-hidden rounded-lg bg-white shadow">
-                    <MapExplore
-                      resortCollection={resortCollection}
-                      setRenderedResorts={setRenderedResorts}
-                      selectedResort={selectedResort}
-                      setSelectedResort={setSelectedResort}
-                    />
-                  </div>
-                </section>
+            {/* Right — Map */}
+            <div className="order-first h-[55vh] lg:order-last lg:col-span-2 lg:h-full">
+              <div className="h-full overflow-hidden rounded-xl border border-slate-200 shadow-lg">
+                <MapExplore
+                  resortCollection={resortCollection}
+                  setRenderedResorts={setRenderedResorts}
+                  selectedResort={selectedResort}
+                  setSelectedResort={setSelectedResort}
+                />
               </div>
             </div>
           </div>
-        </main>
+        </div>
+      </main>
 
-        <footer>
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-            <div className="border-t border-gray-200 py-4 text-center text-sm text-gray-500 sm:text-left">
-              <span className="block sm:inline">
-                &copy; 2024 Skimail, Inc. All rights reserved.
-              </span>
-            </div>
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <span className="text-xs text-slate-400">
+            &copy; {new Date().getFullYear()} Skimail
+          </span>
+          <div className="flex gap-4">
+            <a href="/skimail-mvp/about" className="text-xs text-slate-400 transition-colors hover:text-slate-600">About</a>
+            <a href="https://airtable.com/appa1Nkb8pG0dRNxk/shrJ1gvC7YwqziQwK" target="_blank" rel="noopener noreferrer" className="text-xs text-slate-400 transition-colors hover:text-slate-600">Feedback</a>
           </div>
-        </footer>
-      </div>
-    </>
+        </div>
+      </footer>
+    </div>
   );
 }

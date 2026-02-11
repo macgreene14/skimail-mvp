@@ -5,100 +5,91 @@ import Link from "next/link";
 import "../globals.css";
 
 const navigation = [
-  { name: "Explore", href: "/", current: false },
+  { name: "Explore", href: "/" },
+  { name: "About", href: "/about" },
   {
-    name: "Share Feedback",
+    name: "Feedback",
     href: "https://airtable.com/appa1Nkb8pG0dRNxk/shrJ1gvC7YwqziQwK",
-    current: false,
+    external: true,
   },
 ];
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export function NavBar() {
   return (
-    <Disclosure as="nav" className="bg-gray-800">
+    <Disclosure as="nav" className="sticky top-0 z-50 border-b border-white/10 bg-ski-950/95 backdrop-blur-md">
       {({ open }) => (
         <>
-          <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center justify-between">
-              <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex h-16 items-center justify-between">
+              {/* Mobile menu button */}
+              <div className="flex items-center sm:hidden">
                 <Disclosure.Button
-                  className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:cursor-pointer hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                  className="inline-flex items-center justify-center rounded-lg p-2 text-snow-200/70 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/20"
                   style={{ minHeight: "44px", minWidth: "44px" }}
                 >
-                  <span className="absolute -inset-0.5" />
                   <span className="sr-only">Open main menu</span>
                   {open ? (
-                    <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
                   ) : (
-                    <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                    <Bars3Icon className="h-6 w-6" aria-hidden="true" />
                   )}
                 </Disclosure.Button>
               </div>
-              <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                <div className="flex flex-shrink-0 items-center">
-                  <Link href="/about">
-                    <img
-                      className="h-12 w-auto"
-                      src="https://ik.imagekit.io/bamlnhgnz/logo_invert.png?updatedAt=1673031278735"
-                      alt="Skimail"
-                      width={48}
-                      height={48}
-                      loading="lazy"
-                    />
-                  </Link>
-                </div>
-                <div className="my-auto hidden sm:ml-6 sm:block">
-                  <div className="flex space-x-4">
-                    {navigation.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className={classNames(
-                          item.current
-                            ? "bg-gray-900 text-white"
-                            : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                          "rounded-md px-3 py-2 text-sm font-medium",
-                        )}
-                        aria-current={item.current ? "page" : undefined}
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
+
+              {/* Logo + nav links */}
+              <div className="flex flex-1 items-center justify-center sm:justify-start">
+                <Link href="/about" className="flex items-center gap-2">
+                  <img
+                    className="h-10 w-auto"
+                    src="https://ik.imagekit.io/bamlnhgnz/logo_invert.png?updatedAt=1673031278735"
+                    alt="Skimail"
+                    width={40}
+                    height={40}
+                    loading="lazy"
+                  />
+                  <span className="hidden text-lg font-semibold tracking-tight text-white sm:block">
+                    Skimail
+                  </span>
+                </Link>
+
+                <div className="hidden sm:ml-8 sm:flex sm:items-center sm:gap-1">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      className="rounded-lg px-3 py-2 text-sm font-medium text-snow-200/70 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
                 </div>
               </div>
-              <div className="absolute inset-y-0 right-0 hidden items-center pr-2 sm:flex">
-                <span className="text-xs text-gray-500">
+
+              {/* Build version */}
+              <div className="hidden items-center sm:flex">
+                <span className="text-xs text-white/30">
                   {process.env.NEXT_PUBLIC_BUILD_VERSION}
                 </span>
               </div>
             </div>
           </div>
 
-          <Disclosure.Panel className="sm:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
+          <Disclosure.Panel className="border-t border-white/10 sm:hidden">
+            <div className="space-y-1 px-4 pb-4 pt-3">
               {navigation.map((item) => (
                 <Disclosure.Button
                   key={item.name}
                   as="a"
                   href={item.href}
-                  className={classNames(
-                    item.current
-                      ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                    "block rounded-md px-3 py-3 text-base font-medium",
-                  )}
+                  {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="block rounded-lg px-3 py-3 text-base font-medium text-snow-200/70 transition-colors hover:bg-white/10 hover:text-white"
                   style={{ minHeight: "44px" }}
-                  aria-current={item.current ? "page" : undefined}
                 >
                   {item.name}
                 </Disclosure.Button>
               ))}
-              <span className="block px-3 py-2 text-xs text-gray-500">
+              <span className="block px-3 py-2 text-xs text-white/30">
                 {process.env.NEXT_PUBLIC_BUILD_VERSION}
               </span>
             </div>

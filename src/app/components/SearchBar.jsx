@@ -25,18 +25,18 @@ export function SearchBar({ data, setRenderedResorts }) {
   }, [searchTerm, data, setRenderedResorts]);
 
   return (
-    <div className="mx-auto w-full">
+    <div className="w-full">
       <label htmlFor="mobile-search" className="sr-only">
-        Search
+        Search resorts
       </label>
-      <div className="relative text-black focus-within:text-gray-600">
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-          <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
+      <div className="relative">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+          <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
         </div>
         <input
           id="mobile-search"
-          className="block w-full rounded-md border-2 border-gray-500 bg-white/20 py-2 pl-10 pr-3 text-gray-200 placeholder:text-black focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
-          placeholder="Search"
+          className="block w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-ski-500 focus:outline-none focus:ring-2 focus:ring-ski-500/20 transition-shadow"
+          placeholder="Search resorts, states, countries..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           type="search"

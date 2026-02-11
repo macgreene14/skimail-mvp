@@ -19,17 +19,14 @@ export function MapExplore({
   const handlersAttached = useRef(false);
   const resorts = resortCollection.features;
 
-  // Pure CSS fullscreen — works on iOS Safari (no Fullscreen API needed)
   const toggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => {
       const next = !prev;
-      // Resize map after CSS layout change
       setTimeout(() => map.current?.resize(), 50);
       return next;
     });
   }, []);
 
-  // Escape key exits fullscreen
   useEffect(() => {
     const handleKey = (e) => {
       if (e.key === "Escape" && isFullscreen) {
@@ -42,9 +39,8 @@ export function MapExplore({
   }, [isFullscreen]);
 
   useEffect(() => {
-    if (map.current) return; // initialize map only once
+    if (map.current) return;
 
-    // Adjust initial zoom level based on device size
     let zoomInit = 3;
     if (window.innerWidth <= 768) {
       zoomInit = zoomInit - 0.75;
@@ -57,7 +53,6 @@ export function MapExplore({
       zoom: zoomInit,
     });
 
-    // Mapbox Controls
     map.current.addControl(
       new mapboxgl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
@@ -67,8 +62,6 @@ export function MapExplore({
       }),
       "top-left",
     );
-
-    // Fullscreen handled by custom CSS toggle (works on iOS Safari)
 
     const checkboxControlIkon = new CheckboxControl({
       labelText: "Ikon",
@@ -107,7 +100,6 @@ export function MapExplore({
 
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
-    // Load icons and layers
     map.current.on("load", async () => {
       try {
         const ikonImage = await new Promise((resolve, reject) => {
@@ -160,7 +152,6 @@ export function MapExplore({
           }
         }
 
-        // Fire initial rendered features after layers load
         const features = map.current.queryRenderedFeatures({
           layers: ["Epic", "Ikon"],
         });
@@ -171,7 +162,6 @@ export function MapExplore({
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Attach moveend and click handlers ONCE
   useEffect(() => {
     if (!map.current || handlersAttached.current) return;
 
@@ -197,7 +187,6 @@ export function MapExplore({
     };
   }, [setRenderedResorts, setSelectedResort]);
 
-  // When resort selected, add popup and center
   useEffect(() => {
     if (selectedResort) {
       const popup = addPopup(selectedResort);
@@ -231,10 +220,10 @@ export function MapExplore({
 
   return (
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
-      <div ref={mapContainer} className="z-1 h-full w-full rounded-lg" />
+      <div ref={mapContainer} className="z-1 h-full w-full" />
       <button
         onClick={toggleFullscreen}
-        className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-md hover:bg-gray-100 active:bg-gray-200"
+        className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 rounded-xl bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:shadow-xl"
         style={{ minHeight: "44px", minWidth: "44px" }}
         aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
       >
@@ -245,40 +234,44 @@ export function MapExplore({
 }
 
 const PopupContent = ({ selectedResort }) => (
-  <div className="rounded-lg border-2 border-solid bg-white p-3 text-center shadow-md">
+  <div className="rounded-xl bg-white p-4 text-center">
     <a
       href={`/skimail-mvp/resorts/${selectedResort.properties.slug}`}
       target="_blank"
       rel="noopener noreferrer"
       className="block"
     >
-      <h1 className="m-1 w-full text-base font-bold text-black">
+      <h1 className="text-base font-bold text-slate-900">
         {selectedResort.properties.name !== "Unknown"
           ? selectedResort.properties.name
           : null}
-        {selectedResort.properties.name !== "Unknown" &&
-        selectedResort.properties.state !== "Unknown"
-          ? " — "
-          : null}
+      </h1>
+      <p className="mt-0.5 text-sm text-slate-500">
         {selectedResort.properties.state !== "Unknown"
           ? selectedResort.properties.state
           : null}
-        {selectedResort.properties.state !== "Unknown" ? " — " : null}
+        {selectedResort.properties.state !== "Unknown" &&
+        selectedResort.properties.country !== "Unknown"
+          ? ", "
+          : null}
         {selectedResort.properties.country !== "Unknown"
           ? selectedResort.properties.country
           : null}
-      </h1>
-      <div className="mt-1 flex flex-wrap justify-center gap-1">
-        <span className="inline-block rounded-full bg-gray-200 px-2 py-1 text-xs font-semibold text-gray-700">
-          ✼ {selectedResort.properties.avg_snowfall} in
+      </p>
+      <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+        <span className="inline-block rounded-full bg-ski-50 px-2.5 py-1 text-xs font-medium text-ski-700">
+          ❄ {selectedResort.properties.avg_snowfall}&quot;
         </span>
-        <span className="inline-block rounded-full bg-gray-200 px-2 py-1 text-xs font-semibold text-gray-700">
+        <span className="inline-block rounded-full bg-ski-50 px-2.5 py-1 text-xs font-medium text-ski-700">
           ⛰ {selectedResort.properties.vertical_drop} ft
         </span>
-        <span className="inline-block rounded-full bg-gray-200 px-2 py-1 text-xs font-semibold text-gray-700">
-          ⛷ {selectedResort.properties.skiable_acres} acres
+        <span className="inline-block rounded-full bg-ski-50 px-2.5 py-1 text-xs font-medium text-ski-700">
+          ⛷ {selectedResort.properties.skiable_acres} ac
         </span>
       </div>
+      <span className="mt-2 inline-block text-xs font-medium text-ski-600">
+        View details →
+      </span>
     </a>
   </div>
 );
