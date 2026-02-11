@@ -311,22 +311,57 @@ export function MapExplore({
           },
         });
 
-        // Snow labels
+        // Snow labels (all resorts, higher zoom)
         map.current.addLayer({
           id: "snow-labels",
           type: "symbol",
           source: "snow-data",
-          minzoom: 4,
+          minzoom: 5,
           layout: {
-            "text-field": ["concat", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
+            "text-field": ["concat", "❄ ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
             "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
             "text-size": 10,
             "text-allow-overlap": false,
+            "text-offset": [0, -2.2],
           },
           paint: {
             "text-color": "#ffffff",
             "text-halo-color": "rgba(0,50,100,0.8)",
             "text-halo-width": 1,
+          },
+        });
+
+        // Top snow reports source (filled dynamically with top 10)
+        map.current.addSource("top-snow", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] },
+        });
+
+        // Top snow badges — always visible, even at globe zoom
+        map.current.addLayer({
+          id: "top-snow-badges",
+          type: "symbol",
+          source: "top-snow",
+          minzoom: 0,
+          layout: {
+            "text-field": ["concat", "❄️ ", ["get", "name"], " ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
+            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+            "text-size": [
+              "interpolate", ["linear"], ["zoom"],
+              0, 9,
+              3, 11,
+              6, 12,
+            ],
+            "text-allow-overlap": true,
+            "text-ignore-placement": true,
+            "text-offset": [0, -2.5],
+            "text-max-width": 15,
+            "symbol-sort-key": ["*", -1, ["get", "snowfall_7d"]],
+          },
+          paint: {
+            "text-color": "#7dd3fc",
+            "text-halo-color": "rgba(15,23,42,0.9)",
+            "text-halo-width": 2,
           },
         });
 
@@ -404,6 +439,20 @@ export function MapExplore({
           };
           if (map.current.getSource("snow-data")) {
             map.current.getSource("snow-data").setData(snowGeoJSON);
+          }
+          // Update top snow badges (top 10 by 7d snowfall)
+          const topResorts = [...withSnow]
+            .sort((a, b) => (b.snowfall_7d || 0) - (a.snowfall_7d || 0))
+            .slice(0, 10);
+          if (map.current.getSource("top-snow")) {
+            map.current.getSource("top-snow").setData({
+              type: "FeatureCollection",
+              features: topResorts.map((d) => ({
+                type: "Feature",
+                geometry: { type: "Point", coordinates: d.coordinates },
+                properties: { name: d.name, snowfall_7d: d.snowfall_7d, snowfall_24h: d.snowfall_24h },
+              })),
+            });
           }
           // Show banner on first batch with snow
           if (!bannerShown && withSnow.length > 0) {
@@ -551,12 +600,30 @@ export function MapExplore({
           },
         });
         map.current.addLayer({
-          id: "snow-labels", type: "symbol", source: "snow-data", minzoom: 4,
+          id: "snow-labels", type: "symbol", source: "snow-data", minzoom: 5,
           layout: {
-            "text-field": ["concat", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
+            "text-field": ["concat", "❄ ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
             "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"], "text-size": 10, "text-allow-overlap": false,
+            "text-offset": [0, -2.2],
           },
           paint: { "text-color": "#ffffff", "text-halo-color": "rgba(0,50,100,0.8)", "text-halo-width": 1 },
+        });
+
+        // Top snow badges
+        if (!map.current.getSource("top-snow")) {
+          map.current.addSource("top-snow", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+        }
+        map.current.addLayer({
+          id: "top-snow-badges", type: "symbol", source: "top-snow", minzoom: 0,
+          layout: {
+            "text-field": ["concat", "❄️ ", ["get", "name"], " ", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
+            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+            "text-size": ["interpolate", ["linear"], ["zoom"], 0, 9, 3, 11, 6, 12],
+            "text-allow-overlap": true, "text-ignore-placement": true,
+            "text-offset": [0, -2.5], "text-max-width": 15,
+            "symbol-sort-key": ["*", -1, ["get", "snowfall_7d"]],
+          },
+          paint: { "text-color": "#7dd3fc", "text-halo-color": "rgba(15,23,42,0.9)", "text-halo-width": 2 },
         });
 
         // Re-apply snow data if available
@@ -568,6 +635,16 @@ export function MapExplore({
               type: "Feature",
               geometry: { type: "Point", coordinates: d.coordinates },
               properties: { slug: d.slug, name: d.name, snowfall_7d: d.snowfall_7d, snowfall_24h: d.snowfall_24h, snow_depth: d.snow_depth, temperature: d.temperature },
+            })),
+          });
+          // Restore top badges
+          const topResorts = [...withSnow].sort((a, b) => (b.snowfall_7d || 0) - (a.snowfall_7d || 0)).slice(0, 10);
+          map.current.getSource("top-snow").setData({
+            type: "FeatureCollection",
+            features: topResorts.map((d) => ({
+              type: "Feature",
+              geometry: { type: "Point", coordinates: d.coordinates },
+              properties: { name: d.name, snowfall_7d: d.snowfall_7d, snowfall_24h: d.snowfall_24h },
             })),
           });
         }
@@ -652,8 +729,7 @@ export function MapExplore({
     );
     const coordinates = selectedResort.geometry.coordinates.slice();
     const popup = new mapboxgl.Popup({
-      anchor: "bottom",
-      offset: 30,
+      offset: 25,
       keepInView: true,
       closeOnClick: true,
       closeButton: true,
@@ -666,7 +742,17 @@ export function MapExplore({
       .addTo(map.current);
 
     spinEnabled.current = false;
-    map.current.flyTo({ center: coordinates, zoom: Math.max(map.current.getZoom(), 5) });
+    // Pan to show popup fully — offset upward to account for popup height
+    const point = map.current.project(coordinates);
+    const mapH = map.current.getContainer().clientHeight;
+    // If the marker is in the upper third, use a lower center to avoid popup clipping at top
+    const targetLat = point.y < mapH * 0.35
+      ? map.current.unproject([point.x, point.y + 80]).lat
+      : coordinates[1];
+    map.current.flyTo({
+      center: [coordinates[0], targetLat],
+      zoom: Math.max(map.current.getZoom(), 5),
+    });
     return popup;
   }
 

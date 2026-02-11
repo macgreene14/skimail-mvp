@@ -60,6 +60,9 @@ html {
 
 .skimail-popup .mapboxgl-popup-tip {
   border-top-color: rgba(15, 23, 42, 0.92);
+  border-bottom-color: rgba(15, 23, 42, 0.92);
+  border-left-color: rgba(15, 23, 42, 0.92);
+  border-right-color: rgba(15, 23, 42, 0.92);
 }
 
 .skimail-popup .mapboxgl-popup-close-button {
