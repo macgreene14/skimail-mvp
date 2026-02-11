@@ -765,15 +765,16 @@ export function MapExplore({
       .addTo(map.current);
 
     spinEnabled.current = false;
-    // Pan map down so popup is fully visible — offset the center below the marker
-    const point = map.current.project(coordinates);
+    // Pan so marker sits at ~65% down the screen, giving popup room above
     const mapH = map.current.getContainer().clientHeight;
-    // Shift viewport so marker sits in the lower 60% of screen, giving popup room above
-    const targetPoint = [point.x, point.y + mapH * 0.2];
-    const targetCoords = map.current.unproject(targetPoint);
+    const mapW = map.current.getContainer().clientWidth;
+    const targetZoom = Math.max(map.current.getZoom(), 5);
+
+    // Project where the marker would be at target zoom, then offset
     map.current.flyTo({
-      center: targetCoords,
-      zoom: Math.max(map.current.getZoom(), 5),
+      center: coordinates,
+      zoom: targetZoom,
+      offset: [0, mapH * 0.15], // shift map up so marker is in lower portion
     });
     return popup;
   }
