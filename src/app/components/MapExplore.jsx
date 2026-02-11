@@ -805,7 +805,8 @@ export function MapExplore({
       </button>
 
       {/* Top-left: regions dropdown */}
-      <div className="pointer-events-auto absolute left-3 top-3" style={{ position: "relative" }}>
+      <div className="pointer-events-auto absolute left-3 top-3">
+      <div className="relative">
         <button
           onClick={() => setRegionsOpen(!regionsOpen)}
           className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-all"
@@ -858,6 +859,7 @@ export function MapExplore({
             ))}
           </div>
         )}
+      </div>
       </div>
 
       {/* Top-right: layer toggles — horizontal row */}
