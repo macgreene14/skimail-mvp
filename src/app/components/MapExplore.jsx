@@ -268,12 +268,13 @@ export function MapExplore({
     const coordinates = selectedResort.geometry.coordinates.slice();
     const popup = new mapboxgl.Popup({
       anchor: "bottom",
-      offset: 5,
+      offset: 30,
       keepInView: true,
       closeOnClick: true,
       closeButton: true,
-      maxWidth: "320px",
+      maxWidth: "300px",
       focusAfterOpen: false,
+      className: "skimail-popup",
     })
       .setLngLat(coordinates)
       .setHTML(popupNode)
@@ -307,7 +308,7 @@ const PopupContent = ({ selectedResort }) => {
   ].filter(Boolean).join(", ");
 
   return (
-    <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", minWidth: "220px", maxWidth: "280px" }}>
+    <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", minWidth: "200px", maxWidth: "260px" }}>
       <a
         href={"/skimail-mvp/resorts/" + p.slug}
         target="_blank"
@@ -315,52 +316,52 @@ const PopupContent = ({ selectedResort }) => {
         style={{ textDecoration: "none", color: "inherit", display: "block" }}
       >
         {/* Pass badge + name */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
           <span style={{
             display: "inline-block", padding: "2px 8px", borderRadius: "999px",
-            backgroundColor: passColor, color: "white", fontSize: "11px", fontWeight: "700",
-            letterSpacing: "0.5px", textTransform: "uppercase",
+            backgroundColor: passColor, color: "white", fontSize: "10px", fontWeight: "700",
+            letterSpacing: "0.5px", textTransform: "uppercase", flexShrink: "0",
           }}>{p.pass}</span>
-          <span style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", lineHeight: "1.2" }}>
+          <span style={{ fontSize: "14px", fontWeight: "700", color: "#f8fafc", lineHeight: "1.2" }}>
             {p.name !== "Unknown" ? p.name : ""}
           </span>
         </div>
 
         {/* Location */}
         {location && (
-          <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "8px" }}>
+          <div style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "6px" }}>
             📍 {location}
           </div>
         )}
 
         {/* Stats row */}
-        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
+        <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "6px" }}>
           {p.avg_snowfall && p.avg_snowfall !== "Unknown" && (
             <span style={{
-              padding: "3px 8px", borderRadius: "6px", backgroundColor: "#f0f9ff",
-              fontSize: "12px", fontWeight: "600", color: "#0369a1",
+              padding: "2px 6px", borderRadius: "5px", backgroundColor: "rgba(14,165,233,0.15)",
+              fontSize: "11px", fontWeight: "600", color: "#7dd3fc",
             }}>❄️ {p.avg_snowfall}&quot;</span>
           )}
           {p.vertical_drop && p.vertical_drop !== "Unknown" && (
             <span style={{
-              padding: "3px 8px", borderRadius: "6px", backgroundColor: "#f0fdf4",
-              fontSize: "12px", fontWeight: "600", color: "#15803d",
+              padding: "2px 6px", borderRadius: "5px", backgroundColor: "rgba(34,197,94,0.15)",
+              fontSize: "11px", fontWeight: "600", color: "#86efac",
             }}>⛰️ {p.vertical_drop} ft</span>
           )}
           {p.skiable_acres && p.skiable_acres !== "Unknown" && (
             <span style={{
-              padding: "3px 8px", borderRadius: "6px", backgroundColor: "#fefce8",
-              fontSize: "12px", fontWeight: "600", color: "#a16207",
+              padding: "2px 6px", borderRadius: "5px", backgroundColor: "rgba(234,179,8,0.15)",
+              fontSize: "11px", fontWeight: "600", color: "#fde047",
             }}>⛷️ {p.skiable_acres} ac</span>
           )}
         </div>
 
         {/* CTA */}
         <div style={{
-          fontSize: "12px", fontWeight: "600", color: passColor,
+          fontSize: "11px", fontWeight: "600", color: passColor,
           display: "flex", alignItems: "center", gap: "4px",
         }}>
-          View details <span style={{ fontSize: "14px" }}>→</span>
+          View details <span style={{ fontSize: "13px" }}>→</span>
         </div>
       </a>
     </div>

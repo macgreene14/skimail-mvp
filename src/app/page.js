@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { MapExplore } from "./components/MapExplore.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
@@ -13,6 +13,19 @@ export default function App() {
   const [showResults, setShowResults] = useState(false);
 
   const renderedResorts = searchResults !== null ? searchResults : mapResorts;
+
+  // Swipe gesture for bottom sheet
+  const touchStart = useRef(null);
+  const onTouchStart = useCallback((e) => {
+    touchStart.current = e.touches[0].clientY;
+  }, []);
+  const onTouchEnd = useCallback((e) => {
+    if (touchStart.current === null) return;
+    const delta = touchStart.current - e.changedTouches[0].clientY;
+    if (delta > 40) setShowResults(true);   // swipe up
+    if (delta < -40) setShowResults(false);  // swipe down
+    touchStart.current = null;
+  }, []);
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
@@ -55,10 +68,14 @@ export default function App() {
         </div>
 
         {/* Bottom sheet */}
-        <div className={`
-          absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-all duration-300 ease-in-out
-          ${showResults ? "max-h-[60vh]" : "max-h-14"}
-        `}>
+        <div
+          className={`
+            absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-all duration-300 ease-in-out
+            ${showResults ? "max-h-[60vh]" : "max-h-14"}
+          `}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
           {/* Handle + toggle */}
           <button
             onClick={() => setShowResults(!showResults)}
