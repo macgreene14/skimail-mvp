@@ -60,7 +60,7 @@ export function MapExplore({
     const zoom = map.current.getZoom();
     if (zoom < 3.5) {
       const center = map.current.getCenter();
-      center.lng -= 0.3;
+      center.lng -= 0.8;
       map.current.easeTo({ center, duration: 50, easing: (t) => t });
     }
   }, []);
@@ -73,8 +73,8 @@ export function MapExplore({
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8",
-      center: [10, 30],
-      zoom: 1.5,
+      center: [-98, 39],
+      zoom: 1.2,
       projection: "globe",
     });
 
