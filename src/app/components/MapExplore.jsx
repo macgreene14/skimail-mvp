@@ -19,45 +19,27 @@ export function MapExplore({
   const handlersAttached = useRef(false);
   const resorts = resortCollection.features;
 
-  // Listen for native fullscreen changes to sync state
-  useEffect(() => {
-    const handleFsChange = () => {
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        setIsFullscreen(false);
-        mapContainer.current?.classList.remove("map-fullscreen");
-      }
-    };
-    document.addEventListener("fullscreenchange", handleFsChange);
-    document.addEventListener("webkitfullscreenchange", handleFsChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFsChange);
-      document.removeEventListener("webkitfullscreenchange", handleFsChange);
-    };
-  }, []);
-
-  // Toggle fullscreen programmatically
+  // Pure CSS fullscreen — works on iOS Safari (no Fullscreen API needed)
   const toggleFullscreen = useCallback(() => {
-    const container = mapContainer.current;
-    if (!container) return;
-
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-      if (container.requestFullscreen) {
-        container.requestFullscreen();
-      } else if (container.webkitRequestFullscreen) {
-        container.webkitRequestFullscreen();
-      }
-      setIsFullscreen(true);
-      container.classList.add("map-fullscreen");
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      }
-      setIsFullscreen(false);
-      container.classList.remove("map-fullscreen");
-    }
+    setIsFullscreen((prev) => {
+      const next = !prev;
+      // Resize map after CSS layout change
+      setTimeout(() => map.current?.resize(), 50);
+      return next;
+    });
   }, []);
+
+  // Escape key exits fullscreen
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
+        setTimeout(() => map.current?.resize(), 50);
+      }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [isFullscreen]);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -86,7 +68,7 @@ export function MapExplore({
       "top-left",
     );
 
-    map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
+    // Fullscreen handled by custom CSS toggle (works on iOS Safari)
 
     const checkboxControlIkon = new CheckboxControl({
       labelText: "Ikon",
@@ -248,17 +230,15 @@ export function MapExplore({
   }
 
   return (
-    <div className="relative h-full w-full">
+    <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
       <div ref={mapContainer} className="z-1 h-full w-full rounded-lg" />
-      {/* Mobile-friendly fullscreen toggle */}
       <button
         onClick={toggleFullscreen}
-        className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-md active:bg-gray-100 sm:hidden"
+        className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-md hover:bg-gray-100 active:bg-gray-200"
         style={{ minHeight: "44px", minWidth: "44px" }}
         aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
       >
-        <span aria-hidden="true">{isFullscreen ? "✕" : "⛶"}</span>
-        {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+        <span aria-hidden="true">{isFullscreen ? "✕ Exit" : "⛶ Fullscreen"}</span>
       </button>
     </div>
   );

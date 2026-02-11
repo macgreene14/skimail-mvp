@@ -2,25 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Mapbox fullscreen support */
-.mapboxgl-map:-webkit-full-screen {
-  width: 100%;
-  height: 100%;
-}
-.mapboxgl-map:fullscreen {
-  width: 100%;
-  height: 100%;
-}
-
-/* Custom fullscreen map mode */
-.map-fullscreen {
+/* CSS-only fullscreen map (works on iOS Safari) */
+.map-wrapper-fullscreen {
   position: fixed !important;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
   width: 100vw !important;
   height: 100vh !important;
   z-index: 9999;
   border-radius: 0 !important;
+  background: #000;
+}
+.map-wrapper-fullscreen .mapboxgl-map {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 :root {
