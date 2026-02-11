@@ -393,10 +393,8 @@ export function MapExplore({
           }
         }
 
-        const features = map.current.queryRenderedFeatures({
-          layers: ["Epic", "Ikon"],
-        });
-        if (features) setRenderedResorts(features);
+        // At globe zoom, show all resorts initially
+        setRenderedResorts(resorts);
 
         layersAdded.current = true;
 
@@ -667,17 +665,32 @@ export function MapExplore({
     if (!map.current || handlersAttached.current) return;
 
     const onMoveEnd = () => {
+      const zoom = map.current.getZoom();
+
+      // At low zoom (globe/continent), show all resorts — queryRenderedFeatures is unreliable
+      if (zoom < 3) {
+        setRenderedResorts(resorts);
+        return;
+      }
+
       const layers = [];
       if (map.current.getLayer("Epic")) layers.push("Epic");
       if (map.current.getLayer("Ikon")) layers.push("Ikon");
       if (layers.length === 0) return;
+
       const features = map.current.queryRenderedFeatures({ layers });
       if (features) {
-        setRenderedResorts(features);
+        // Deduplicate by slug
+        const seen = new Set();
+        const unique = features.filter((f) => {
+          if (seen.has(f.properties.slug)) return false;
+          seen.add(f.properties.slug);
+          return true;
+        });
+        setRenderedResorts(unique);
         // Prioritize snow data for newly visible resorts
         if (snowManagerRef.current) {
-          const slugs = [...new Set(features.map((f) => f.properties.slug))];
-          snowManagerRef.current.prioritizeViewport(slugs);
+          snowManagerRef.current.prioritizeViewport([...seen]);
         }
       }
     };
@@ -771,6 +784,32 @@ export function MapExplore({
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
       <div ref={mapContainer} className="z-1 h-full w-full" />
 
+      {/* Spin toggle — prominent when stopped */}
+      <button
+        onClick={() => {
+          if (spinning) {
+            spinEnabled.current = false;
+            userOverride.current = true;
+            setSpinning(false);
+          } else {
+            spinEnabled.current = true;
+            userOverride.current = false;
+            setSpinning(true);
+            // Zoom out if needed for rotation
+            if (map.current && map.current.getZoom() >= 3.5) {
+              map.current.flyTo({ center: map.current.getCenter(), zoom: 1.2 });
+            }
+          }
+        }}
+        className={`absolute z-10 flex items-center gap-1.5 rounded-full backdrop-blur-sm transition-all ${
+          spinning
+            ? "bottom-14 right-3 bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90"
+            : "bottom-14 right-3 bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500"
+        }`}
+      >
+        {spinning ? "⏸ Pause" : "🌍 Spin Globe"}
+      </button>
+
       {/* Top-right: layer toggles */}
       <div className="absolute right-3 top-3 z-10 flex flex-col gap-1.5">
         {[
@@ -812,31 +851,13 @@ export function MapExplore({
           ))}
         </div>
 
-        {/* Right: spin + fullscreen */}
-        <div className="flex gap-1.5">
-          <button
-            onClick={() => {
-              if (spinning) {
-                spinEnabled.current = false;
-                userOverride.current = true;
-                setSpinning(false);
-              } else {
-                spinEnabled.current = true;
-                userOverride.current = false;
-                setSpinning(true);
-              }
-            }}
-            className="flex items-center rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white"
-          >
-            {spinning ? "⏸" : "🌍"}
-          </button>
-          <button
-            onClick={toggleFullscreen}
-            className="hidden items-center rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white sm:flex"
-          >
-            {isFullscreen ? "✕" : "⛶"}
-          </button>
-        </div>
+        {/* Right: fullscreen (desktop) */}
+        <button
+          onClick={toggleFullscreen}
+          className="hidden items-center rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white sm:flex"
+        >
+          {isFullscreen ? "✕" : "⛶"}
+        </button>
       </div>
     </div>
   );
