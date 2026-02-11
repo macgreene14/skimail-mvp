@@ -102,28 +102,74 @@ export function MapExplore({
 
     map.current.on("load", async () => {
       try {
-        const ikonImage = await new Promise((resolve, reject) => {
-          map.current.loadImage(
-            "https://ik.imagekit.io/bamlnhgnz/mountain-blue.png?updatedAt=1693368553125",
-            (error, image) => {
-              if (error) reject(error);
-              resolve(image);
-            },
-          );
-        });
+        // Generate crisp SVG-based markers via canvas
+        const createMarkerImage = (fillColor, strokeColor, snowflakeColor) => {
+          const size = 64;
+          const ratio = window.devicePixelRatio || 1;
+          const canvas = document.createElement("canvas");
+          canvas.width = size * ratio;
+          canvas.height = (size + 12) * ratio;
+          const ctx = canvas.getContext("2d");
+          ctx.scale(ratio, ratio);
 
-        const epicImage = await new Promise((resolve, reject) => {
-          map.current.loadImage(
-            "https://ik.imagekit.io/bamlnhgnz/mountain-orange.png?updatedAt=1693110233960",
-            (error, image) => {
-              if (error) reject(error);
-              resolve(image);
-            },
-          );
-        });
+          // Drop shadow
+          ctx.shadowColor = "rgba(0,0,0,0.3)";
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetY = 2;
 
-        map.current.addImage("Ikon", ikonImage);
-        map.current.addImage("Epic", epicImage);
+          // Pin body (rounded square)
+          const x = 8, y = 4, w = 48, h = 44, r = 12;
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.lineTo(x + w - r, y);
+          ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+          ctx.lineTo(x + w, y + h - r);
+          ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+          // Pin point
+          ctx.lineTo(size / 2 + 6, y + h);
+          ctx.lineTo(size / 2, y + h + 10);
+          ctx.lineTo(size / 2 - 6, y + h);
+          ctx.lineTo(x + r, y + h);
+          ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+          ctx.lineTo(x, y + r);
+          ctx.quadraticCurveTo(x, y, x + r, y);
+          ctx.closePath();
+
+          ctx.fillStyle = fillColor;
+          ctx.fill();
+          ctx.shadowColor = "transparent";
+          ctx.strokeStyle = strokeColor;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Mountain icon
+          ctx.fillStyle = "white";
+          ctx.beginPath();
+          ctx.moveTo(22, 36);
+          ctx.lineTo(32, 14);
+          ctx.lineTo(42, 36);
+          ctx.closePath();
+          ctx.fill();
+
+          // Snow cap
+          ctx.fillStyle = snowflakeColor;
+          ctx.beginPath();
+          ctx.moveTo(27, 24);
+          ctx.lineTo(32, 14);
+          ctx.lineTo(37, 24);
+          ctx.closePath();
+          ctx.fill();
+
+          return ctx.getImageData(0, 0, canvas.width, canvas.height);
+        };
+
+        // Ikon: ski blue palette
+        const ikonImg = createMarkerImage("#1b57f5", "#1443e1", "#bcd8ff");
+        // Epic: warm orange
+        const epicImg = createMarkerImage("#f97316", "#ea580c", "#fed7aa");
+
+        map.current.addImage("Ikon", ikonImg, { pixelRatio: window.devicePixelRatio || 1 });
+        map.current.addImage("Epic", epicImg, { pixelRatio: window.devicePixelRatio || 1 });
 
         map.current.addSource("resorts", {
           type: "geojson",
@@ -140,12 +186,31 @@ export function MapExplore({
               layout: {
                 "icon-image": ["get", "pass"],
                 "icon-allow-overlap": true,
-                "icon-size": 0.05,
+                "icon-size": [
+                  "interpolate", ["linear"], ["zoom"],
+                  3, 0.5,
+                  6, 0.7,
+                  10, 1.0,
+                ],
+                "icon-anchor": "bottom",
                 "icon-ignore-placement": true,
                 "text-field": ["get", "name"],
-                "text-offset": [0, 1.2],
-                "text-size": 14,
+                "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
+                "text-offset": [0, 0.3],
+                "text-anchor": "top",
+                "text-size": [
+                  "interpolate", ["linear"], ["zoom"],
+                  3, 0,
+                  5, 10,
+                  8, 13,
+                ],
                 "text-optional": true,
+                "text-max-width": 8,
+              },
+              paint: {
+                "text-color": "#1e293b",
+                "text-halo-color": "rgba(255,255,255,0.9)",
+                "text-halo-width": 1.5,
               },
               filter: ["==", "pass", layerID],
             });
@@ -157,7 +222,7 @@ export function MapExplore({
         });
         if (features) setRenderedResorts(features);
       } catch (error) {
-        console.error("Failed to load images:", error);
+        console.error("Failed to load marker images:", error);
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
