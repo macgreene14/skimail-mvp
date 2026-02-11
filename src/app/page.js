@@ -7,9 +7,12 @@ import resortCollection from "../../assets/resorts.json";
 
 export default function App() {
   const resorts = resortCollection.features;
-  const [renderedResorts, setRenderedResorts] = useState(resorts);
+  const [mapResorts, setMapResorts] = useState(resorts);
+  const [searchResults, setSearchResults] = useState(null); // null = no active search
   const [selectedResort, setSelectedResort] = useState(null);
   const [showResults, setShowResults] = useState(false);
+
+  const renderedResorts = searchResults !== null ? searchResults : mapResorts;
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
@@ -19,7 +22,7 @@ export default function App() {
       <div className="hidden flex-1 gap-3 overflow-hidden p-3 lg:flex">
         {/* Left: search + results */}
         <div className="flex w-[380px] flex-col gap-2 overflow-hidden">
-          <SearchBar data={resorts} setRenderedResorts={setRenderedResorts} />
+          <SearchBar data={resorts} setSearchResults={setSearchResults} />
           <div className="min-h-0 flex-1 overflow-auto rounded-xl">
             <ResultsContainer
               resorts={renderedResorts}
@@ -32,7 +35,7 @@ export default function App() {
         <div className="flex-1 overflow-hidden rounded-xl border border-slate-200 shadow-lg">
           <MapExplore
             resortCollection={resortCollection}
-            setRenderedResorts={setRenderedResorts}
+            setRenderedResorts={setMapResorts}
             selectedResort={selectedResort}
             setSelectedResort={setSelectedResort}
           />
@@ -45,7 +48,7 @@ export default function App() {
         <div className="flex-1">
           <MapExplore
             resortCollection={resortCollection}
-            setRenderedResorts={setRenderedResorts}
+            setRenderedResorts={setMapResorts}
             selectedResort={selectedResort}
             setSelectedResort={setSelectedResort}
           />
@@ -63,14 +66,14 @@ export default function App() {
           >
             <div className="mb-1 h-1 w-10 rounded-full bg-slate-300" />
             <span className="text-sm font-semibold text-slate-700">
-              {showResults ? "Hide resorts" : `📋 ${renderedResorts.length} resorts in view`}
+              {showResults ? "Hide resorts" : `📋 ${renderedResorts.length} resorts${searchResults !== null ? "" : " in view"}`}
             </span>
           </button>
 
           {/* Expandable content */}
           {showResults && (
             <div className="flex flex-1 flex-col gap-2 overflow-hidden px-3 pb-3">
-              <SearchBar data={resorts} setRenderedResorts={setRenderedResorts} />
+              <SearchBar data={resorts} setSearchResults={setSearchResults} />
               <div className="min-h-0 flex-1 overflow-auto rounded-xl">
                 <ResultsContainer
                   resorts={renderedResorts}
