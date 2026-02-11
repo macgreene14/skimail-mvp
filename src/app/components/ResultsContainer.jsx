@@ -28,7 +28,7 @@ export function ResultsContainer({
                 }
                 onClick={() => {
                   resort?.properties.name === selectedResort?.properties.name
-                    ? window.open(`/resorts/${resort.properties.slug}`)
+                    ? window.open(`/skimail-mvp/resorts/${resort.properties.slug}`)
                     : setSelectedResort(resort);
                 }}
               />

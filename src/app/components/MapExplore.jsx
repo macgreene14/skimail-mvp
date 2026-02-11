@@ -67,8 +67,8 @@ export function MapExplore({
       "top-left",
     );
 
-    // Full screen - uses native Fullscreen API with CSS fallback
-    map.current.addControl(new mapboxgl.FullscreenControl({ container: mapContainer.current }), "top-right");
+    // Full screen
+    map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
 
     // Ikon toggle
     const checkboxControlIkon = new CheckboxControl({
@@ -221,7 +221,7 @@ export function MapExplore({
   const PopupContent = ({ selectedResort }) => (
     <div className="-m-4 rounded-lg border-2 border-solid bg-white p-2 text-center shadow-md ">
       <a
-        href={`/resorts/${selectedResort.properties.slug}`}
+        href={`/skimail-mvp/resorts/${selectedResort.properties.slug}`}
         target="_blank"
         rel="noopener noreferrer"
         className="block"
