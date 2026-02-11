@@ -4,7 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import CheckboxControl from "../../../utils/CheckboxControl";
 import CollapsibleControl from "../../../utils/CollapsibleControl";
 import ReactDOMServer from "react-dom/server";
-import { fetchAllSnowData, getTopSnowfall } from "../utils/fetchSnowData";
+import { SnowDataManager, getTopSnowfall } from "../utils/fetchSnowData";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
@@ -22,6 +22,7 @@ export function MapExplore({
   const userOverride = useRef(false);
   const [spinning, setSpinning] = useState(true);
   const snowDataRef = useRef(null);
+  const snowManagerRef = useRef(null);
   const [snowBanner, setSnowBanner] = useState(null); // { count, top }
   const [mapStyle, setMapStyle] = useState("skimail"); // skimail | dark | satellite | outdoors
   const layersAdded = useRef(false);
@@ -381,11 +382,11 @@ export function MapExplore({
         // Start globe spin
         const spinInterval = setInterval(spinGlobe, 50);
 
-        // Fetch snow data progressively
+        // Initialize snow data manager
         let bannerShown = false;
-        fetchAllSnowData(resorts, (batchResults) => {
-          snowDataRef.current = batchResults;
-          const withSnow = batchResults.filter((d) => d.snowfall_7d > 0);
+        const updateSnowLayer = (allResults) => {
+          snowDataRef.current = allResults;
+          const withSnow = allResults.filter((d) => d.snowfall_7d > 0);
           const snowGeoJSON = {
             type: "FeatureCollection",
             features: withSnow.map((d) => ({
@@ -411,7 +412,17 @@ export function MapExplore({
             setSnowBanner({ count: withSnow.length, top });
             setTimeout(() => setSnowBanner(null), 8000);
           }
-        });
+        };
+
+        snowManagerRef.current = new SnowDataManager(resorts, updateSnowLayer);
+
+        // Get initially visible resort slugs
+        const visibleFeatures = map.current.queryRenderedFeatures({ layers: ["Epic", "Ikon"] });
+        const visibleSlugs = visibleFeatures
+          ? [...new Set(visibleFeatures.map((f) => f.properties.slug))]
+          : resorts.map((r) => r.properties.slug);
+
+        snowManagerRef.current.initialize(visibleSlugs);
 
         return () => clearInterval(spinInterval);
       } catch (error) {
@@ -575,7 +586,14 @@ export function MapExplore({
       if (map.current.getLayer("Ikon")) layers.push("Ikon");
       if (layers.length === 0) return;
       const features = map.current.queryRenderedFeatures({ layers });
-      if (features) setRenderedResorts(features);
+      if (features) {
+        setRenderedResorts(features);
+        // Prioritize snow data for newly visible resorts
+        if (snowManagerRef.current) {
+          const slugs = [...new Set(features.map((f) => f.properties.slug))];
+          snowManagerRef.current.prioritizeViewport(slugs);
+        }
+      }
     };
 
     const onClick = (e) => {
@@ -625,10 +643,9 @@ export function MapExplore({
   }, [selectedResort]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function addPopup(selectedResort) {
-    // Merge snow data if available
-    const snowInfo = snowDataRef.current?.find(
-      (d) => d.slug === selectedResort.properties.slug
-    );
+    // Merge snow data from cache
+    const snowInfo = snowManagerRef.current?.get(selectedResort.properties.slug)
+      || snowDataRef.current?.find((d) => d.slug === selectedResort.properties.slug);
 
     const popupNode = ReactDOMServer.renderToStaticMarkup(
       <PopupContent selectedResort={selectedResort} snowData={snowInfo} stats={datasetStats} />,
