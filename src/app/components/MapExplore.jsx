@@ -288,7 +288,7 @@ export function MapExplore({
       <div ref={mapContainer} className="z-1 h-full w-full" />
       <button
         onClick={toggleFullscreen}
-        className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 rounded-xl bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:shadow-xl"
+        className="absolute bottom-3 left-3 z-10 hidden items-center gap-1.5 rounded-xl bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:shadow-xl sm:flex"
         style={{ minHeight: "44px", minWidth: "44px" }}
         aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
       >
