@@ -13,48 +13,64 @@ export default function App() {
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
-      <main className="flex flex-1 flex-col overflow-hidden p-2 lg:p-3">
-        <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col overflow-hidden">
-          <h1 className="sr-only">Explore</h1>
+      <h1 className="sr-only">Explore</h1>
 
-          {/* Desktop: side-by-side grid */}
-          <div className="flex flex-1 flex-col gap-2 overflow-hidden lg:flex-row lg:gap-3">
+      {/* Desktop layout */}
+      <div className="hidden flex-1 gap-3 overflow-hidden p-3 lg:flex">
+        {/* Left: search + results */}
+        <div className="flex w-[380px] flex-col gap-2 overflow-hidden">
+          <SearchBar data={resorts} setRenderedResorts={setRenderedResorts} />
+          <div className="min-h-0 flex-1 overflow-auto rounded-xl">
+            <ResultsContainer
+              resorts={renderedResorts}
+              setSelectedResort={setSelectedResort}
+              selectedResort={selectedResort}
+            />
+          </div>
+        </div>
+        {/* Right: map */}
+        <div className="flex-1 overflow-hidden rounded-xl border border-slate-200 shadow-lg">
+          <MapExplore
+            resortCollection={resortCollection}
+            setRenderedResorts={setRenderedResorts}
+            selectedResort={selectedResort}
+            setSelectedResort={setSelectedResort}
+          />
+        </div>
+      </div>
 
-            {/* Map — takes all available space on mobile */}
-            <div className="relative flex-1 overflow-hidden lg:order-last lg:flex-[2]">
-              <div className="h-full overflow-hidden rounded-xl border border-slate-200 shadow-lg">
-                <MapExplore
-                  resortCollection={resortCollection}
-                  setRenderedResorts={setRenderedResorts}
-                  selectedResort={selectedResort}
-                  setSelectedResort={setSelectedResort}
-                />
-              </div>
+      {/* Mobile layout — full-bleed map with bottom sheet */}
+      <div className="relative flex flex-1 flex-col overflow-hidden lg:hidden">
+        {/* Map fills entire area */}
+        <div className="flex-1">
+          <MapExplore
+            resortCollection={resortCollection}
+            setRenderedResorts={setRenderedResorts}
+            selectedResort={selectedResort}
+            setSelectedResort={setSelectedResort}
+          />
+        </div>
 
-              {/* Mobile toggle for results panel */}
-              <button
-                onClick={() => setShowResults(!showResults)}
-                className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-md hover:bg-gray-100 active:bg-gray-200 lg:hidden"
-                style={{ minHeight: "44px" }}
-              >
-                {showResults ? "✕ Hide" : `📋 Resorts (${renderedResorts.length})`}
-              </button>
-            </div>
+        {/* Bottom sheet */}
+        <div className={`
+          absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-all duration-300 ease-in-out
+          ${showResults ? "max-h-[60vh]" : "max-h-14"}
+        `}>
+          {/* Handle + toggle */}
+          <button
+            onClick={() => setShowResults(!showResults)}
+            className="flex w-full flex-col items-center px-4 py-2"
+          >
+            <div className="mb-1 h-1 w-10 rounded-full bg-slate-300" />
+            <span className="text-sm font-semibold text-slate-700">
+              {showResults ? "Hide resorts" : `📋 ${renderedResorts.length} resorts in view`}
+            </span>
+          </button>
 
-            {/* Results panel — slide up on mobile, always visible on desktop */}
-            <div className={`
-              flex flex-col gap-2 overflow-hidden transition-all duration-300 ease-in-out
-              lg:order-first lg:flex-1 lg:max-h-none lg:opacity-100
-              ${showResults
-                ? "max-h-[45vh] opacity-100"
-                : "max-h-0 opacity-0 lg:max-h-none lg:opacity-100"
-              }
-            `}>
-              <SearchBar
-                data={resorts}
-                setRenderedResorts={setRenderedResorts}
-              />
-
+          {/* Expandable content */}
+          {showResults && (
+            <div className="flex flex-1 flex-col gap-2 overflow-hidden px-3 pb-3">
+              <SearchBar data={resorts} setRenderedResorts={setRenderedResorts} />
               <div className="min-h-0 flex-1 overflow-auto rounded-xl">
                 <ResultsContainer
                   resorts={renderedResorts}
@@ -63,17 +79,14 @@ export default function App() {
                 />
               </div>
             </div>
-
-          </div>
+          )}
         </div>
-      </main>
+      </div>
 
-      {/* Footer — hidden on mobile to save space */}
+      {/* Footer — desktop only */}
       <footer className="hidden border-t border-slate-200 bg-white lg:block">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <span className="text-xs text-slate-400">
-            &copy; {new Date().getFullYear()} Skimail
-          </span>
+          <span className="text-xs text-slate-400">&copy; {new Date().getFullYear()} Skimail</span>
           <div className="flex gap-4">
             <a href="/skimail-mvp/about" className="text-xs text-slate-400 transition-colors hover:text-slate-600">About</a>
             <a href="https://airtable.com/appa1Nkb8pG0dRNxk/shrJ1gvC7YwqziQwK" target="_blank" rel="noopener noreferrer" className="text-xs text-slate-400 transition-colors hover:text-slate-600">Feedback</a>

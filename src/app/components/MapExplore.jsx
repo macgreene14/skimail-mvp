@@ -298,45 +298,71 @@ export function MapExplore({
   );
 }
 
-const PopupContent = ({ selectedResort }) => (
-  <div className="rounded-xl bg-white p-4 text-center">
-    <a
-      href={`/skimail-mvp/resorts/${selectedResort.properties.slug}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block"
-    >
-      <h1 className="text-base font-bold text-slate-900">
-        {selectedResort.properties.name !== "Unknown"
-          ? selectedResort.properties.name
-          : null}
-      </h1>
-      <p className="mt-0.5 text-sm text-slate-500">
-        {selectedResort.properties.state !== "Unknown"
-          ? selectedResort.properties.state
-          : null}
-        {selectedResort.properties.state !== "Unknown" &&
-        selectedResort.properties.country !== "Unknown"
-          ? ", "
-          : null}
-        {selectedResort.properties.country !== "Unknown"
-          ? selectedResort.properties.country
-          : null}
-      </p>
-      <div className="mt-2 flex flex-wrap justify-center gap-1.5">
-        <span className="inline-block rounded-full bg-ski-50 px-2.5 py-1 text-xs font-medium text-ski-700">
-          ❄ {selectedResort.properties.avg_snowfall}&quot;
-        </span>
-        <span className="inline-block rounded-full bg-ski-50 px-2.5 py-1 text-xs font-medium text-ski-700">
-          ⛰ {selectedResort.properties.vertical_drop} ft
-        </span>
-        <span className="inline-block rounded-full bg-ski-50 px-2.5 py-1 text-xs font-medium text-ski-700">
-          ⛷ {selectedResort.properties.skiable_acres} ac
-        </span>
-      </div>
-      <span className="mt-2 inline-block text-xs font-medium text-ski-600">
-        View details →
-      </span>
-    </a>
-  </div>
-);
+const PopupContent = ({ selectedResort }) => {
+  const p = selectedResort.properties;
+  const passColor = p.pass === "Ikon" ? "#1b57f5" : "#f97316";
+  const location = [
+    p.state !== "Unknown" ? p.state : null,
+    p.country !== "Unknown" ? p.country : null,
+  ].filter(Boolean).join(", ");
+
+  return (
+    <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", minWidth: "220px", maxWidth: "280px" }}>
+      <a
+        href={"/skimail-mvp/resorts/" + p.slug}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ textDecoration: "none", color: "inherit", display: "block" }}
+      >
+        {/* Pass badge + name */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+          <span style={{
+            display: "inline-block", padding: "2px 8px", borderRadius: "999px",
+            backgroundColor: passColor, color: "white", fontSize: "11px", fontWeight: "700",
+            letterSpacing: "0.5px", textTransform: "uppercase",
+          }}>{p.pass}</span>
+          <span style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", lineHeight: "1.2" }}>
+            {p.name !== "Unknown" ? p.name : ""}
+          </span>
+        </div>
+
+        {/* Location */}
+        {location && (
+          <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "8px" }}>
+            📍 {location}
+          </div>
+        )}
+
+        {/* Stats row */}
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
+          {p.avg_snowfall && p.avg_snowfall !== "Unknown" && (
+            <span style={{
+              padding: "3px 8px", borderRadius: "6px", backgroundColor: "#f0f9ff",
+              fontSize: "12px", fontWeight: "600", color: "#0369a1",
+            }}>❄️ {p.avg_snowfall}&quot;</span>
+          )}
+          {p.vertical_drop && p.vertical_drop !== "Unknown" && (
+            <span style={{
+              padding: "3px 8px", borderRadius: "6px", backgroundColor: "#f0fdf4",
+              fontSize: "12px", fontWeight: "600", color: "#15803d",
+            }}>⛰️ {p.vertical_drop} ft</span>
+          )}
+          {p.skiable_acres && p.skiable_acres !== "Unknown" && (
+            <span style={{
+              padding: "3px 8px", borderRadius: "6px", backgroundColor: "#fefce8",
+              fontSize: "12px", fontWeight: "600", color: "#a16207",
+            }}>⛷️ {p.skiable_acres} ac</span>
+          )}
+        </div>
+
+        {/* CTA */}
+        <div style={{
+          fontSize: "12px", fontWeight: "600", color: passColor,
+          display: "flex", alignItems: "center", gap: "4px",
+        }}>
+          View details <span style={{ fontSize: "14px" }}>→</span>
+        </div>
+      </a>
+    </div>
+  );
+};
