@@ -39,7 +39,7 @@ export function NavBar() {
 
               {/* Center: logo (centered on mobile, left on desktop) */}
               <div className="flex items-center justify-center sm:flex-1 sm:justify-start">
-                <Link href="/about" className="flex items-center gap-2">
+                <Link href="/" className="flex items-center gap-2">
                   <img
                     className="h-8 w-auto sm:h-9"
                     src="https://ik.imagekit.io/bamlnhgnz/logo_invert.png?updatedAt=1673031278735"
