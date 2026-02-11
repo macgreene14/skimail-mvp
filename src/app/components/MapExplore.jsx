@@ -22,6 +22,16 @@ export function MapExplore({
   const userOverride = useRef(false);
   const [spinning, setSpinning] = useState(true);
   const snowDataRef = useRef(null);
+  const [snowBanner, setSnowBanner] = useState(null); // { count, top }
+  const [mapStyle, setMapStyle] = useState("skimail"); // skimail | dark | satellite | outdoors
+  const layersAdded = useRef(false);
+
+  const MAP_STYLES = {
+    skimail: "mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8",
+    dark: "mapbox://styles/mapbox/dark-v11",
+    satellite: "mapbox://styles/mapbox/satellite-streets-v12",
+    outdoors: "mapbox://styles/mapbox/outdoors-v12",
+  };
   const resorts = resortCollection.features;
 
   // Precompute dataset stats for percentile charts
@@ -366,17 +376,19 @@ export function MapExplore({
         });
         if (features) setRenderedResorts(features);
 
+        layersAdded.current = true;
+
         // Start globe spin
         const spinInterval = setInterval(spinGlobe, 50);
 
         // Fetch snow data progressively
+        let bannerShown = false;
         fetchAllSnowData(resorts, (batchResults) => {
           snowDataRef.current = batchResults;
+          const withSnow = batchResults.filter((d) => d.snowfall_7d > 0);
           const snowGeoJSON = {
             type: "FeatureCollection",
-            features: batchResults
-              .filter((d) => d.snowfall_7d > 0)
-              .map((d) => ({
+            features: withSnow.map((d) => ({
                 type: "Feature",
                 geometry: { type: "Point", coordinates: d.coordinates },
                 properties: {
@@ -392,6 +404,13 @@ export function MapExplore({
           if (map.current.getSource("snow-data")) {
             map.current.getSource("snow-data").setData(snowGeoJSON);
           }
+          // Show banner on first batch with snow
+          if (!bannerShown && withSnow.length > 0) {
+            bannerShown = true;
+            const top = [...withSnow].sort((a, b) => (b.snowfall_7d || 0) - (a.snowfall_7d || 0)).slice(0, 3);
+            setSnowBanner({ count: withSnow.length, top });
+            setTimeout(() => setSnowBanner(null), 8000);
+          }
         });
 
         return () => clearInterval(spinInterval);
@@ -400,6 +419,152 @@ export function MapExplore({
       }
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Style switcher — swap style and wait for reload
+  useEffect(() => {
+    if (!map.current || !layersAdded.current) return;
+    const styleUrl = MAP_STYLES[mapStyle];
+    if (!styleUrl) return;
+
+    // Save current state
+    const center = map.current.getCenter();
+    const zoom = map.current.getZoom();
+    const bearing = map.current.getBearing();
+    const pitch = map.current.getPitch();
+
+    map.current.setStyle(styleUrl);
+
+    map.current.once("style.load", () => {
+      // Re-apply globe + fog
+      map.current.setProjection("globe");
+      map.current.setFog({
+        color: mapStyle === "dark" ? "rgb(20, 20, 40)" : "rgb(186, 210, 235)",
+        "high-color": mapStyle === "dark" ? "rgb(10, 10, 30)" : "rgb(36, 92, 223)",
+        "horizon-blend": 0.02,
+        "space-color": "rgb(11, 11, 25)",
+        "star-intensity": mapStyle === "dark" ? 0.9 : 0.6,
+      });
+
+      // Restore view
+      map.current.jumpTo({ center, zoom, bearing, pitch });
+
+      // Re-add sources and layers would be complex; reload page is simpler
+      // But we can re-add the key sources/layers
+      try {
+        if (!map.current.getSource("resorts")) {
+          map.current.addSource("resorts", { type: "geojson", data: resortCollection });
+        }
+        if (!map.current.getSource("snow-data")) {
+          map.current.addSource("snow-data", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+        }
+
+        // Re-create marker images
+        const createMarkerImage = (fillColor, strokeColor, snowflakeColor) => {
+          const size = 64;
+          const ratio = window.devicePixelRatio || 1;
+          const canvas = document.createElement("canvas");
+          canvas.width = size * ratio;
+          canvas.height = (size + 12) * ratio;
+          const ctx = canvas.getContext("2d");
+          ctx.scale(ratio, ratio);
+          ctx.shadowColor = "rgba(0,0,0,0.3)"; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
+          const x = 8, y = 4, w = 48, h = 44, r = 12;
+          ctx.beginPath();
+          ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+          ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+          ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+          ctx.lineTo(size / 2 + 6, y + h); ctx.lineTo(size / 2, y + h + 10); ctx.lineTo(size / 2 - 6, y + h);
+          ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+          ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+          ctx.fillStyle = fillColor; ctx.fill();
+          ctx.shadowColor = "transparent"; ctx.strokeStyle = strokeColor; ctx.lineWidth = 2; ctx.stroke();
+          ctx.fillStyle = "white"; ctx.beginPath(); ctx.moveTo(22, 36); ctx.lineTo(32, 14); ctx.lineTo(42, 36); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = snowflakeColor; ctx.beginPath(); ctx.moveTo(27, 24); ctx.lineTo(32, 14); ctx.lineTo(37, 24); ctx.closePath(); ctx.fill();
+          return ctx.getImageData(0, 0, canvas.width, canvas.height);
+        };
+        if (!map.current.hasImage("Ikon")) {
+          map.current.addImage("Ikon", createMarkerImage("#1b57f5", "#1443e1", "#bcd8ff"), { pixelRatio: window.devicePixelRatio || 1 });
+        }
+        if (!map.current.hasImage("Epic")) {
+          map.current.addImage("Epic", createMarkerImage("#f97316", "#ea580c", "#fed7aa"), { pixelRatio: window.devicePixelRatio || 1 });
+        }
+
+        // Re-add resort layers
+        const isDark = mapStyle === "dark" || mapStyle === "satellite";
+        for (const feature of resorts) {
+          const layerID = feature.properties.pass;
+          if (!map.current.getLayer(layerID)) {
+            map.current.addLayer({
+              id: layerID, type: "symbol", source: "resorts",
+              layout: {
+                "icon-image": ["get", "pass"], "icon-allow-overlap": true,
+                "icon-size": ["interpolate", ["linear"], ["zoom"], 1, 0.25, 3, 0.5, 6, 0.7, 10, 1.0],
+                "icon-anchor": "bottom", "icon-ignore-placement": true,
+                "text-field": ["get", "name"],
+                "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
+                "text-offset": [0, 0.3], "text-anchor": "top",
+                "text-size": ["interpolate", ["linear"], ["zoom"], 3, 0, 5, 10, 8, 13],
+                "text-optional": true, "text-max-width": 8,
+              },
+              paint: {
+                "text-color": isDark ? "#e2e8f0" : "#1e293b",
+                "text-halo-color": isDark ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.9)",
+                "text-halo-width": 1.5,
+              },
+              filter: ["==", "pass", layerID],
+            });
+          }
+        }
+
+        // Re-add snow layers
+        map.current.addLayer({
+          id: "snow-heatmap", type: "heatmap", source: "snow-data", maxzoom: 6,
+          paint: {
+            "heatmap-weight": ["interpolate", ["linear"], ["get", "snowfall_7d"], 0, 0, 10, 0.3, 50, 0.7, 150, 1],
+            "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 4, 1.5],
+            "heatmap-color": ["interpolate", ["linear"], ["heatmap-density"],
+              0, "rgba(0,0,0,0)", 0.1, "rgba(100,181,246,0.3)", 0.3, "rgba(66,165,245,0.5)",
+              0.5, "rgba(30,136,229,0.6)", 0.7, "rgba(21,101,192,0.7)", 1, "rgba(255,255,255,0.85)"],
+            "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 15, 3, 30, 6, 50],
+            "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0.8, 7, 0],
+          },
+        });
+        map.current.addLayer({
+          id: "snow-circles", type: "circle", source: "snow-data", minzoom: 3,
+          paint: {
+            "circle-radius": ["interpolate", ["linear"], ["get", "snowfall_7d"], 0, 4, 20, 10, 80, 18, 200, 28],
+            "circle-color": ["interpolate", ["linear"], ["get", "snowfall_7d"],
+              0, "rgba(100,181,246,0.6)", 20, "rgba(66,165,245,0.7)", 60, "rgba(30,136,229,0.8)", 150, "rgba(255,255,255,0.9)"],
+            "circle-stroke-width": 1.5, "circle-stroke-color": "rgba(255,255,255,0.5)",
+            "circle-opacity": ["interpolate", ["linear"], ["zoom"], 3, 0, 4.5, 0.8],
+          },
+        });
+        map.current.addLayer({
+          id: "snow-labels", type: "symbol", source: "snow-data", minzoom: 4,
+          layout: {
+            "text-field": ["concat", ["to-string", ["round", ["get", "snowfall_7d"]]], "cm"],
+            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"], "text-size": 10, "text-allow-overlap": false,
+          },
+          paint: { "text-color": "#ffffff", "text-halo-color": "rgba(0,50,100,0.8)", "text-halo-width": 1 },
+        });
+
+        // Re-apply snow data if available
+        if (snowDataRef.current) {
+          const withSnow = snowDataRef.current.filter((d) => d.snowfall_7d > 0);
+          map.current.getSource("snow-data").setData({
+            type: "FeatureCollection",
+            features: withSnow.map((d) => ({
+              type: "Feature",
+              geometry: { type: "Point", coordinates: d.coordinates },
+              properties: { slug: d.slug, name: d.name, snowfall_7d: d.snowfall_7d, snowfall_24h: d.snowfall_24h, snow_depth: d.snow_depth, temperature: d.temperature },
+            })),
+          });
+        }
+      } catch (err) {
+        console.error("Style switch layer restore error:", err);
+      }
+    });
+  }, [mapStyle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!map.current || handlersAttached.current) return;
@@ -488,28 +653,73 @@ export function MapExplore({
     return popup;
   }
 
+  const styleLabels = { skimail: "Skimail", dark: "Dark", satellite: "Satellite", outdoors: "Terrain" };
+
   return (
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
       <div ref={mapContainer} className="z-1 h-full w-full" />
-      {/* Spin toggle */}
-      <button
-        onClick={() => {
-          if (spinning) {
-            spinEnabled.current = false;
-            userOverride.current = true;
-            setSpinning(false);
-          } else {
-            spinEnabled.current = true;
-            userOverride.current = false;
-            setSpinning(true);
-          }
-        }}
-        className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white"
-        style={{ minHeight: "36px" }}
-        aria-label={spinning ? "Stop rotation" : "Resume rotation"}
-      >
-        <span aria-hidden="true">{spinning ? "⏸ Pause" : "🌍 Spin"}</span>
-      </button>
+
+      {/* Snow data banner */}
+      {snowBanner && (
+        <div
+          className="absolute left-1/2 top-3 z-20 -translate-x-1/2 animate-fade-in rounded-xl bg-gradient-to-r from-sky-600/90 to-blue-700/90 px-4 py-2.5 shadow-lg backdrop-blur-sm"
+          style={{ maxWidth: "min(90vw, 360px)" }}
+        >
+          <div className="flex items-center gap-2 text-white">
+            <span className="text-lg">❄️</span>
+            <div>
+              <div className="text-xs font-bold">Live Snow Data Loaded</div>
+              <div className="text-[10px] text-white/80">
+                {snowBanner.count} resorts reporting snow
+                {snowBanner.top.length > 0 && (
+                  <span> — Top: {snowBanner.top.map((r) => `${r.name} (${Math.round(r.snowfall_7d)}cm)`).join(", ")}</span>
+                )}
+              </div>
+            </div>
+            <button onClick={() => setSnowBanner(null)} className="ml-auto text-white/60 hover:text-white">✕</button>
+          </div>
+        </div>
+      )}
+
+      {/* Map style switcher */}
+      <div className="absolute left-3 top-3 z-10 flex rounded-lg bg-black/50 p-0.5 backdrop-blur-sm sm:left-auto sm:right-3">
+        {Object.entries(styleLabels).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setMapStyle(key)}
+            className={`rounded-md px-2 py-1 text-[10px] font-semibold transition-all ${
+              mapStyle === key
+                ? "bg-white/20 text-white"
+                : "text-white/50 hover:text-white/80"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Controls row */}
+      <div className="absolute bottom-3 right-3 z-10 flex gap-2">
+        <button
+          onClick={() => {
+            if (spinning) {
+              spinEnabled.current = false;
+              userOverride.current = true;
+              setSpinning(false);
+            } else {
+              spinEnabled.current = true;
+              userOverride.current = false;
+              setSpinning(true);
+            }
+          }}
+          className="flex items-center gap-1.5 rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white"
+          style={{ minHeight: "36px" }}
+          aria-label={spinning ? "Stop rotation" : "Resume rotation"}
+        >
+          <span aria-hidden="true">{spinning ? "⏸" : "🌍"}</span>
+        </button>
+      </div>
+
       <button
         onClick={toggleFullscreen}
         className="absolute bottom-3 left-3 z-10 hidden items-center gap-1.5 rounded-xl bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow-lg backdrop-blur-sm transition-all hover:bg-white hover:shadow-xl sm:flex"
