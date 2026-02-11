@@ -72,7 +72,7 @@ export function MapExplore({
     const zoom = map.current.getZoom();
     if (zoom < 3.5) {
       const center = map.current.getCenter();
-      center.lng -= 0.8;
+      center.lng += 0.8;
       map.current.easeTo({ center, duration: 50, easing: (t) => t });
     }
   }, []);
