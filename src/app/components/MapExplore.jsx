@@ -809,8 +809,8 @@ export function MapExplore({
         }}
         className={`pointer-events-auto absolute flex items-center gap-1.5 rounded-full backdrop-blur-sm transition-all ${
           spinning
-            ? "bottom-14 right-3 bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90"
-            : "bottom-14 right-3 bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500"
+            ? "bottom-[7.5rem] right-3 bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90 sm:bottom-14"
+            : "bottom-[7.5rem] right-3 bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500 sm:bottom-14"
         }`}
       >
         {spinning ? "⏸ Pause" : "🌍 Spin Globe"}
@@ -899,7 +899,7 @@ export function MapExplore({
       </div>
 
       {/* Bottom bar: base map switcher + fullscreen */}
-      <div className="pointer-events-auto absolute bottom-3 left-3 right-3 flex items-end justify-between">
+      <div className="pointer-events-auto absolute bottom-20 left-3 right-3 flex items-end justify-between sm:bottom-3">
         <BaseMapSwitcher
           activeStyle={mapStyle}
           onStyleChange={setMapStyle}
