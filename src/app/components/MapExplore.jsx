@@ -4,6 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 // CollapsibleControl replaced by React regions dropdown below
 import ReactDOMServer from "react-dom/server";
 import { SnowDataManager } from "../utils/fetchSnowData";
+import BaseMapSwitcher from "./BaseMapSwitcher";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
@@ -781,7 +782,7 @@ export function MapExplore({
     return popup;
   }
 
-  const styleLabels = { skimail: "Skimail", dark: "Dark", satellite: "Satellite", outdoors: "Terrain" };
+  // Style labels moved to BaseMapSwitcher component
 
   return (
     <div className={`relative h-full w-full ${isFullscreen ? "map-wrapper-fullscreen" : ""}`}>
@@ -897,23 +898,13 @@ export function MapExplore({
         {/* Cluster toggle removed — collision detection handles overlap */}
       </div>
 
-      {/* Bottom bar: style switcher + fullscreen */}
-      <div className="pointer-events-auto absolute bottom-3 left-3 right-3 flex items-center justify-between">
-        <div className="flex rounded-lg bg-black/50 p-0.5 backdrop-blur-sm">
-          {Object.entries(styleLabels).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setMapStyle(key)}
-              className={`rounded-md px-2 py-1 text-[10px] font-semibold transition-all ${
-                mapStyle === key
-                  ? "bg-white/20 text-white"
-                  : "text-white/50 hover:text-white/80"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      {/* Bottom bar: base map switcher + fullscreen */}
+      <div className="pointer-events-auto absolute bottom-3 left-3 right-3 flex items-end justify-between">
+        <BaseMapSwitcher
+          activeStyle={mapStyle}
+          onStyleChange={setMapStyle}
+          mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_APIKEY}
+        />
 
         <button
           onClick={toggleFullscreen}
