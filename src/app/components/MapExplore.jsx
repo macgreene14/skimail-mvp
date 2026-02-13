@@ -69,10 +69,21 @@ export function MapExplore({ resortCollection }) {
     }
   }, [snowData, setSnowBySlug]);
 
-  // Build snow GeoJSON
+  // Active passes set — used to filter snow data
+  const activePasses = useMemo(() => {
+    const passes = new Set();
+    if (showIkon) passes.add('Ikon');
+    if (showEpic) passes.add('Epic');
+    if (showMC) passes.add('Mountain Collective');
+    if (showIndy) passes.add('Indy');
+    if (showIndependent) passes.add('Independent');
+    return passes;
+  }, [showIkon, showEpic, showMC, showIndy, showIndependent]);
+
+  // Build snow GeoJSON — filtered by active pass toggles
   const snowGeoJSON = useMemo(() => {
     if (!snowData?.length) return { type: 'FeatureCollection', features: [] };
-    const withSnow = snowData.filter((d) => d.snowfall_7d > 0);
+    const withSnow = snowData.filter((d) => d.snowfall_7d > 0 && activePasses.has(d.pass));
     return {
       type: 'FeatureCollection',
       features: withSnow.map((d) => ({
@@ -88,7 +99,7 @@ export function MapExplore({ resortCollection }) {
         },
       })),
     };
-  }, [snowData]);
+  }, [snowData, activePasses]);
 
   // MODIS snow cover tile date (yesterday for availability)
   const modisDate = useMemo(() => {
