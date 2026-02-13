@@ -40,12 +40,11 @@ export function MapExplore({ resortCollection }) {
   const spinTimerRef = useRef(null);
   const idleTimerRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [spinning, setSpinning] = useState(false);
+  const [spinning, setSpinning] = useState(true);
   const [userStopped, setUserStopped] = useState(false);
   const [popupInfo, setPopupInfo] = useState(null);
 
   const {
-    viewState, setViewState,
     mapStyle, mapStyleKey,
     showIkon, showEpic, showMC, showIndy, showIndependent, showSnow,
     selectedResort, setSelectedResort,
@@ -160,18 +159,20 @@ export function MapExplore({ resortCollection }) {
     return { snowfall: vals('avg_snowfall'), vertical: vals('vertical_drop'), acres: vals('skiable_acres') };
   }, [resorts]);
 
-  // Globe spin — updates viewState through Zustand (not imperative easeTo)
-  // so react-map-gl controlled mode stays in sync.
+  // Globe spin — imperative easeTo (works with uncontrolled mode)
   useEffect(() => {
     if (!spinning || userStopped) return;
     spinTimerRef.current = setInterval(() => {
-      const vs = useMapStore.getState().viewState;
-      if (vs.zoom < 3.5) {
-        setViewState({ ...vs, longitude: vs.longitude + 0.3 });
+      const map = mapRef.current;
+      if (!map) return;
+      if (map.getZoom() < 3.5) {
+        const center = map.getCenter();
+        center.lng += 0.8;
+        map.easeTo({ center, duration: 50, easing: (t) => t });
       }
     }, 50);
     return () => clearInterval(spinTimerRef.current);
-  }, [spinning, userStopped, setViewState]);
+  }, [spinning, userStopped]);
 
   const stopSpin = useCallback(() => {
     setSpinning(false);
@@ -216,12 +217,8 @@ export function MapExplore({ resortCollection }) {
     }
   }, [resorts, setRenderedResorts]);
 
-  const onMove = useCallback(
-    (evt) => {
-      setViewState(evt.viewState);
-    },
-    [setViewState]
-  );
+  // Uncontrolled mode — no onMove needed. Map manages its own viewState.
+  // Read position from mapRef.current when needed (flyToResort, resetView, etc.)
 
   // Click on resort dot
   const onClick = useCallback(
@@ -322,8 +319,7 @@ export function MapExplore({ resortCollection }) {
     <div className={`relative h-full w-full ${isFullscreen ? 'map-wrapper-fullscreen' : ''}`}>
       <Map
         ref={mapRef}
-        {...viewState}
-        onMove={onMove}
+        initialViewState={{ longitude: -98, latitude: 39, zoom: 1.2, pitch: 0, bearing: 0 }}
         onMoveEnd={onMoveEnd}
         onMouseDown={stopSpin}
         onTouchStart={stopSpin}
