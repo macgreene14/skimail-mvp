@@ -21,7 +21,6 @@ function AppContent() {
 
   const selectedResort = useMapStore((s) => s.selectedResort);
   const setSelectedResort = useMapStore((s) => s.setSelectedResort);
-  const filteredResorts = useMapStore((s) => s.filteredResorts);
   const showIkon = useMapStore((s) => s.showIkon);
   const showEpic = useMapStore((s) => s.showEpic);
   const showMC = useMapStore((s) => s.showMC);
@@ -39,11 +38,10 @@ function AppContent() {
     return passes;
   }, [showIkon, showEpic, showMC, showIndy, showIndependent]);
 
-  // Display resorts: viewport-filtered if available, else all — always pass-filtered
+  // All resorts filtered by active passes — always show full list, not viewport-limited
   const displayedResorts = useMemo(() => {
-    const base = filteredResorts.length > 0 ? filteredResorts : resorts;
-    return base.filter((r) => activePasses.has(r.properties?.pass));
-  }, [filteredResorts, resorts, activePasses]);
+    return resorts.filter((r) => activePasses.has(r.properties?.pass));
+  }, [resorts, activePasses]);
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">

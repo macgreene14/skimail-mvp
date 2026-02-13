@@ -55,8 +55,19 @@ export function MapExplore({ resortCollection }) {
     isResortView, setIsResortView,
   } = useMapStore();
 
-  // Fetch snow data for all resorts
+  const setSnowBySlug = useMapStore((s) => s.setSnowBySlug);
+
+  // Fetch snow data for pass resorts
   const { data: snowData } = useBatchSnowData(resorts, showSnow);
+
+  // Populate snowBySlug in Zustand so any component can look up snow data
+  useEffect(() => {
+    if (snowData?.length) {
+      const map = {};
+      snowData.forEach((d) => { map[d.slug] = d; });
+      setSnowBySlug(map);
+    }
+  }, [snowData, setSnowBySlug]);
 
   // Build snow GeoJSON
   const snowGeoJSON = useMemo(() => {

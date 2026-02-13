@@ -58,6 +58,12 @@ const useMapStore = create(
       // Legacy alias — renderedResorts → filteredResorts
       renderedResorts: [],
       setRenderedResorts: (r) => set({ renderedResorts: r, filteredResorts: r }),
+
+      // ── Snow data by slug ──
+      // Set by MapExplore when batch snow data loads.
+      // Read by any component needing snow info for a resort.
+      snowBySlug: {},
+      setSnowBySlug: (map) => set({ snowBySlug: map }),
     }),
     {
       name: 'skimail-preferences',

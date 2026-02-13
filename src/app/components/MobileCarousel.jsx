@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useCallback } from "react";
 import { getPercentile } from "../utils/percentiles";
+import useMapStore from "../store/useMapStore";
 
 const PASS_COLORS = {
   Ikon: "bg-sky-500",
@@ -13,7 +14,7 @@ const PASS_COLORS = {
 /**
  * CompactCard — individual resort card in the carousel.
  */
-function CompactCard({ resort, isSelected, onClick }) {
+function CompactCard({ resort, isSelected, onClick, snowInfo }) {
   const ref = useRef(null);
   const p = resort.properties;
   const passColor = PASS_COLORS[p.pass] || "bg-gray-500";
@@ -61,6 +62,14 @@ function CompactCard({ resort, isSelected, onClick }) {
         )}
       </div>
 
+      {/* Live snow data */}
+      {snowInfo && snowInfo.snowfall_7d > 0 && (
+        <div className="flex items-center gap-1.5 mt-1 text-[9px] text-sky-300 font-semibold">
+          <span>❄ {Math.round(snowInfo.snowfall_7d)}cm/7d</span>
+          {snowInfo.snow_depth > 0 && <span>· {Math.round(snowInfo.snow_depth)}cm base</span>}
+        </div>
+      )}
+
       <div className="flex items-center gap-1.5 mt-1.5">
         {[
           { stat: "avg_snowfall", val: p.avg_snowfall, color: "#38bdf8" },
@@ -95,6 +104,7 @@ function CompactCard({ resort, isSelected, onClick }) {
  */
 export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
   const scrollRef = useRef(null);
+  const snowBySlug = useMapStore((s) => s.snowBySlug);
 
   const sorted = resorts
     ?.slice()
@@ -114,7 +124,7 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
 
   return (
     <div className="absolute bottom-2 left-0 right-0 z-20 sm:hidden pointer-events-none"
-         style={{ height: '100px' }}>
+         style={{ height: '110px' }}>
       <div
         ref={scrollRef}
         onTouchStart={onTouchStart}
@@ -127,6 +137,7 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
             resort={resort}
             isSelected={resort.properties.name === selectedResort?.properties?.name}
             onClick={() => setSelectedResort(resort)}
+            snowInfo={snowBySlug[resort.properties.slug]}
           />
         ))}
       </div>
