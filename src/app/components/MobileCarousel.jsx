@@ -1,6 +1,5 @@
 "use client";
 import React, { useRef, useEffect } from "react";
-import Link from "next/link";
 import { getPercentile } from "../utils/percentiles";
 
 const PASS_COLORS = {
@@ -11,6 +10,11 @@ const PASS_COLORS = {
   Independent: "bg-gray-500",
 };
 
+/**
+ * CompactCard — individual resort card in the carousel.
+ * Pointer-events are on each card, NOT on the scroll container.
+ * This lets touches between cards pass through to the map.
+ */
 function CompactCard({ resort, isSelected, onClick }) {
   const ref = useRef(null);
   const p = resort.properties;
@@ -86,6 +90,18 @@ function CompactCard({ resort, isSelected, onClick }) {
   );
 }
 
+/**
+ * MobileCarousel — horizontal snap-scroll card strip.
+ *
+ * POINTER EVENTS:
+ *  - Outer wrapper: pointer-events-none (touches pass to map)
+ *  - Scroll container: pointer-events-none (gap touches pass to map)
+ *  - Individual cards: pointer-events-auto (only cards capture touches)
+ *
+ * FILTERING:
+ *  - `resorts` prop comes from useMapStore.filteredResorts via page.js
+ *  - Sorted by snowfall descending, capped at 50 for performance
+ */
 export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
   const sorted = resorts
     ?.slice()
@@ -94,14 +110,16 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
       const B = parseFloat(b.properties.avg_snowfall) || 0;
       return B - A;
     })
-    .slice(0, 50); // Limit to 50 cards for performance
+    .slice(0, 50);
 
   if (!sorted?.length) return null;
 
   return (
     <div className="absolute bottom-4 left-0 right-0 z-20 sm:hidden pointer-events-none">
-      <div className="flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 pointer-events-none"
-           style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div
+        className="pointer-events-none flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {sorted.map((resort) => (
           <CompactCard
             key={resort.properties.slug || resort.properties.name}

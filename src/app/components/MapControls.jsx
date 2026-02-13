@@ -4,6 +4,26 @@ import React, { useState } from "react";
 import useMapStore from "../store/useMapStore";
 import BaseMapSwitcher from "./BaseMapSwitcher";
 
+/**
+ * MapControls — consolidated overlay for ALL map UI controls.
+ *
+ * LAYOUT (mobile):
+ *   Top-left:     Regions dropdown
+ *   Top-right:    Collapsible "Filters" button → pass/snow toggles
+ *   Bottom-right: Spin globe (above carousel)
+ *   Bottom-left:  Base map switcher + Back to Globe (above carousel)
+ *
+ * LAYOUT (desktop):
+ *   Top-left:     Regions dropdown
+ *   Top-right:    Always-visible filter pills
+ *   Bottom-right: Spin globe
+ *   Bottom-left:  Base map switcher + Back to Globe + Fullscreen
+ *
+ * EXTENSIBILITY:
+ *   To add a new filter: add an entry to the `filters` array below.
+ *   It will automatically appear in both mobile dropdown and desktop pills.
+ */
+
 const PASS_COLORS = {
   Ikon: "#74a5f2",
   Epic: "#f97316",
@@ -36,13 +56,6 @@ const REGIONS = [
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
-/**
- * Consolidated map overlay controls.
- * Props:
- *  - mapRef: ref to the Mapbox GL map instance
- *  - spinning / setSpinning / stopSpin / setUserStopped: globe spin controls
- *  - isResortView / resetView: resort 3D view controls
- */
 export default function MapControls({
   mapRef,
   spinning,
@@ -61,6 +74,8 @@ export default function MapControls({
     mapStyleKey, setMapStyle,
   } = useMapStore();
 
+  // ── Filter definitions ──
+  // Add new filters here — they auto-render in both mobile and desktop.
   const filters = [
     { label: "Ikon", key: "showIkon", active: showIkon, color: PASS_COLORS.Ikon },
     { label: "Epic", key: "showEpic", active: showEpic, color: PASS_COLORS.Epic },
@@ -69,6 +84,14 @@ export default function MapControls({
     { label: "Other", key: "showIndependent", active: showIndependent, color: PASS_COLORS.Independent },
     { label: "Snow", key: "showSnow", active: showSnow, color: PASS_COLORS.Snow },
   ];
+
+  const handleFilterClick = (key) => {
+    if (key === "showSnow") {
+      useMapStore.getState().toggleSnow();
+    } else {
+      togglePass(key);
+    }
+  };
 
   const pillStyle = (active, color) => ({
     background: active ? `${color}33` : "rgba(0,0,0,0.5)",
@@ -80,10 +103,16 @@ export default function MapControls({
   const glassBtn =
     "rounded-full px-2.5 py-1.5 text-[11px] font-bold backdrop-blur-sm transition-all";
 
+  const glassPanel = {
+    background: "rgba(15,23,42,0.92)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+  };
+
   return (
     <div className="pointer-events-none absolute inset-0" style={{ zIndex: 30 }}>
       {/* ── Top-left: Regions ── */}
-      <div className="pointer-events-auto absolute left-3 top-12 sm:top-3">
+      <div className="pointer-events-auto absolute left-3 top-3">
         <div className="relative">
           <button
             onClick={() => setRegionsOpen(!regionsOpen)}
@@ -104,12 +133,7 @@ export default function MapControls({
           {regionsOpen && (
             <div
               className="absolute left-0 top-full mt-1 min-w-[140px] rounded-xl p-1 backdrop-blur-xl"
-              style={{
-                background: "rgba(15,23,42,0.92)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-                zIndex: 100,
-              }}
+              style={{ ...glassPanel, zIndex: 100 }}
             >
               {REGIONS.map((region) => (
                 <button
@@ -130,32 +154,30 @@ export default function MapControls({
         </div>
       </div>
 
-      {/* ── Top-right: Filter panel ── */}
-      {/* Desktop: always show pills */}
+      {/* ── Top-right: Filter pills (desktop — always visible) ── */}
       <div className="pointer-events-auto absolute right-3 top-3 hidden sm:flex flex-wrap items-start justify-end gap-1.5">
         {filters.map((ctrl) => (
           <button
             key={ctrl.label}
-            onClick={() => ctrl.key === "showSnow" ? useMapStore.getState().toggleSnow() : togglePass(ctrl.key)}
+            onClick={() => handleFilterClick(ctrl.key)}
             className={glassBtn}
             style={pillStyle(ctrl.active, ctrl.color)}
           >
             {ctrl.label}
           </button>
         ))}
-        {/* Snow Cover */}
         <button
           onClick={() => useMapStore.getState().toggleSnowCover()}
           className={glassBtn}
           style={pillStyle(showSnowCover, "#0ea5e9")}
           title="Toggle NASA MODIS Snow Cover"
         >
-          🛰️ Snow Cover
+          🛰️ Snow
         </button>
       </div>
 
-      {/* Mobile: compact filter button + expandable */}
-      <div className="pointer-events-auto absolute right-3 top-12 sm:hidden">
+      {/* ── Top-right: Collapsible filter button (mobile) ── */}
+      <div className="pointer-events-auto absolute right-3 top-3 sm:hidden">
         <button
           onClick={() => setFiltersOpen(!filtersOpen)}
           className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-all"
@@ -175,18 +197,12 @@ export default function MapControls({
         {filtersOpen && (
           <div
             className="absolute right-0 top-full mt-1 flex flex-wrap gap-1.5 rounded-xl p-2 backdrop-blur-xl"
-            style={{
-              background: "rgba(15,23,42,0.92)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-              minWidth: "160px",
-              zIndex: 100,
-            }}
+            style={{ ...glassPanel, minWidth: "160px", zIndex: 100 }}
           >
             {filters.map((ctrl) => (
               <button
                 key={ctrl.label}
-                onClick={() => ctrl.key === "showSnow" ? useMapStore.getState().toggleSnow() : togglePass(ctrl.key)}
+                onClick={() => handleFilterClick(ctrl.key)}
                 className={glassBtn}
                 style={pillStyle(ctrl.active, ctrl.color)}
               >
@@ -198,14 +214,14 @@ export default function MapControls({
               className={glassBtn}
               style={pillStyle(showSnowCover, "#0ea5e9")}
             >
-              🛰️ Snow Cover
+              🛰️ Snow
             </button>
           </div>
         )}
       </div>
 
-      {/* ── Bottom-right: Spin globe ── */}
-      <div className="pointer-events-auto absolute bottom-28 right-3 sm:bottom-14">
+      {/* ── Bottom-right: Spin globe (above carousel on mobile) ── */}
+      <div className="pointer-events-auto absolute bottom-24 right-3 sm:bottom-3">
         <button
           onClick={() => {
             if (spinning) {
@@ -228,8 +244,8 @@ export default function MapControls({
         </button>
       </div>
 
-      {/* ── Bottom-left: Base map switcher + back to globe ── */}
-      <div className="pointer-events-auto absolute bottom-28 left-3 flex items-end gap-2 sm:bottom-3">
+      {/* ── Bottom-left: Base map + Back to Globe (above carousel on mobile) ── */}
+      <div className="pointer-events-auto absolute bottom-24 left-3 flex items-end gap-2 sm:bottom-3">
         <BaseMapSwitcher
           activeStyle={mapStyleKey}
           onStyleChange={(key) => setMapStyle(key, MAP_STYLES[key])}

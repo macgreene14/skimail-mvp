@@ -1,22 +1,30 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { MapExplore } from "./components/MapExplore.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
-import { SearchBar } from "./components/SearchBar.jsx";
 import { MobileCarousel } from "./components/MobileCarousel.jsx";
 import QueryProvider from "./providers/QueryProvider.jsx";
 import useMapStore from "./store/useMapStore";
 import resortCollection from "../../assets/resorts.json";
 
+/**
+ * AppContent — top-level layout.
+ *
+ * Filters live in Zustand (useMapStore). Pass toggles drive:
+ *   1. Map layer visibility (via filteredGeoJSON in MapExplore)
+ *   2. Carousel cards (via filteredResorts selector)
+ *   3. Desktop sidebar results (same selector)
+ *
+ * No local filter state here — single source of truth in the store.
+ */
 function AppContent() {
   const resorts = resortCollection.features;
-  const [searchResults, setSearchResults] = useState(null);
 
-  const renderedResorts = useMapStore((s) => s.renderedResorts);
   const selectedResort = useMapStore((s) => s.selectedResort);
   const setSelectedResort = useMapStore((s) => s.setSelectedResort);
+  const filteredResorts = useMapStore((s) => s.filteredResorts);
 
-  const displayedResorts = searchResults !== null ? searchResults : (renderedResorts.length ? renderedResorts : resorts);
+  const displayedResorts = filteredResorts.length ? filteredResorts : resorts;
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
@@ -25,7 +33,6 @@ function AppContent() {
       {/* Desktop layout */}
       <div className="hidden flex-1 gap-3 overflow-hidden p-3 lg:flex">
         <div className="flex w-[380px] flex-col gap-2 overflow-hidden">
-          <SearchBar data={resorts} setSearchResults={setSearchResults} />
           <div className="min-h-0 flex-1 overflow-auto rounded-xl">
             <ResultsContainer
               resorts={displayedResorts}
@@ -45,14 +52,7 @@ function AppContent() {
           <MapExplore resortCollection={resortCollection} />
         </div>
 
-        {/* Floating search bar — positioned to avoid regions (left) and filters (right) */}
-        <div className="absolute top-3 left-28 right-24 z-20 pointer-events-none sm:hidden">
-          <div className="pointer-events-auto">
-            <SearchBar data={resorts} setSearchResults={setSearchResults} variant="dark" />
-          </div>
-        </div>
-
-        {/* Horizontal card carousel */}
+        {/* Horizontal card carousel — driven by Zustand pass filters */}
         <MobileCarousel
           resorts={displayedResorts}
           selectedResort={selectedResort}
