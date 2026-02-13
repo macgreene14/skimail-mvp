@@ -194,12 +194,42 @@ export function MapExplore({ resortCollection }) {
   // Update rendered resorts on move — only when zoomed in enough for dots/markers.
   // At globe zoom (<5), don't update — let pass filters in page.js handle it.
   // Skip during spin to avoid constant resets from easeTo animation.
+  // Update carousel/sidebar with resorts visible in current viewport.
+  // Uses a ref for spinning check to avoid stale closure issues.
+  const spinningRef = useRef(spinning);
+  useEffect(() => { spinningRef.current = spinning; }, [spinning]);
+
+  // When spin stops, query viewport after a short delay so results update
+  useEffect(() => {
+    if (!spinning && mapRef.current) {
+      const timer = setTimeout(() => {
+        const map = mapRef.current;
+        if (!map || map.getZoom() < 5) return;
+        const layers = [];
+        if (map.getLayer('resort-dots')) layers.push('resort-dots');
+        if (map.getLayer('resort-markers')) layers.push('resort-markers');
+        if (layers.length === 0) return;
+        const features = map.queryRenderedFeatures(undefined, { layers });
+        if (features?.length) {
+          const seen = new Set();
+          const unique = features.filter((f) => {
+            if (seen.has(f.properties.slug)) return false;
+            seen.add(f.properties.slug);
+            return true;
+          });
+          setRenderedResorts(unique);
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [spinning, setRenderedResorts]);
+
   const onMoveEnd = useCallback(() => {
-    if (spinning) return; // spin easeTo fires onMoveEnd constantly
+    if (spinningRef.current) return; // spin easeTo fires onMoveEnd constantly
     const map = mapRef.current;
     if (!map) return;
     const zoom = map.getZoom();
-    if (zoom < 5) return; // dots layer starts at minzoom 5, no point querying before
+    if (zoom < 5) return; // dots layer starts at minzoom 5
     const layers = [];
     if (map.getLayer('resort-dots')) layers.push('resort-dots');
     if (map.getLayer('resort-markers')) layers.push('resort-markers');
@@ -214,7 +244,7 @@ export function MapExplore({ resortCollection }) {
       });
       setRenderedResorts(unique);
     }
-  }, [spinning, setRenderedResorts]);
+  }, [setRenderedResorts]);
 
   // Uncontrolled mode — no onMove needed. Map manages its own viewState.
   // Read position from mapRef.current when needed (flyToResort, resetView, etc.)
@@ -435,6 +465,94 @@ export function MapExplore({ resortCollection }) {
           fitBoundsOptions={{ maxZoom: 5 }}
         />
 
+        {/* Snow data source — rendered BEFORE resorts so circles appear behind markers */}
+        <Source id="snow-data" type="geojson" data={snowGeoJSON}>
+          <Layer
+            id="snow-heatmap"
+            type="heatmap"
+            maxzoom={9}
+            layout={{ visibility: showSnow ? 'visible' : 'none' }}
+            paint={{
+              'heatmap-weight': [
+                'interpolate', ['linear'], ['get', 'snowfall_7d'],
+                0, 0, 3, 0.2, 15, 0.5, 40, 0.8, 100, 1,
+              ],
+              'heatmap-intensity': [
+                'interpolate', ['linear'], ['zoom'],
+                0, 0.8, 3, 1.5, 6, 2.5, 9, 3.5,
+              ],
+              'heatmap-color': [
+                'interpolate', ['linear'], ['heatmap-density'],
+                0, 'rgba(0,0,0,0)',
+                0.1, 'rgba(100,181,246,0.5)',
+                0.25, 'rgba(56,130,246,0.65)',
+                0.4, 'rgba(30,100,240,0.75)',
+                0.55, 'rgba(100,60,220,0.82)',
+                0.7, 'rgba(160,80,240,0.88)',
+                0.85, 'rgba(220,200,255,0.92)',
+                1, 'rgba(255,255,255,1)',
+              ],
+              'heatmap-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                0, 18, 3, 35, 6, 55, 9, 70,
+              ],
+              'heatmap-opacity': [
+                'interpolate', ['linear'], ['zoom'],
+                7, 0.9, 9, 0,
+              ],
+            }}
+          />
+          <Layer
+            id="snow-circles"
+            type="circle"
+            minzoom={3}
+            layout={{ visibility: showSnow ? 'visible' : 'none' }}
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['get', 'snowfall_7d'],
+                0, 5, 15, 12, 50, 20, 150, 30,
+              ],
+              'circle-color': [
+                'interpolate', ['linear'], ['get', 'snowfall_7d'],
+                0, 'rgba(100,181,246,0.7)',
+                15, 'rgba(66,165,245,0.8)',
+                40, 'rgba(30,136,229,0.9)',
+                100, 'rgba(255,255,255,1)',
+              ],
+              'circle-stroke-width': 2,
+              'circle-stroke-color': 'rgba(255,255,255,0.7)',
+              'circle-opacity': [
+                'interpolate', ['linear'], ['zoom'],
+                3, 0, 4, 0.9,
+              ],
+            }}
+          />
+          <Layer
+            id="snow-labels"
+            type="symbol"
+            minzoom={2}
+            layout={{
+              visibility: showSnow ? 'visible' : 'none',
+              'text-field': ['concat', '❄ ', ['get', 'name'], '\n', ['to-string', ['round', ['get', 'snowfall_7d']]], 'cm'],
+              'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
+              'text-size': ['interpolate', ['linear'], ['zoom'], 2, 11, 4, 13, 7, 14],
+              'text-allow-overlap': false,
+              'text-ignore-placement': false,
+              'text-offset': [0, -2.5],
+              'text-line-height': 1.2,
+              'text-max-width': 12,
+              'text-padding': 8,
+              'symbol-sort-key': ['*', -1, ['get', 'snowfall_7d']],
+            }}
+            paint={{
+              'text-color': '#ffffff',
+              'text-halo-color': 'rgba(14,165,233,0.6)',
+              'text-halo-width': 2,
+              'text-halo-blur': 1,
+            }}
+          />
+        </Source>
+
         {/* Resort source with clustering — filtered by active pass toggles */}
         <Source
           id="resorts"
@@ -566,94 +684,6 @@ export function MapExplore({ resortCollection }) {
               'text-color': isDark ? '#e2e8f0' : '#1e293b',
               'text-halo-color': isDark ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)',
               'text-halo-width': 1.5,
-            }}
-          />
-        </Source>
-
-        {/* Snow data source */}
-        <Source id="snow-data" type="geojson" data={snowGeoJSON}>
-          <Layer
-            id="snow-heatmap"
-            type="heatmap"
-            maxzoom={9}
-            layout={{ visibility: showSnow ? 'visible' : 'none' }}
-            paint={{
-              'heatmap-weight': [
-                'interpolate', ['linear'], ['get', 'snowfall_7d'],
-                0, 0, 3, 0.2, 15, 0.5, 40, 0.8, 100, 1,
-              ],
-              'heatmap-intensity': [
-                'interpolate', ['linear'], ['zoom'],
-                0, 0.8, 3, 1.5, 6, 2.5, 9, 3.5,
-              ],
-              'heatmap-color': [
-                'interpolate', ['linear'], ['heatmap-density'],
-                0, 'rgba(0,0,0,0)',
-                0.1, 'rgba(100,181,246,0.5)',
-                0.25, 'rgba(56,130,246,0.65)',
-                0.4, 'rgba(30,100,240,0.75)',
-                0.55, 'rgba(100,60,220,0.82)',
-                0.7, 'rgba(160,80,240,0.88)',
-                0.85, 'rgba(220,200,255,0.92)',
-                1, 'rgba(255,255,255,1)',
-              ],
-              'heatmap-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                0, 18, 3, 35, 6, 55, 9, 70,
-              ],
-              'heatmap-opacity': [
-                'interpolate', ['linear'], ['zoom'],
-                7, 0.9, 9, 0,
-              ],
-            }}
-          />
-          <Layer
-            id="snow-circles"
-            type="circle"
-            minzoom={3}
-            layout={{ visibility: showSnow ? 'visible' : 'none' }}
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['get', 'snowfall_7d'],
-                0, 5, 15, 12, 50, 20, 150, 30,
-              ],
-              'circle-color': [
-                'interpolate', ['linear'], ['get', 'snowfall_7d'],
-                0, 'rgba(100,181,246,0.7)',
-                15, 'rgba(66,165,245,0.8)',
-                40, 'rgba(30,136,229,0.9)',
-                100, 'rgba(255,255,255,1)',
-              ],
-              'circle-stroke-width': 2,
-              'circle-stroke-color': 'rgba(255,255,255,0.7)',
-              'circle-opacity': [
-                'interpolate', ['linear'], ['zoom'],
-                3, 0, 4, 0.9,
-              ],
-            }}
-          />
-          <Layer
-            id="snow-labels"
-            type="symbol"
-            minzoom={2}
-            layout={{
-              visibility: showSnow ? 'visible' : 'none',
-              'text-field': ['concat', '❄ ', ['get', 'name'], '\n', ['to-string', ['round', ['get', 'snowfall_7d']]], 'cm'],
-              'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
-              'text-size': ['interpolate', ['linear'], ['zoom'], 2, 11, 4, 13, 7, 14],
-              'text-allow-overlap': false,
-              'text-ignore-placement': false,
-              'text-offset': [0, -2.5],
-              'text-line-height': 1.2,
-              'text-max-width': 12,
-              'text-padding': 8,
-              'symbol-sort-key': ['*', -1, ['get', 'snowfall_7d']],
-            }}
-            paint={{
-              'text-color': '#ffffff',
-              'text-halo-color': 'rgba(14,165,233,0.6)',
-              'text-halo-width': 2,
-              'text-halo-blur': 1,
             }}
           />
         </Source>
