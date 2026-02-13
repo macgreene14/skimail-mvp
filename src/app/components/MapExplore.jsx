@@ -8,19 +8,6 @@ import BaseMapSwitcher from "./BaseMapSwitcher";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
-// Generate hexagon polygon around [lng, lat]
-function makeHexagon(center, radiusDeg = 0.04) {
-  const [lng, lat] = center;
-  const cosLat = Math.cos(lat * Math.PI / 180);
-  const coords = [];
-  for (let i = 0; i < 6; i++) {
-    const angle = (Math.PI / 3) * i - Math.PI / 6;
-    coords.push([lng + radiusDeg * Math.cos(angle) / cosLat, lat + radiusDeg * Math.sin(angle)]);
-  }
-  coords.push(coords[0]);
-  return [coords];
-}
-
 export function MapExplore({
   resortCollection,
   setRenderedResorts,
@@ -41,6 +28,8 @@ export function MapExplore({
   const layersAdded = useRef(false);
   const [showIkon, setShowIkon] = useState(true);
   const [showEpic, setShowEpic] = useState(true);
+  const [showMC, setShowMC] = useState(true);
+  const [showIndy, setShowIndy] = useState(true);
   const [showIndependent, setShowIndependent] = useState(true);
   const [showSnow, setShowSnow] = useState(true);
   const [regionsOpen, setRegionsOpen] = useState(false);
@@ -210,16 +199,76 @@ export function MapExplore({
 
         const ikonImg = createMarkerImage("#1b57f5", "#1443e1", "#bcd8ff");
         const epicImg = createMarkerImage("#f97316", "#ea580c", "#fed7aa");
+        const mcImg = createMarkerImage("#7c3aed", "#6d28d9", "#ddd6fe");
+        const indyImg = createMarkerImage("#16a34a", "#15803d", "#bbf7d0");
         const indImg = createMarkerImage("#6b7280", "#4b5563", "#d1d5db");
 
         map.current.addImage("Ikon", ikonImg, { pixelRatio: window.devicePixelRatio || 1 });
         map.current.addImage("Epic", epicImg, { pixelRatio: window.devicePixelRatio || 1 });
+        map.current.addImage("Mountain Collective", mcImg, { pixelRatio: window.devicePixelRatio || 1 });
+        map.current.addImage("Indy", indyImg, { pixelRatio: window.devicePixelRatio || 1 });
         map.current.addImage("Independent", indImg, { pixelRatio: window.devicePixelRatio || 1 });
 
         map.current.addSource("resorts", {
           type: "geojson",
           data: resortCollection,
+          cluster: true,
+          clusterRadius: 50,
+          clusterMaxZoom: 8,
         });
+
+        // Cluster circle layer — shows aggregated count at low zoom
+        map.current.addLayer({
+          id: "resort-clusters",
+          type: "circle",
+          source: "resorts",
+          filter: ["has", "point_count"],
+          paint: {
+            "circle-color": [
+              "step", ["get", "point_count"],
+              "rgba(100,181,246,0.7)", 10,
+              "rgba(56,189,248,0.75)", 50,
+              "rgba(14,165,233,0.8)", 200,
+              "rgba(2,132,199,0.85)",
+            ],
+            "circle-radius": [
+              "step", ["get", "point_count"],
+              14, 10, 18, 50, 24, 200, 30,
+            ],
+            "circle-stroke-width": 2,
+            "circle-stroke-color": "rgba(255,255,255,0.4)",
+          },
+        });
+
+        // Cluster count labels
+        map.current.addLayer({
+          id: "resort-cluster-count",
+          type: "symbol",
+          source: "resorts",
+          filter: ["has", "point_count"],
+          layout: {
+            "text-field": ["get", "point_count_abbreviated"],
+            "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
+            "text-size": 12,
+            "text-allow-overlap": true,
+          },
+          paint: {
+            "text-color": "#ffffff",
+          },
+        });
+
+        // Click on cluster to zoom in
+        map.current.on("click", "resort-clusters", (e) => {
+          const features = map.current.queryRenderedFeatures(e.point, { layers: ["resort-clusters"] });
+          const clusterId = features[0].properties.cluster_id;
+          map.current.getSource("resorts").getClusterExpansionZoom(clusterId, (err, zoom) => {
+            if (err) return;
+            map.current.easeTo({ center: features[0].geometry.coordinates, zoom: zoom });
+          });
+        });
+
+        map.current.on("mouseenter", "resort-clusters", () => { map.current.getCanvas().style.cursor = "pointer"; });
+        map.current.on("mouseleave", "resort-clusters", () => { map.current.getCanvas().style.cursor = ""; });
 
         // Snow data source (simple, no clustering)
         map.current.addSource("snow-data", {
@@ -227,80 +276,50 @@ export function MapExplore({
           data: { type: "FeatureCollection", features: [] },
         });
 
-        // Snow columns source (hexagon polygons for 3D extrusions)
-        map.current.addSource("snow-columns", {
-          type: "geojson",
-          data: { type: "FeatureCollection", features: [] },
-        });
-
-        // 3D extruded hexagons — height by snowfall
-        map.current.addLayer({
-          id: "snow-extrusions",
-          type: "fill-extrusion",
-          source: "snow-columns",
-          minzoom: 3,
-          paint: {
-            "fill-extrusion-color": [
-              "interpolate", ["linear"], ["get", "snowfall_7d"],
-              0, "#64b5f6",
-              15, "#42a5f5",
-              40, "#1e88e5",
-              80, "#0d47a1",
-              150, "#e0f7fa",
-              250, "#ffffff",
-            ],
-            "fill-extrusion-height": [
-              "interpolate", ["linear"], ["get", "snowfall_7d"],
-              0, 0,
-              10, 20000,
-              30, 80000,
-              80, 200000,
-              150, 400000,
-              300, 600000,
-            ],
-            "fill-extrusion-base": 0,
-            "fill-extrusion-opacity": 0.8,
-          },
-        });
-
-        // Snow depth heatmap layer (visible at low zoom)
+        // Snow heatmap layer — primary snow visualization
         map.current.addLayer({
           id: "snow-heatmap",
           type: "heatmap",
           source: "snow-data",
-          maxzoom: 6,
+          maxzoom: 9,
           paint: {
             "heatmap-weight": [
               "interpolate", ["linear"], ["get", "snowfall_7d"],
               0, 0,
-              10, 0.3,
-              50, 0.7,
+              5, 0.15,
+              20, 0.4,
+              60, 0.7,
               150, 1,
             ],
             "heatmap-intensity": [
               "interpolate", ["linear"], ["zoom"],
-              0, 0.5,
-              4, 1.5,
+              0, 0.4,
+              3, 1.0,
+              6, 1.8,
+              9, 2.5,
             ],
             "heatmap-color": [
               "interpolate", ["linear"], ["heatmap-density"],
               0, "rgba(0,0,0,0)",
               0.1, "rgba(100,181,246,0.3)",
-              0.3, "rgba(66,165,245,0.5)",
-              0.5, "rgba(30,136,229,0.6)",
-              0.7, "rgba(21,101,192,0.7)",
-              1, "rgba(255,255,255,0.85)",
+              0.25, "rgba(56,130,246,0.45)",
+              0.4, "rgba(66,100,230,0.55)",
+              0.55, "rgba(120,80,210,0.65)",
+              0.7, "rgba(160,100,220,0.75)",
+              0.85, "rgba(200,180,240,0.85)",
+              1, "rgba(255,255,255,0.95)",
             ],
             "heatmap-radius": [
               "interpolate", ["linear"], ["zoom"],
-              0, 15,
-              3, 30,
-              6, 50,
+              0, 12,
+              3, 25,
+              6, 40,
+              9, 55,
             ],
             "heatmap-opacity": [
               "interpolate", ["linear"], ["zoom"],
-              4, 0.8,
-              7, 0,
+              6, 0.85,
+              9, 0,
             ],
           },
         });
@@ -399,7 +418,7 @@ export function MapExplore({
                 "text-halo-color": "rgba(255,255,255,0.9)",
                 "text-halo-width": 1.5,
               },
-              filter: ["==", "pass", layerID],
+              filter: ["all", ["!", ["has", "point_count"]], ["==", "pass", layerID]],
             });
           }
         }
@@ -434,23 +453,12 @@ export function MapExplore({
           if (map.current.getSource("snow-data")) {
             map.current.getSource("snow-data").setData(snowGeoJSON);
           }
-          // Update 3D column polygons
-          if (map.current.getSource("snow-columns")) {
-            map.current.getSource("snow-columns").setData({
-              type: "FeatureCollection",
-              features: withSnow.map((d) => ({
-                type: "Feature",
-                geometry: { type: "Polygon", coordinates: makeHexagon(d.coordinates) },
-                properties: { name: d.name, snowfall_7d: d.snowfall_7d },
-              })),
-            });
-          }
         };
 
         snowManagerRef.current = new SnowDataManager(resorts, updateSnowLayer);
 
         // Get initially visible resort slugs
-        const allLayers = ["Epic", "Ikon", "Independent"].filter(l => map.current.getLayer(l));
+        const allLayers = ["Epic", "Ikon", "Mountain Collective", "Indy", "Independent"].filter(l => map.current.getLayer(l));
         const visibleFeatures = map.current.queryRenderedFeatures({ layers: allLayers });
         const visibleSlugs = visibleFeatures
           ? [...new Set(visibleFeatures.map((f) => f.properties.slug))]
@@ -480,6 +488,18 @@ export function MapExplore({
 
   useEffect(() => {
     if (!map.current || !layersAdded.current) return;
+    const vis = showMC ? "visible" : "none";
+    if (map.current.getLayer("Mountain Collective")) map.current.setLayoutProperty("Mountain Collective", "visibility", vis);
+  }, [showMC]);
+
+  useEffect(() => {
+    if (!map.current || !layersAdded.current) return;
+    const vis = showIndy ? "visible" : "none";
+    if (map.current.getLayer("Indy")) map.current.setLayoutProperty("Indy", "visibility", vis);
+  }, [showIndy]);
+
+  useEffect(() => {
+    if (!map.current || !layersAdded.current) return;
     const vis = showIndependent ? "visible" : "none";
     if (map.current.getLayer("Independent")) map.current.setLayoutProperty("Independent", "visibility", vis);
   }, [showIndependent]);
@@ -487,7 +507,7 @@ export function MapExplore({
   useEffect(() => {
     if (!map.current || !layersAdded.current) return;
     const vis = showSnow ? "visible" : "none";
-    ["snow-heatmap", "snow-circles", "snow-labels", "snow-extrusions"].forEach((id) => {
+    ["snow-heatmap", "snow-circles", "snow-labels"].forEach((id) => {
       if (map.current.getLayer(id)) map.current.setLayoutProperty(id, "visibility", vis);
     });
   }, [showSnow]);
@@ -526,7 +546,27 @@ export function MapExplore({
       // But we can re-add the key sources/layers
       try {
         if (!map.current.getSource("resorts")) {
-          map.current.addSource("resorts", { type: "geojson", data: resortCollection });
+          map.current.addSource("resorts", { type: "geojson", data: resortCollection, cluster: true, clusterRadius: 50, clusterMaxZoom: 8 });
+        }
+
+        // Re-add cluster layers
+        if (!map.current.getLayer("resort-clusters")) {
+          map.current.addLayer({
+            id: "resort-clusters", type: "circle", source: "resorts",
+            filter: ["has", "point_count"],
+            paint: {
+              "circle-color": ["step", ["get", "point_count"],
+                "rgba(100,181,246,0.7)", 10, "rgba(56,189,248,0.75)", 50, "rgba(14,165,233,0.8)", 200, "rgba(2,132,199,0.85)"],
+              "circle-radius": ["step", ["get", "point_count"], 14, 10, 18, 50, 24, 200, 30],
+              "circle-stroke-width": 2, "circle-stroke-color": "rgba(255,255,255,0.4)",
+            },
+          });
+          map.current.addLayer({
+            id: "resort-cluster-count", type: "symbol", source: "resorts",
+            filter: ["has", "point_count"],
+            layout: { "text-field": ["get", "point_count_abbreviated"], "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"], "text-size": 12, "text-allow-overlap": true },
+            paint: { "text-color": "#ffffff" },
+          });
         }
         if (!map.current.getSource("snow-data")) {
           map.current.addSource("snow-data", {
@@ -565,6 +605,12 @@ export function MapExplore({
         if (!map.current.hasImage("Epic")) {
           map.current.addImage("Epic", createMarkerImage("#f97316", "#ea580c", "#fed7aa"), { pixelRatio: window.devicePixelRatio || 1 });
         }
+        if (!map.current.hasImage("Mountain Collective")) {
+          map.current.addImage("Mountain Collective", createMarkerImage("#7c3aed", "#6d28d9", "#ddd6fe"), { pixelRatio: window.devicePixelRatio || 1 });
+        }
+        if (!map.current.hasImage("Indy")) {
+          map.current.addImage("Indy", createMarkerImage("#16a34a", "#15803d", "#bbf7d0"), { pixelRatio: window.devicePixelRatio || 1 });
+        }
         if (!map.current.hasImage("Independent")) {
           map.current.addImage("Independent", createMarkerImage("#6b7280", "#4b5563", "#d1d5db"), { pixelRatio: window.devicePixelRatio || 1 });
         }
@@ -591,38 +637,23 @@ export function MapExplore({
                 "text-halo-color": isDark ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.9)",
                 "text-halo-width": 1.5,
               },
-              filter: ["==", "pass", layerID],
+              filter: ["all", ["!", ["has", "point_count"]], ["==", "pass", layerID]],
             });
           }
         }
 
-        // Re-add snow columns
-        if (!map.current.getSource("snow-columns")) {
-          map.current.addSource("snow-columns", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-        }
-        map.current.addLayer({
-          id: "snow-extrusions", type: "fill-extrusion", source: "snow-columns", minzoom: 3,
-          paint: {
-            "fill-extrusion-color": ["interpolate", ["linear"], ["get", "snowfall_7d"],
-              0, "#64b5f6", 15, "#42a5f5", 40, "#1e88e5", 80, "#0d47a1", 150, "#e0f7fa", 250, "#ffffff"],
-            "fill-extrusion-height": ["interpolate", ["linear"], ["get", "snowfall_7d"],
-              0, 0, 10, 20000, 30, 80000, 80, 200000, 150, 400000, 300, 600000],
-            "fill-extrusion-base": 0,
-            "fill-extrusion-opacity": 0.8,
-          },
-        });
-
         // Re-add snow layers
         map.current.addLayer({
-          id: "snow-heatmap", type: "heatmap", source: "snow-data", maxzoom: 6,
+          id: "snow-heatmap", type: "heatmap", source: "snow-data", maxzoom: 9,
           paint: {
-            "heatmap-weight": ["interpolate", ["linear"], ["get", "snowfall_7d"], 0, 0, 10, 0.3, 50, 0.7, 150, 1],
-            "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 4, 1.5],
+            "heatmap-weight": ["interpolate", ["linear"], ["get", "snowfall_7d"], 0, 0, 5, 0.15, 20, 0.4, 60, 0.7, 150, 1],
+            "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 0.4, 3, 1.0, 6, 1.8, 9, 2.5],
             "heatmap-color": ["interpolate", ["linear"], ["heatmap-density"],
-              0, "rgba(0,0,0,0)", 0.1, "rgba(100,181,246,0.3)", 0.3, "rgba(66,165,245,0.5)",
-              0.5, "rgba(30,136,229,0.6)", 0.7, "rgba(21,101,192,0.7)", 1, "rgba(255,255,255,0.85)"],
-            "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 15, 3, 30, 6, 50],
-            "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0.8, 7, 0],
+              0, "rgba(0,0,0,0)", 0.1, "rgba(100,181,246,0.3)", 0.25, "rgba(56,130,246,0.45)",
+              0.4, "rgba(66,100,230,0.55)", 0.55, "rgba(120,80,210,0.65)", 0.7, "rgba(160,100,220,0.75)",
+              0.85, "rgba(200,180,240,0.85)", 1, "rgba(255,255,255,0.95)"],
+            "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 12, 3, 25, 6, 40, 9, 55],
+            "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0.85, 9, 0],
           },
         });
         map.current.addLayer({
@@ -659,17 +690,7 @@ export function MapExplore({
               properties: { slug: d.slug, name: d.name, snowfall_7d: d.snowfall_7d, snowfall_24h: d.snowfall_24h, snow_depth: d.snow_depth, temperature: d.temperature },
             })),
           });
-          // Restore 3D columns
-          if (map.current.getSource("snow-columns")) {
-            map.current.getSource("snow-columns").setData({
-              type: "FeatureCollection",
-              features: withSnow.map((d) => ({
-                type: "Feature",
-                geometry: { type: "Polygon", coordinates: makeHexagon(d.coordinates) },
-                properties: { name: d.name, snowfall_7d: d.snowfall_7d },
-              })),
-            });
-          }
+          // 3D columns removed — heatmap is primary snow viz
         }
       } catch (err) {
         console.error("Style switch layer restore error:", err);
@@ -692,6 +713,8 @@ export function MapExplore({
       const layers = [];
       if (map.current.getLayer("Epic")) layers.push("Epic");
       if (map.current.getLayer("Ikon")) layers.push("Ikon");
+      if (map.current.getLayer("Mountain Collective")) layers.push("Mountain Collective");
+      if (map.current.getLayer("Indy")) layers.push("Indy");
       if (map.current.getLayer("Independent")) layers.push("Independent");
       if (layers.length === 0) return;
 
@@ -739,7 +762,7 @@ export function MapExplore({
     };
 
     map.current.on("moveend", onMoveEnd);
-    const clickLayers = ["Epic", "Ikon", "Independent"].filter(l => map.current.getLayer(l));
+    const clickLayers = ["Epic", "Ikon", "Mountain Collective", "Indy", "Independent"].filter(l => map.current.getLayer(l));
     map.current.on("click", clickLayers, onClick);
     map.current.on("click", "snow-circles", onSnowClick);
     handlersAttached.current = true;
@@ -894,7 +917,9 @@ export function MapExplore({
         {[
           { label: "Ikon", active: showIkon, toggle: () => setShowIkon(!showIkon), color: "#74a5f2" },
           { label: "Epic", active: showEpic, toggle: () => setShowEpic(!showEpic), color: "#f97316" },
-          { label: "Indie", active: showIndependent, toggle: () => setShowIndependent(!showIndependent), color: "#9ca3af" },
+          { label: "MC", active: showMC, toggle: () => setShowMC(!showMC), color: "#7c3aed" },
+          { label: "Indy", active: showIndy, toggle: () => setShowIndy(!showIndy), color: "#16a34a" },
+          { label: "Other", active: showIndependent, toggle: () => setShowIndependent(!showIndependent), color: "#9ca3af" },
           { label: "Snow", active: showSnow, toggle: () => setShowSnow(!showSnow), color: "#38bdf8" },
         ].map((ctrl) => (
           <button
@@ -972,9 +997,25 @@ function percentile(sortedArr, val) {
   return Math.round((count / sortedArr.length) * 100);
 }
 
+const PASS_LINKS = {
+  "Ikon": "https://www.ikonpass.com/",
+  "Epic": "https://www.epicpass.com/",
+  "Mountain Collective": "https://mountaincollective.com/",
+  "Indy": "https://www.indyskipass.com/",
+};
+
+const PASS_COLORS = {
+  "Ikon": "#1b57f5",
+  "Epic": "#f97316",
+  "Mountain Collective": "#7c3aed",
+  "Indy": "#16a34a",
+  "Independent": "#6b7280",
+};
+
 const PopupContent = ({ selectedResort, snowData, stats }) => {
   const p = selectedResort.properties;
-  const passColor = p.pass === "Ikon" ? "#1b57f5" : p.pass === "Epic" ? "#f97316" : "#6b7280";
+  const passColor = PASS_COLORS[p.pass] || "#6b7280";
+  const passLink = PASS_LINKS[p.pass];
   const location = [
     p.state !== "Unknown" ? p.state : null,
     p.country !== "Unknown" ? p.country : null,
@@ -1000,11 +1041,20 @@ const PopupContent = ({ selectedResort, snowData, stats }) => {
       >
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-          <span style={{
-            display: "inline-block", padding: "2px 8px", borderRadius: "999px",
-            backgroundColor: passColor, color: "white", fontSize: "10px", fontWeight: "700",
-            letterSpacing: "0.5px", textTransform: "uppercase", flexShrink: "0",
-          }}>{p.pass}</span>
+          {passLink ? (
+            <a href={passLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{
+              display: "inline-block", padding: "2px 8px", borderRadius: "999px",
+              backgroundColor: passColor, color: "white", fontSize: "10px", fontWeight: "700",
+              letterSpacing: "0.5px", textTransform: "uppercase", flexShrink: "0",
+              textDecoration: "none", cursor: "pointer",
+            }}>{p.pass === "Mountain Collective" ? "MC" : p.pass}</a>
+          ) : (
+            <span style={{
+              display: "inline-block", padding: "2px 8px", borderRadius: "999px",
+              backgroundColor: passColor, color: "white", fontSize: "10px", fontWeight: "700",
+              letterSpacing: "0.5px", textTransform: "uppercase", flexShrink: "0",
+            }}>{p.pass}</span>
+          )}
           <span style={{ fontSize: "14px", fontWeight: "700", color: "#f8fafc", lineHeight: "1.2" }}>
             {p.name !== "Unknown" ? p.name : ""}
           </span>

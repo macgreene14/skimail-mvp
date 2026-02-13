@@ -74,7 +74,22 @@ export default function ResortPage({ slug }) {
     country !== "Unknown" ? country : null,
   ].filter(Boolean).join(", ");
 
-  const passColor = pass === "Ikon" ? "bg-sky-500" : pass === "Epic" ? "bg-orange-500" : "bg-gray-500";
+  const passColorMap = {
+    "Ikon": "bg-sky-500",
+    "Epic": "bg-orange-500",
+    "Mountain Collective": "bg-violet-600",
+    "Indy": "bg-green-600",
+    "Independent": "bg-gray-500",
+  };
+  const passLinkMap = {
+    "Ikon": "https://www.ikonpass.com/",
+    "Epic": "https://www.epicpass.com/",
+    "Mountain Collective": "https://mountaincollective.com/",
+    "Indy": "https://www.indyskipass.com/",
+  };
+  const passColor = passColorMap[pass] || "bg-gray-500";
+  const passLabel = pass === "Mountain Collective" ? "Mountain Collective" : pass;
+  const passLink = passLinkMap[pass];
 
   const snowPct = getPercentile("avg_snowfall", avg_snowfall);
   const vertPct = getPercentile("vertical_drop", vertical_drop);
@@ -111,9 +126,16 @@ export default function ResortPage({ slug }) {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 p-6 sm:p-8">
-              <span className={`inline-block rounded-full ${passColor} px-3 py-1 text-xs font-semibold text-white shadow-sm`}>
-                {pass} Pass
-              </span>
+              {passLink ? (
+                <a href={passLink} target="_blank" rel="noopener noreferrer"
+                  className={`inline-block rounded-full ${passColor} px-3 py-1 text-xs font-semibold text-white shadow-sm hover:opacity-80 transition-opacity`}>
+                  {passLabel} Pass ↗
+                </a>
+              ) : (
+                <span className={`inline-block rounded-full ${passColor} px-3 py-1 text-xs font-semibold text-white shadow-sm`}>
+                  {passLabel}
+                </span>
+              )}
               <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
                 {name}
               </h1>

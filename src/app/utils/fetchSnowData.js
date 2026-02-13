@@ -11,7 +11,7 @@
 
 const BATCH_SIZE = 40;
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
-const MAX_API_CALLS = 10; // max batched requests per session
+const MAX_API_CALLS = 30; // max batched requests per session
 
 let apiCallCount = 0;
 
@@ -107,19 +107,34 @@ export class SnowDataManager {
 
   /** Initial load — fetch high-priority resorts then background fill */
   async initialize(initialVisibleSlugs) {
-    // Phase 1: Visible resorts first
-    const visible = initialVisibleSlugs
+    const PASS_PRIORITY = { Ikon: 0, Epic: 1, "Mountain Collective": 2 };
+    const visibleSet = new Set(initialVisibleSlugs);
+
+    // Phase 1: All Ikon/Epic/MC resorts (worldwide, regardless of viewport)
+    const passResorts = this.allResorts
+      .filter((r) => r.properties.pass in PASS_PRIORITY)
+      .sort((a, b) => {
+        const pa = PASS_PRIORITY[a.properties.pass] ?? 99;
+        const pb = PASS_PRIORITY[b.properties.pass] ?? 99;
+        if (pa !== pb) return pa - pb;
+        return Math.abs(b.geometry.coordinates[1]) - Math.abs(a.geometry.coordinates[1]);
+      });
+    const passSlugs = new Set(passResorts.map((r) => r.properties.slug));
+
+    // Phase 2: Viewport-visible independents (not already in pass list)
+    const viewportIndependents = initialVisibleSlugs
+      .filter((slug) => !passSlugs.has(slug))
       .map((slug) => this.allResorts.find((r) => r.properties.slug === slug))
       .filter(Boolean)
       .sort((a, b) => Math.abs(b.geometry.coordinates[1]) - Math.abs(a.geometry.coordinates[1]));
 
-    // Phase 2: Remaining resorts sorted by latitude (snow likelihood)
-    const visibleSet = new Set(initialVisibleSlugs);
+    // Phase 3: Remaining resorts sorted by latitude
+    const queuedSlugs = new Set([...passSlugs, ...initialVisibleSlugs]);
     const remaining = this.allResorts
-      .filter((r) => !visibleSet.has(r.properties.slug))
+      .filter((r) => !queuedSlugs.has(r.properties.slug))
       .sort((a, b) => Math.abs(b.geometry.coordinates[1]) - Math.abs(a.geometry.coordinates[1]));
 
-    this.fetchQueue = [...visible, ...remaining];
+    this.fetchQueue = [...passResorts, ...viewportIndependents, ...remaining];
     await this._processFetchQueue();
   }
 

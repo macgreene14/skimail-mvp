@@ -28,7 +28,22 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
     country !== "Unknown" ? country : null,
   ].filter(Boolean).join(", ");
 
-  const passColor = pass === "Ikon" ? "bg-sky-500" : pass === "Epic" ? "bg-orange-500" : "bg-gray-500";
+  const passColorMap = {
+    "Ikon": "bg-sky-500",
+    "Epic": "bg-orange-500",
+    "Mountain Collective": "bg-violet-600",
+    "Indy": "bg-green-600",
+    "Independent": "bg-gray-500",
+  };
+  const passLinkMap = {
+    "Ikon": "https://www.ikonpass.com/",
+    "Epic": "https://www.epicpass.com/",
+    "Mountain Collective": "https://mountaincollective.com/",
+    "Indy": "https://www.indyskipass.com/",
+  };
+  const passColor = passColorMap[pass] || "bg-gray-500";
+  const passLabel = pass === "Mountain Collective" ? "MC" : pass;
+  const passLink = passLinkMap[pass];
 
   return (
     <div
@@ -44,9 +59,21 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
       {/* Left: info */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className={`shrink-0 rounded-full ${passColor} px-1.5 py-0.5 text-[10px] font-bold text-white`}>
-            {pass}
-          </span>
+          {passLink ? (
+            <a
+              href={passLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className={`shrink-0 rounded-full ${passColor} px-1.5 py-0.5 text-[10px] font-bold text-white hover:opacity-80 transition-opacity`}
+            >
+              {passLabel}
+            </a>
+          ) : (
+            <span className={`shrink-0 rounded-full ${passColor} px-1.5 py-0.5 text-[10px] font-bold text-white`}>
+              {passLabel}
+            </span>
+          )}
           <h3 className="truncate text-sm font-semibold text-slate-900">
             {name !== "Unknown" ? name : "Resort"}
           </h3>
