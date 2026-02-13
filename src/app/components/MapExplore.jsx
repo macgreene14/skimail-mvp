@@ -41,6 +41,7 @@ export function MapExplore({
   const layersAdded = useRef(false);
   const [showIkon, setShowIkon] = useState(true);
   const [showEpic, setShowEpic] = useState(true);
+  const [showIndependent, setShowIndependent] = useState(true);
   const [showSnow, setShowSnow] = useState(true);
   const [regionsOpen, setRegionsOpen] = useState(false);
   // clustering removed — using collision detection instead
@@ -209,9 +210,11 @@ export function MapExplore({
 
         const ikonImg = createMarkerImage("#1b57f5", "#1443e1", "#bcd8ff");
         const epicImg = createMarkerImage("#f97316", "#ea580c", "#fed7aa");
+        const indImg = createMarkerImage("#6b7280", "#4b5563", "#d1d5db");
 
         map.current.addImage("Ikon", ikonImg, { pixelRatio: window.devicePixelRatio || 1 });
         map.current.addImage("Epic", epicImg, { pixelRatio: window.devicePixelRatio || 1 });
+        map.current.addImage("Independent", indImg, { pixelRatio: window.devicePixelRatio || 1 });
 
         map.current.addSource("resorts", {
           type: "geojson",
@@ -447,7 +450,8 @@ export function MapExplore({
         snowManagerRef.current = new SnowDataManager(resorts, updateSnowLayer);
 
         // Get initially visible resort slugs
-        const visibleFeatures = map.current.queryRenderedFeatures({ layers: ["Epic", "Ikon"] });
+        const allLayers = ["Epic", "Ikon", "Independent"].filter(l => map.current.getLayer(l));
+        const visibleFeatures = map.current.queryRenderedFeatures({ layers: allLayers });
         const visibleSlugs = visibleFeatures
           ? [...new Set(visibleFeatures.map((f) => f.properties.slug))]
           : resorts.map((r) => r.properties.slug);
@@ -473,6 +477,12 @@ export function MapExplore({
     const vis = showEpic ? "visible" : "none";
     if (map.current.getLayer("Epic")) map.current.setLayoutProperty("Epic", "visibility", vis);
   }, [showEpic]);
+
+  useEffect(() => {
+    if (!map.current || !layersAdded.current) return;
+    const vis = showIndependent ? "visible" : "none";
+    if (map.current.getLayer("Independent")) map.current.setLayoutProperty("Independent", "visibility", vis);
+  }, [showIndependent]);
 
   useEffect(() => {
     if (!map.current || !layersAdded.current) return;
@@ -554,6 +564,9 @@ export function MapExplore({
         }
         if (!map.current.hasImage("Epic")) {
           map.current.addImage("Epic", createMarkerImage("#f97316", "#ea580c", "#fed7aa"), { pixelRatio: window.devicePixelRatio || 1 });
+        }
+        if (!map.current.hasImage("Independent")) {
+          map.current.addImage("Independent", createMarkerImage("#6b7280", "#4b5563", "#d1d5db"), { pixelRatio: window.devicePixelRatio || 1 });
         }
 
         // Re-add resort layers
@@ -679,6 +692,7 @@ export function MapExplore({
       const layers = [];
       if (map.current.getLayer("Epic")) layers.push("Epic");
       if (map.current.getLayer("Ikon")) layers.push("Ikon");
+      if (map.current.getLayer("Independent")) layers.push("Independent");
       if (layers.length === 0) return;
 
       const features = map.current.queryRenderedFeatures({ layers });
@@ -725,13 +739,14 @@ export function MapExplore({
     };
 
     map.current.on("moveend", onMoveEnd);
-    map.current.on("click", ["Epic", "Ikon"], onClick);
+    const clickLayers = ["Epic", "Ikon", "Independent"].filter(l => map.current.getLayer(l));
+    map.current.on("click", clickLayers, onClick);
     map.current.on("click", "snow-circles", onSnowClick);
     handlersAttached.current = true;
 
     return () => {
       map.current.off("moveend", onMoveEnd);
-      map.current.off("click", ["Epic", "Ikon"], onClick);
+      map.current.off("click", clickLayers, onClick);
       map.current.off("click", "snow-circles", onSnowClick);
       handlersAttached.current = false;
     };
@@ -879,6 +894,7 @@ export function MapExplore({
         {[
           { label: "Ikon", active: showIkon, toggle: () => setShowIkon(!showIkon), color: "#74a5f2" },
           { label: "Epic", active: showEpic, toggle: () => setShowEpic(!showEpic), color: "#f97316" },
+          { label: "Indie", active: showIndependent, toggle: () => setShowIndependent(!showIndependent), color: "#9ca3af" },
           { label: "Snow", active: showSnow, toggle: () => setShowSnow(!showSnow), color: "#38bdf8" },
         ].map((ctrl) => (
           <button
@@ -958,7 +974,7 @@ function percentile(sortedArr, val) {
 
 const PopupContent = ({ selectedResort, snowData, stats }) => {
   const p = selectedResort.properties;
-  const passColor = p.pass === "Ikon" ? "#1b57f5" : "#f97316";
+  const passColor = p.pass === "Ikon" ? "#1b57f5" : p.pass === "Epic" ? "#f97316" : "#6b7280";
   const location = [
     p.state !== "Unknown" ? p.state : null,
     p.country !== "Unknown" ? p.country : null,

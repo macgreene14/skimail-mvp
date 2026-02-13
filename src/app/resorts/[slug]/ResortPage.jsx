@@ -74,7 +74,7 @@ export default function ResortPage({ slug }) {
     country !== "Unknown" ? country : null,
   ].filter(Boolean).join(", ");
 
-  const passColor = pass === "Ikon" ? "bg-sky-500" : "bg-orange-500";
+  const passColor = pass === "Ikon" ? "bg-sky-500" : pass === "Epic" ? "bg-orange-500" : "bg-gray-500";
 
   const snowPct = getPercentile("avg_snowfall", avg_snowfall);
   const vertPct = getPercentile("vertical_drop", vertical_drop);

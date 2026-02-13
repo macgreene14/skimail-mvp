@@ -28,7 +28,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
     country !== "Unknown" ? country : null,
   ].filter(Boolean).join(", ");
 
-  const passColor = pass === "Ikon" ? "bg-sky-500" : "bg-orange-500";
+  const passColor = pass === "Ikon" ? "bg-sky-500" : pass === "Epic" ? "bg-orange-500" : "bg-gray-500";
 
   return (
     <div
