@@ -230,18 +230,14 @@ export function MapExplore({ resortCollection }) {
       }
       const f = features[0];
 
-      // Handle cluster click — zoom into the cluster
+      // Handle cluster click — fly directly to zoom 7 for regional nav
       if (f.properties.cluster) {
         const map = mapRef.current;
         if (!map) return;
-        const source = map.getSource('resorts');
-        source.getClusterExpansionZoom(f.properties.cluster_id, (err, zoom) => {
-          if (err) return;
-          map.flyTo({
-            center: f.geometry.coordinates,
-            zoom: Math.min(zoom, 11),
-            duration: 800,
-          });
+        map.flyTo({
+          center: f.geometry.coordinates,
+          zoom: 7,
+          duration: 1000,
         });
         return;
       }
