@@ -271,15 +271,32 @@ export function MapExplore({ resortCollection }) {
       }
       const f = features[0];
 
-      // Handle cluster click — fly directly to zoom 7 for regional nav
+      // Handle cluster click — fly to nearest matching REGION preset
       if (f.properties.cluster) {
         const map = mapRef.current;
         if (!map) return;
-        map.flyTo({
-          center: f.geometry.coordinates,
-          zoom: 7,
-          duration: 1000,
-        });
+        const [lng, lat] = f.geometry.coordinates;
+        // Find closest region to the cluster center
+        const REGIONS = [
+          { lat: 41.0, lng: -101.0, zoom: 4.5 },   // USA
+          { lat: 40.7, lng: -109.7, zoom: 5.5 },    // Rockies
+          { lat: 45.6, lng: -120.7, zoom: 5.5 },    // PNW
+          { lat: 37.0, lng: -121.0, zoom: 5.5 },    // California
+          { lat: 41.4, lng: -78.9, zoom: 5.0 },     // Eastern US
+          { lat: 51.3, lng: -119.4, zoom: 5.0 },    // Canada
+          { lat: 45.6, lng: 6.6, zoom: 5.0 },       // Europe
+          { lat: 38.4, lng: 136.2, zoom: 5.0 },     // Japan
+          { lat: -38.1, lng: 156.2, zoom: 4.0 },    // Oceania
+          { lat: -34.9, lng: -72.4, zoom: 5.5 },    // S. America
+        ];
+        let closest = REGIONS[0];
+        let minDist = Infinity;
+        for (const r of REGIONS) {
+          const d = Math.hypot(r.lat - lat, r.lng - lng);
+          if (d < minDist) { minDist = d; closest = r; }
+        }
+        const zoom = window.innerWidth <= 768 ? closest.zoom - 0.5 : closest.zoom;
+        map.flyTo({ center: [closest.lng, closest.lat], zoom, duration: 1200 });
         return;
       }
 
@@ -476,6 +493,49 @@ export function MapExplore({ resortCollection }) {
           fitBoundsOptions={{ maxZoom: 5 }}
         />
 
+        {/* Snow data — rendered before resorts (visually behind).
+             NOT in interactiveLayerIds so clicks pass through to resort markers. */}
+        <Source id="snow-data" type="geojson" data={snowGeoJSON}>
+          <Layer id="snow-heatmap" type="heatmap" maxzoom={9}
+            layout={{ visibility: showSnow ? 'visible' : 'none' }}
+            paint={{
+              'heatmap-weight': ['interpolate', ['linear'], ['get', 'snowfall_7d'], 0, 0, 3, 0.2, 15, 0.5, 40, 0.8, 100, 1],
+              'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0.8, 3, 1.5, 6, 2.5, 9, 3.5],
+              'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'],
+                0, 'rgba(0,0,0,0)', 0.1, 'rgba(100,181,246,0.5)', 0.25, 'rgba(56,130,246,0.65)',
+                0.4, 'rgba(30,100,240,0.75)', 0.55, 'rgba(100,60,220,0.82)', 0.7, 'rgba(160,80,240,0.88)',
+                0.85, 'rgba(220,200,255,0.92)', 1, 'rgba(255,255,255,1)'],
+              'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 18, 3, 35, 6, 55, 9, 70],
+              'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.9, 9, 0],
+            }}
+          />
+          <Layer id="snow-circles" type="circle" minzoom={3}
+            layout={{ visibility: showSnow ? 'visible' : 'none' }}
+            paint={{
+              'circle-radius': ['interpolate', ['linear'], ['get', 'snowfall_7d'], 0, 5, 15, 12, 50, 20, 150, 30],
+              'circle-color': ['interpolate', ['linear'], ['get', 'snowfall_7d'],
+                0, 'rgba(100,181,246,0.7)', 15, 'rgba(66,165,245,0.8)', 40, 'rgba(30,136,229,0.9)', 100, 'rgba(255,255,255,1)'],
+              'circle-stroke-width': 2, 'circle-stroke-color': 'rgba(255,255,255,0.7)',
+              'circle-opacity': ['interpolate', ['linear'], ['zoom'], 3, 0, 4, 0.9],
+            }}
+          />
+          <Layer id="snow-labels" type="symbol" minzoom={2}
+            layout={{
+              visibility: showSnow ? 'visible' : 'none',
+              'text-field': ['concat', '❄ ', ['get', 'name'], '\n', ['to-string', ['round', ['get', 'snowfall_7d']]], 'cm'],
+              'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
+              'text-size': ['interpolate', ['linear'], ['zoom'], 2, 11, 4, 13, 7, 14],
+              'text-allow-overlap': false, 'text-ignore-placement': false,
+              'text-offset': [0, -2.5], 'text-line-height': 1.2, 'text-max-width': 12, 'text-padding': 8,
+              'symbol-sort-key': ['*', -1, ['get', 'snowfall_7d']],
+            }}
+            paint={{
+              'text-color': '#ffffff', 'text-halo-color': 'rgba(14,165,233,0.6)',
+              'text-halo-width': 2, 'text-halo-blur': 1,
+            }}
+          />
+        </Source>
+
         {/* Resort source with clustering — filtered by active pass toggles */}
         <Source
           id="resorts"
@@ -607,98 +667,6 @@ export function MapExplore({ resortCollection }) {
               'text-color': isDark ? '#e2e8f0' : '#1e293b',
               'text-halo-color': isDark ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)',
               'text-halo-width': 1.5,
-            }}
-          />
-        </Source>
-
-        {/* Snow data — after resorts in JSX (so resorts get click priority)
-             but beforeId="clusters" renders them visually behind resort layers */}
-        <Source id="snow-data" type="geojson" data={snowGeoJSON}>
-          <Layer
-            id="snow-heatmap"
-            type="heatmap"
-            beforeId="clusters"
-            maxzoom={9}
-            layout={{ visibility: showSnow ? 'visible' : 'none' }}
-            paint={{
-              'heatmap-weight': [
-                'interpolate', ['linear'], ['get', 'snowfall_7d'],
-                0, 0, 3, 0.2, 15, 0.5, 40, 0.8, 100, 1,
-              ],
-              'heatmap-intensity': [
-                'interpolate', ['linear'], ['zoom'],
-                0, 0.8, 3, 1.5, 6, 2.5, 9, 3.5,
-              ],
-              'heatmap-color': [
-                'interpolate', ['linear'], ['heatmap-density'],
-                0, 'rgba(0,0,0,0)',
-                0.1, 'rgba(100,181,246,0.5)',
-                0.25, 'rgba(56,130,246,0.65)',
-                0.4, 'rgba(30,100,240,0.75)',
-                0.55, 'rgba(100,60,220,0.82)',
-                0.7, 'rgba(160,80,240,0.88)',
-                0.85, 'rgba(220,200,255,0.92)',
-                1, 'rgba(255,255,255,1)',
-              ],
-              'heatmap-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                0, 18, 3, 35, 6, 55, 9, 70,
-              ],
-              'heatmap-opacity': [
-                'interpolate', ['linear'], ['zoom'],
-                7, 0.9, 9, 0,
-              ],
-            }}
-          />
-          <Layer
-            id="snow-circles"
-            type="circle"
-            beforeId="clusters"
-            minzoom={3}
-            layout={{ visibility: showSnow ? 'visible' : 'none' }}
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['get', 'snowfall_7d'],
-                0, 5, 15, 12, 50, 20, 150, 30,
-              ],
-              'circle-color': [
-                'interpolate', ['linear'], ['get', 'snowfall_7d'],
-                0, 'rgba(100,181,246,0.7)',
-                15, 'rgba(66,165,245,0.8)',
-                40, 'rgba(30,136,229,0.9)',
-                100, 'rgba(255,255,255,1)',
-              ],
-              'circle-stroke-width': 2,
-              'circle-stroke-color': 'rgba(255,255,255,0.7)',
-              'circle-opacity': [
-                'interpolate', ['linear'], ['zoom'],
-                3, 0, 4, 0.9,
-              ],
-            }}
-          />
-          <Layer
-            id="snow-labels"
-            type="symbol"
-            beforeId="clusters"
-            minzoom={2}
-            layout={{
-              visibility: showSnow ? 'visible' : 'none',
-              'text-field': ['concat', '❄ ', ['get', 'name'], '\n', ['to-string', ['round', ['get', 'snowfall_7d']]], 'cm'],
-              'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
-              'text-size': ['interpolate', ['linear'], ['zoom'], 2, 11, 4, 13, 7, 14],
-              'text-allow-overlap': false,
-              'text-ignore-placement': false,
-              'text-offset': [0, -2.5],
-              'text-line-height': 1.2,
-              'text-max-width': 12,
-              'text-padding': 8,
-              'symbol-sort-key': ['*', -1, ['get', 'snowfall_7d']],
-            }}
-            paint={{
-              'text-color': '#ffffff',
-              'text-halo-color': 'rgba(14,165,233,0.6)',
-              'text-halo-width': 2,
-              'text-halo-blur': 1,
             }}
           />
         </Source>
