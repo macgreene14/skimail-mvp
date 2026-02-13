@@ -39,6 +39,7 @@ export function MapExplore({ resortCollection }) {
   const mapRef = useRef(null);
   const spinTimerRef = useRef(null);
   const idleTimerRef = useRef(null);
+  const lastFlewToRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [spinning, setSpinning] = useState(true);
   const [userStopped, setUserStopped] = useState(false);
@@ -122,6 +123,7 @@ export function MapExplore({ resortCollection }) {
       essential: true,
     });
     setIsResortView(false);
+    lastFlewToRef.current = null; // allow re-clicking same resort
   }, [previousViewState, setIsResortView]);
 
   // Build pass filter expressions
@@ -259,13 +261,16 @@ export function MapExplore({ resortCollection }) {
   );
 
   // When selectedResort changes externally (e.g. from card click)
+  // Use a ref to track which resort we already flew to, preventing re-fly loops.
   useEffect(() => {
-    if (selectedResort && mapRef.current) {
-      const snowInfo = snowData?.find((d) => d.slug === selectedResort.properties.slug);
-      setPopupInfo({ resort: selectedResort, snowInfo });
-      flyToResort(selectedResort);
-    }
-  }, [selectedResort, snowData, flyToResort]);
+    if (!selectedResort || !mapRef.current) return;
+    const slug = selectedResort.properties?.slug;
+    if (slug === lastFlewToRef.current) return; // already flying/flew here
+    lastFlewToRef.current = slug;
+    const snowInfo = snowData?.find((d) => d.slug === slug);
+    setPopupInfo({ resort: selectedResort, snowInfo });
+    flyToResort(selectedResort);
+  }, [selectedResort]); // intentionally minimal deps — flyToResort is stable via useCallback
 
   const onMapLoad = useCallback(() => {
     const map = mapRef.current;
