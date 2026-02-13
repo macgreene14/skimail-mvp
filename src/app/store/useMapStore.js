@@ -41,10 +41,6 @@ const useMapStore = create(
       searchQuery: '',
       setSearchQuery: (q) => set({ searchQuery: q }),
 
-      // Mobile drawer snap point
-      drawerSnap: 0.15,
-      setDrawerSnap: (snap) => set({ drawerSnap: snap }),
-
       // Rendered resorts (from map viewport)
       renderedResorts: [],
       setRenderedResorts: (r) => set({ renderedResorts: r }),

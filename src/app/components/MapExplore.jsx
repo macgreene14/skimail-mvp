@@ -149,6 +149,20 @@ export function MapExplore({ resortCollection }) {
     return ['in', ['get', 'pass'], ['literal', passes]];
   }, [showIkon, showEpic, showMC, showIndy, showIndependent]);
 
+  // Filtered GeoJSON so clusters reflect active pass toggles
+  const filteredGeoJSON = useMemo(() => {
+    const passes = new Set();
+    if (showIkon) passes.add('Ikon');
+    if (showEpic) passes.add('Epic');
+    if (showMC) passes.add('Mountain Collective');
+    if (showIndy) passes.add('Indy');
+    if (showIndependent) passes.add('Independent');
+    return {
+      type: 'FeatureCollection',
+      features: resorts.filter((r) => passes.has(r.properties.pass)),
+    };
+  }, [resorts, showIkon, showEpic, showMC, showIndy, showIndependent]);
+
   // Dataset stats for percentile charts
   const datasetStats = useMemo(() => {
     const vals = (key) =>
@@ -317,17 +331,6 @@ export function MapExplore({ resortCollection }) {
     return () => document.removeEventListener('keydown', handleKey);
   }, [isFullscreen]);
 
-  // Update map padding based on mobile drawer snap point
-  const drawerSnap = useMapStore((s) => s.drawerSnap);
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || window.innerWidth >= 640) return;
-    let bottom = 80;
-    if (drawerSnap >= 1) bottom = window.innerHeight * 0.85;
-    else if (drawerSnap >= 0.5) bottom = window.innerHeight * 0.5;
-    map.setPadding({ top: 0, right: 0, bottom, left: 0 });
-  }, [drawerSnap]);
-
   const interactiveLayerIds = useMemo(
     () => ['clusters', 'resort-dots', 'resort-markers'],
     []
@@ -390,11 +393,11 @@ export function MapExplore({ resortCollection }) {
           fitBoundsOptions={{ maxZoom: 5 }}
         />
 
-        {/* Resort source with clustering */}
+        {/* Resort source with clustering — filtered by active pass toggles */}
         <Source
           id="resorts"
           type="geojson"
-          data={resortCollection}
+          data={filteredGeoJSON}
           cluster={true}
           clusterMaxZoom={6}
           clusterRadius={50}
@@ -617,7 +620,7 @@ export function MapExplore({ resortCollection }) {
       </Map>
 
       {/* UI overlay */}
-      <div className="pointer-events-none absolute inset-0" style={{ zIndex: 10 }}>
+      <div className="pointer-events-none absolute inset-0" style={{ zIndex: 30 }}>
         {/* Reset view button (visible when zoomed into a resort) */}
         {isResortView && (
           <button
@@ -712,7 +715,7 @@ export function MapExplore({ resortCollection }) {
         </div>
 
         {/* Pass toggle pills */}
-        <div className="pointer-events-auto absolute right-3 top-3 flex items-start gap-1.5">
+        <div className="pointer-events-auto absolute right-3 top-3 flex flex-wrap items-start justify-end gap-1.5 max-w-[200px] sm:max-w-none sm:flex-nowrap">
           {[
             { label: 'Ikon', key: 'showIkon', active: showIkon, color: '#74a5f2' },
             { label: 'Epic', key: 'showEpic', active: showEpic, color: '#f97316' },

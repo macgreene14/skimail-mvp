@@ -1,28 +1,16 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { MapExplore } from "./components/MapExplore.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
-import { MobileDrawer } from "./components/MobileDrawer.jsx";
+import { MobileCarousel } from "./components/MobileCarousel.jsx";
 import QueryProvider from "./providers/QueryProvider.jsx";
 import useMapStore from "./store/useMapStore";
 import resortCollection from "../../assets/resorts.json";
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-  return isMobile;
-}
-
 function AppContent() {
   const resorts = resortCollection.features;
   const [searchResults, setSearchResults] = useState(null);
-  const isMobile = useIsMobile();
 
   const renderedResorts = useMapStore((s) => s.renderedResorts);
   const selectedResort = useMapStore((s) => s.selectedResort);
@@ -57,13 +45,17 @@ function AppContent() {
           <MapExplore resortCollection={resortCollection} />
         </div>
 
-        {isMobile && (
-          <MobileDrawer
-            resorts={resorts}
-            displayedResorts={displayedResorts}
-            setSearchResults={setSearchResults}
-          />
-        )}
+        {/* Floating search bar */}
+        <div className="absolute top-14 left-3 right-14 z-30 sm:hidden">
+          <SearchBar data={resorts} setSearchResults={setSearchResults} variant="dark" />
+        </div>
+
+        {/* Horizontal card carousel */}
+        <MobileCarousel
+          resorts={displayedResorts}
+          selectedResort={selectedResort}
+          setSelectedResort={setSelectedResort}
+        />
       </div>
 
       <footer className="hidden border-t border-slate-200 bg-white lg:block">
