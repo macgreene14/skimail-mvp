@@ -64,6 +64,9 @@ export function MapExplore({ resortCollection }) {
     togglePass,
     selectedResort, setSelectedResort,
     setRenderedResorts,
+    showSnowCover,
+    previousViewState, setPreviousViewState,
+    isResortView, setIsResortView,
   } = useMapStore();
 
   // Fetch snow data for all resorts
@@ -89,6 +92,51 @@ export function MapExplore({ resortCollection }) {
       })),
     };
   }, [snowData]);
+
+  // MODIS snow cover tile date (yesterday for availability)
+  const modisDate = useMemo(() => {
+    return new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  }, []);
+
+  // Fly to resort in 3D
+  const flyToResort = useCallback((resort) => {
+    const map = mapRef.current;
+    if (!map) return;
+    // Save current view before flying
+    setPreviousViewState({
+      longitude: viewState.longitude,
+      latitude: viewState.latitude,
+      zoom: viewState.zoom,
+      pitch: viewState.pitch || 0,
+      bearing: viewState.bearing || 0,
+    });
+    setIsResortView(true);
+    const coords = resort.geometry.coordinates;
+    map.flyTo({
+      center: coords,
+      zoom: 13,
+      pitch: 65,
+      bearing: -20,
+      duration: 2000,
+      essential: true,
+    });
+  }, [viewState, setPreviousViewState, setIsResortView]);
+
+  // Reset view back to globe
+  const resetView = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const prev = previousViewState || { longitude: -98, latitude: 39, zoom: 1.2, pitch: 0, bearing: 0 };
+    map.flyTo({
+      center: [prev.longitude, prev.latitude],
+      zoom: prev.zoom,
+      pitch: 0,
+      bearing: 0,
+      duration: 1500,
+      essential: true,
+    });
+    setIsResortView(false);
+  }, [previousViewState, setIsResortView]);
 
   // Build pass filter expressions
   const passFilter = useMemo(() => {
@@ -187,15 +235,15 @@ export function MapExplore({ resortCollection }) {
         return;
       }
       const f = features[0];
-      // Look up full resort data from collection
       const resort = resorts.find((r) => r.properties.slug === f.properties.slug);
       if (resort) {
         setSelectedResort(resort);
         const snowInfo = snowData?.find((d) => d.slug === resort.properties.slug);
         setPopupInfo({ resort, snowInfo });
+        flyToResort(resort);
       }
     },
-    [resorts, snowData, setSelectedResort, stopSpin]
+    [resorts, snowData, setSelectedResort, stopSpin, flyToResort]
   );
 
   // When selectedResort changes externally (e.g. from card click)
@@ -203,14 +251,9 @@ export function MapExplore({ resortCollection }) {
     if (selectedResort && mapRef.current) {
       const snowInfo = snowData?.find((d) => d.slug === selectedResort.properties.slug);
       setPopupInfo({ resort: selectedResort, snowInfo });
-      const coords = selectedResort.geometry.coordinates;
-      mapRef.current.flyTo({
-        center: coords,
-        zoom: Math.max(mapRef.current.getZoom(), 5),
-        offset: [0, mapRef.current.getContainer().clientHeight * 0.15],
-      });
+      flyToResort(selectedResort);
     }
-  }, [selectedResort, snowData]);
+  }, [selectedResort, snowData, flyToResort]);
 
   const onMapLoad = useCallback(() => {
     const map = mapRef.current;
@@ -223,8 +266,8 @@ export function MapExplore({ resortCollection }) {
       'space-color': 'rgb(11, 11, 25)',
       'star-intensity': 0.6,
     });
-    // Mobile padding
-    if (window.innerWidth < 1024) {
+    // Mobile padding (initial — will be updated by drawerSnap effect)
+    if (window.innerWidth < 640) {
       map.setPadding({ top: 0, right: 0, bottom: 80, left: 0 });
     }
     // Initial rendered resorts
@@ -257,6 +300,17 @@ export function MapExplore({ resortCollection }) {
     return () => document.removeEventListener('keydown', handleKey);
   }, [isFullscreen]);
 
+  // Update map padding based on mobile drawer snap point
+  const drawerSnap = useMapStore((s) => s.drawerSnap);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || window.innerWidth >= 640) return;
+    let bottom = 80;
+    if (drawerSnap >= 1) bottom = window.innerHeight * 0.85;
+    else if (drawerSnap >= 0.5) bottom = window.innerHeight * 0.5;
+    map.setPadding({ top: 0, right: 0, bottom, left: 0 });
+  }, [drawerSnap]);
+
   const interactiveLayerIds = useMemo(
     () => ['resort-dots-low', 'resort-dots-high'],
     []
@@ -279,10 +333,37 @@ export function MapExplore({ resortCollection }) {
         interactiveLayerIds={interactiveLayerIds}
         mapStyle={mapStyle}
         mapboxAccessToken={MAPBOX_TOKEN}
+        terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         projection="globe"
         style={{ width: '100%', height: '100%' }}
         cursor="auto"
       >
+        {/* Terrain DEM source — always present */}
+        <Source
+          id="mapbox-dem"
+          type="raster-dem"
+          url="mapbox://mapbox.mapbox-terrain-dem-v1"
+          tileSize={512}
+          maxzoom={14}
+        />
+
+        {/* NASA MODIS Snow Cover */}
+        <Source
+          id="modis-snow"
+          type="raster"
+          tiles={[`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDSI_Snow_Cover/default/${modisDate}/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png`]}
+          tileSize={256}
+          maxzoom={8}
+        />
+        {showSnowCover && (
+          <Layer
+            id="modis-snow-layer"
+            type="raster"
+            source="modis-snow"
+            paint={{ 'raster-opacity': 0.5 }}
+          />
+        )}
+
         <NavigationControl position="bottom-right" />
         <GeolocateControl
           position="top-left"
@@ -474,6 +555,33 @@ export function MapExplore({ resortCollection }) {
 
       {/* UI overlay */}
       <div className="pointer-events-none absolute inset-0" style={{ zIndex: 10 }}>
+        {/* Reset view button (visible when zoomed into a resort) */}
+        {isResortView && (
+          <button
+            onClick={resetView}
+            className="pointer-events-auto absolute bottom-[7.5rem] left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-2 text-xs font-semibold text-slate-800 shadow-lg transition-all hover:bg-white sm:bottom-14"
+          >
+            🌍 Back to Globe
+          </button>
+        )}
+
+        {/* Snow Cover toggle */}
+        <button
+          onClick={() => useMapStore.getState().toggleSnowCover()}
+          className={`pointer-events-auto absolute rounded-full px-2.5 py-1.5 text-[11px] font-bold backdrop-blur-sm transition-all ${
+            isResortView ? 'bottom-[7.5rem] right-28 sm:bottom-14' : 'bottom-[7.5rem] right-28 sm:bottom-14'
+          }`}
+          style={{
+            background: showSnowCover ? 'rgba(14,165,233,0.3)' : 'rgba(0,0,0,0.5)',
+            border: `2px solid ${showSnowCover ? '#0ea5e9' : 'rgba(255,255,255,0.2)'}`,
+            color: showSnowCover ? '#fff' : 'rgba(255,255,255,0.35)',
+            textShadow: showSnowCover ? '0 0 8px #0ea5e9' : 'none',
+          }}
+          title="Toggle NASA MODIS Snow Cover"
+        >
+          🛰️ Snow Cover
+        </button>
+
         {/* Spin toggle */}
         <button
           onClick={() => {
