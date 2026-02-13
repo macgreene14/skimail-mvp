@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { getPercentile } from "../utils/percentiles";
 
 const PASS_COLORS = {
@@ -12,8 +12,6 @@ const PASS_COLORS = {
 
 /**
  * CompactCard — individual resort card in the carousel.
- * Pointer-events are on each card, NOT on the scroll container.
- * This lets touches between cards pass through to the map.
  */
 function CompactCard({ resort, isSelected, onClick }) {
   const ref = useRef(null);
@@ -31,13 +29,12 @@ function CompactCard({ resort, isSelected, onClick }) {
     <div
       ref={ref}
       onClick={onClick}
-      className={`pointer-events-auto snap-center shrink-0 w-48 rounded-xl p-3 cursor-pointer transition-all border ${
+      className={`snap-center shrink-0 w-48 rounded-xl p-3 cursor-pointer transition-all border ${
         isSelected
           ? "bg-slate-800/95 border-sky-500/60 ring-1 ring-sky-500/30"
           : "bg-slate-900/90 border-white/10 hover:border-white/20"
       } backdrop-blur-xl`}
     >
-      {/* Pass badge + name */}
       <div className="flex items-center gap-1.5 mb-1">
         <span className={`shrink-0 rounded-full ${passColor} px-1.5 py-0.5 text-[9px] font-bold text-white leading-none`}>
           {passLabel}
@@ -47,7 +44,6 @@ function CompactCard({ resort, isSelected, onClick }) {
         </h3>
       </div>
 
-      {/* Location */}
       {(p.state !== "Unknown" || p.country !== "Unknown") && (
         <p className="truncate text-[10px] text-slate-400 mb-1.5">
           {[p.state !== "Unknown" ? p.state : null, p.country !== "Unknown" ? p.country : null]
@@ -56,7 +52,6 @@ function CompactCard({ resort, isSelected, onClick }) {
         </p>
       )}
 
-      {/* Stats row */}
       <div className="flex items-center gap-2 text-[10px] text-slate-300">
         {p.avg_snowfall && p.avg_snowfall !== "Unknown" && (
           <span>❄ {p.avg_snowfall}&quot;</span>
@@ -66,7 +61,6 @@ function CompactCard({ resort, isSelected, onClick }) {
         )}
       </div>
 
-      {/* Percentile bars */}
       <div className="flex items-center gap-1.5 mt-1.5">
         {[
           { stat: "avg_snowfall", val: p.avg_snowfall, color: "#38bdf8" },
@@ -93,16 +87,15 @@ function CompactCard({ resort, isSelected, onClick }) {
 /**
  * MobileCarousel — horizontal snap-scroll card strip.
  *
- * POINTER EVENTS:
- *  - Outer wrapper: pointer-events-none (touches pass to map)
- *  - Scroll container: pointer-events-none (gap touches pass to map)
- *  - Individual cards: pointer-events-auto (only cards capture touches)
- *
- * FILTERING:
- *  - `resorts` prop comes from useMapStore.filteredResorts via page.js
- *  - Sorted by snowfall descending, capped at 50 for performance
+ * TOUCH ISOLATION:
+ *  - Outer wrapper is pointer-events-none with fixed height matching card size
+ *  - Scroll container is pointer-events-auto for horizontal scroll
+ *  - Container height is constrained so vertical swipes above/below pass to map
+ *  - onTouchStart with stopPropagation prevents scroll gestures from panning the map
  */
 export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
+  const scrollRef = useRef(null);
+
   const sorted = resorts
     ?.slice()
     .sort((a, b) => {
@@ -112,12 +105,20 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
     })
     .slice(0, 50);
 
+  // Prevent carousel touch from bubbling to map
+  const onTouchStart = useCallback((e) => {
+    e.stopPropagation();
+  }, []);
+
   if (!sorted?.length) return null;
 
   return (
-    <div className="absolute bottom-4 left-0 right-0 z-20 sm:hidden pointer-events-none">
+    <div className="absolute bottom-2 left-0 right-0 z-20 sm:hidden pointer-events-none"
+         style={{ height: '100px' }}>
       <div
-        className="pointer-events-none flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2"
+        ref={scrollRef}
+        onTouchStart={onTouchStart}
+        className="pointer-events-auto h-full flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar items-center"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {sorted.map((resort) => (

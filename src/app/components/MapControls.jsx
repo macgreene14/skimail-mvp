@@ -221,7 +221,7 @@ export default function MapControls({
       </div>
 
       {/* ── Bottom-right: Spin globe (above carousel on mobile) ── */}
-      <div className="pointer-events-auto absolute bottom-24 right-3 sm:bottom-3">
+      <div className="pointer-events-auto absolute bottom-28 right-3 sm:bottom-3">
         <button
           onClick={() => {
             if (spinning) {
@@ -245,7 +245,7 @@ export default function MapControls({
       </div>
 
       {/* ── Bottom-left: Base map + Back to Globe (above carousel on mobile) ── */}
-      <div className="pointer-events-auto absolute bottom-24 left-3 flex items-end gap-2 sm:bottom-3">
+      <div className="pointer-events-auto absolute bottom-28 left-3 flex items-end gap-2 sm:bottom-3">
         <BaseMapSwitcher
           activeStyle={mapStyleKey}
           onStyleChange={(key) => setMapStyle(key, MAP_STYLES[key])}

@@ -101,10 +101,10 @@ export function MapExplore({ resortCollection }) {
     const coords = resort.geometry.coordinates;
     map.flyTo({
       center: coords,
-      zoom: 13,
-      pitch: 65,
-      bearing: -20,
-      duration: 2000,
+      zoom: 14.5,
+      pitch: 72,
+      bearing: -30,
+      duration: 2500,
       essential: true,
     });
   }, [setPreviousViewState, setIsResortView]);
@@ -333,7 +333,7 @@ export function MapExplore({ resortCollection }) {
         interactiveLayerIds={interactiveLayerIds}
         mapStyle={mapStyle}
         mapboxAccessToken={MAPBOX_TOKEN}
-        terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
+        terrain={{ source: 'mapbox-dem', exaggeration: 1.8 }}
         projection="globe"
         style={{ width: '100%', height: '100%' }}
         cursor="auto"
