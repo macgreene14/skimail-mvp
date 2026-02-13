@@ -399,14 +399,14 @@ export function MapExplore({ resortCollection }) {
           type="geojson"
           data={filteredGeoJSON}
           cluster={true}
-          clusterMaxZoom={6}
-          clusterRadius={50}
+          clusterMaxZoom={4}
+          clusterRadius={40}
         >
           {/* === Layer 1: Clusters (zoom 0-7) === */}
           <Layer
             id="clusters"
             type="circle"
-            maxzoom={7}
+            maxzoom={5}
             filter={['has', 'point_count']}
             paint={{
               'circle-radius': ['step', ['get', 'point_count'], 16, 10, 20, 50, 26, 200, 32],
@@ -427,7 +427,7 @@ export function MapExplore({ resortCollection }) {
           <Layer
             id="cluster-count"
             type="symbol"
-            maxzoom={7}
+            maxzoom={5}
             filter={['has', 'point_count']}
             layout={{
               'text-field': ['get', 'point_count_abbreviated'],
@@ -444,7 +444,7 @@ export function MapExplore({ resortCollection }) {
           <Layer
             id="resort-dots"
             type="circle"
-            minzoom={7}
+            minzoom={5}
             maxzoom={11}
             filter={['all', ['!', ['has', 'point_count']], passFilter]}
             paint={{
