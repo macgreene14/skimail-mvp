@@ -361,7 +361,7 @@ export function MapExplore({ resortCollection }) {
           />
         )}
 
-        <NavigationControl position="bottom-right" />
+        <NavigationControl position="top-left" />
         <GeolocateControl
           position="top-left"
           positionOptions={{ enableHighAccuracy: true }}

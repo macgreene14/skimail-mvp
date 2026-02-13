@@ -111,8 +111,8 @@ export default function MapControls({
 
   return (
     <div className="pointer-events-none absolute inset-0" style={{ zIndex: 30 }}>
-      {/* ── Top-left: Regions ── */}
-      <div className="pointer-events-auto absolute left-3 top-3">
+      {/* ── Top-left: Regions (below Mapbox nav/geolocate controls) ── */}
+      <div className="pointer-events-auto absolute left-3 top-[7.5rem]">
         <div className="relative">
           <button
             onClick={() => setRegionsOpen(!regionsOpen)}
