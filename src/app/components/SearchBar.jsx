@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 
-export function SearchBar({ data, setSearchResults }) {
+export function SearchBar({ data, setSearchResults, variant = "light" }) {
+  const isDark = variant === "dark";
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -42,7 +43,11 @@ export function SearchBar({ data, setSearchResults }) {
         </div>
         <input
           id="mobile-search"
-          className="block w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-ski-500 focus:outline-none focus:ring-2 focus:ring-ski-500/20 transition-shadow"
+          className={`block w-full rounded-xl border py-3 pl-11 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 transition-shadow ${
+            isDark
+              ? "border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus:border-sky-500 focus:ring-sky-500/20"
+              : "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-ski-500 focus:ring-ski-500/20"
+          }`}
           placeholder="Search all resorts by name, state, pass..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

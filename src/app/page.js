@@ -1,35 +1,34 @@
 "use client";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { MapExplore } from "./components/MapExplore.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { SearchBar } from "./components/SearchBar.jsx";
+import { MobileDrawer } from "./components/MobileDrawer.jsx";
 import QueryProvider from "./providers/QueryProvider.jsx";
 import useMapStore from "./store/useMapStore";
 import resortCollection from "../../assets/resorts.json";
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return isMobile;
+}
+
 function AppContent() {
   const resorts = resortCollection.features;
   const [searchResults, setSearchResults] = useState(null);
-  const [showResults, setShowResults] = useState(false);
+  const isMobile = useIsMobile();
 
   const renderedResorts = useMapStore((s) => s.renderedResorts);
   const selectedResort = useMapStore((s) => s.selectedResort);
   const setSelectedResort = useMapStore((s) => s.setSelectedResort);
 
   const displayedResorts = searchResults !== null ? searchResults : (renderedResorts.length ? renderedResorts : resorts);
-
-  // Swipe gesture for bottom sheet
-  const touchStart = useRef(null);
-  const onTouchStart = useCallback((e) => {
-    touchStart.current = e.touches[0].clientY;
-  }, []);
-  const onTouchEnd = useCallback((e) => {
-    if (touchStart.current === null) return;
-    const delta = touchStart.current - e.changedTouches[0].clientY;
-    if (delta > 40) setShowResults(true);
-    if (delta < -40) setShowResults(false);
-    touchStart.current = null;
-  }, []);
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
@@ -58,36 +57,13 @@ function AppContent() {
           <MapExplore resortCollection={resortCollection} />
         </div>
 
-        <div
-          className={`absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] transition-all duration-300 ease-in-out ${
-            showResults ? "max-h-[60vh]" : "max-h-14"
-          }`}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        >
-          <button
-            onClick={() => setShowResults(!showResults)}
-            className="flex w-full flex-col items-center px-4 py-2"
-          >
-            <div className="mb-1 h-1 w-10 rounded-full bg-slate-300" />
-            <span className="text-sm font-semibold text-slate-700">
-              {showResults ? "Hide resorts" : `📋 ${displayedResorts.length} resorts${searchResults !== null ? "" : " in view"}`}
-            </span>
-          </button>
-
-          {showResults && (
-            <div className="flex flex-1 flex-col gap-2 overflow-hidden px-3 pb-3">
-              <SearchBar data={resorts} setSearchResults={setSearchResults} />
-              <div className="min-h-0 flex-1 overflow-auto rounded-xl">
-                <ResultsContainer
-                  resorts={displayedResorts}
-                  setSelectedResort={setSelectedResort}
-                  selectedResort={selectedResort}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        {isMobile && (
+          <MobileDrawer
+            resorts={resorts}
+            displayedResorts={displayedResorts}
+            setSearchResults={setSearchResults}
+          />
+        )}
       </div>
 
       <footer className="hidden border-t border-slate-200 bg-white lg:block">
