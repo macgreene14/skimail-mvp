@@ -404,3 +404,4 @@ with open(RESORTS_FILE, 'w') as f:
     json.dump(data, f, ensure_ascii=False)
 
 print(f"\nSaved!")
+# Updated Thu Feb 12 22:02:06 MST 2026
