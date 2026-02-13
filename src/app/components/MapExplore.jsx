@@ -200,8 +200,8 @@ export function MapExplore({ resortCollection }) {
     }
     // Query visible features from both layers
     const layers = [];
-    if (map.getLayer('resort-dots-low')) layers.push('resort-dots-low');
-    if (map.getLayer('resort-dots-high')) layers.push('resort-dots-high');
+    if (map.getLayer('resort-dots')) layers.push('resort-dots');
+    if (map.getLayer('resort-markers')) layers.push('resort-markers');
     if (layers.length === 0) {
       setRenderedResorts(resorts);
       return;
@@ -235,6 +235,23 @@ export function MapExplore({ resortCollection }) {
         return;
       }
       const f = features[0];
+
+      // Handle cluster click — zoom into the cluster
+      if (f.properties.cluster) {
+        const map = mapRef.current;
+        if (!map) return;
+        const source = map.getSource('resorts');
+        source.getClusterExpansionZoom(f.properties.cluster_id, (err, zoom) => {
+          if (err) return;
+          map.flyTo({
+            center: f.geometry.coordinates,
+            zoom: Math.min(zoom, 11),
+            duration: 800,
+          });
+        });
+        return;
+      }
+
       const resort = resorts.find((r) => r.properties.slug === f.properties.slug);
       if (resort) {
         setSelectedResort(resort);
@@ -312,7 +329,7 @@ export function MapExplore({ resortCollection }) {
   }, [drawerSnap]);
 
   const interactiveLayerIds = useMemo(
-    () => ['resort-dots-low', 'resort-dots-high'],
+    () => ['clusters', 'resort-dots', 'resort-markers'],
     []
   );
 
@@ -373,16 +390,62 @@ export function MapExplore({ resortCollection }) {
           fitBoundsOptions={{ maxZoom: 5 }}
         />
 
-        {/* Resort source */}
-        <Source id="resorts" type="geojson" data={resortCollection}>
-          {/* Low zoom: small circles (0-7) */}
+        {/* Resort source with clustering */}
+        <Source
+          id="resorts"
+          type="geojson"
+          data={resortCollection}
+          cluster={true}
+          clusterMaxZoom={6}
+          clusterRadius={50}
+        >
+          {/* === Layer 1: Clusters (zoom 0-7) === */}
           <Layer
-            id="resort-dots-low"
+            id="clusters"
             type="circle"
-            maxzoom={8}
-            filter={passFilter}
+            maxzoom={7}
+            filter={['has', 'point_count']}
             paint={{
-              'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, 3, 7, 5],
+              'circle-radius': ['step', ['get', 'point_count'], 16, 10, 20, 50, 26, 200, 32],
+              'circle-color': [
+                'step', ['get', 'point_count'],
+                '#3b82f6',  // small clusters — Ikon blue
+                10, '#7c3aed', // medium — purple
+                50, '#f97316', // large — orange
+                200, '#ef4444', // very large — red
+              ],
+              'circle-stroke-width': 2,
+              'circle-stroke-color': 'rgba(255,255,255,0.4)',
+              'circle-opacity': 0.85,
+            }}
+          />
+
+          {/* === Layer 2: Cluster count labels (zoom 0-7) === */}
+          <Layer
+            id="cluster-count"
+            type="symbol"
+            maxzoom={7}
+            filter={['has', 'point_count']}
+            layout={{
+              'text-field': ['get', 'point_count_abbreviated'],
+              'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
+              'text-size': 12,
+              'text-allow-overlap': true,
+            }}
+            paint={{
+              'text-color': '#ffffff',
+            }}
+          />
+
+          {/* === Layer 3: Mid-zoom individual dots (zoom 7-11) === */}
+          <Layer
+            id="resort-dots"
+            type="circle"
+            minzoom={7}
+            maxzoom={11}
+            filter={['all', ['!', ['has', 'point_count']], passFilter]}
+            paint={{
+              'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 4, 10, 6],
               'circle-color': [
                 'match',
                 ['get', 'pass'],
@@ -398,14 +461,14 @@ export function MapExplore({ resortCollection }) {
             }}
           />
 
-          {/* High zoom: larger markers (8+) */}
+          {/* === Layer 4: Close-zoom large markers (zoom 11+) === */}
           <Layer
-            id="resort-dots-high"
+            id="resort-markers"
             type="circle"
-            minzoom={8}
-            filter={passFilter}
+            minzoom={11}
+            filter={['all', ['!', ['has', 'point_count']], passFilter]}
             paint={{
-              'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 8, 14, 12],
+              'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 10, 14, 14],
               'circle-color': [
                 'match',
                 ['get', 'pass'],
@@ -421,17 +484,17 @@ export function MapExplore({ resortCollection }) {
             }}
           />
 
-          {/* High zoom: resort name labels */}
+          {/* === Layer 5: Resort name labels (zoom 11+) === */}
           <Layer
             id="resort-labels"
             type="symbol"
-            minzoom={8}
-            filter={passFilter}
+            minzoom={11}
+            filter={['all', ['!', ['has', 'point_count']], passFilter]}
             layout={{
               'text-field': ['get', 'name'],
               'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
-              'text-size': 11,
-              'text-offset': [0, 1.5],
+              'text-size': ['interpolate', ['linear'], ['zoom'], 11, 11, 14, 13],
+              'text-offset': [0, 1.8],
               'text-allow-overlap': false,
               'text-max-width': 8,
               'text-optional': true,
