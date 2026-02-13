@@ -251,13 +251,12 @@ export function MapExplore({ resortCollection }) {
 
       const resort = resorts.find((r) => r.properties.slug === f.properties.slug);
       if (resort) {
+        // Only set selection — the useEffect on selectedResort handles flyTo + popup
+        lastFlewToRef.current = null; // clear so effect will fly
         setSelectedResort(resort);
-        const snowInfo = snowData?.find((d) => d.slug === resort.properties.slug);
-        setPopupInfo({ resort, snowInfo });
-        flyToResort(resort);
       }
     },
-    [resorts, snowData, setSelectedResort, stopSpin, flyToResort]
+    [resorts, setSelectedResort, stopSpin]
   );
 
   // When selectedResort changes externally (e.g. from card click)
