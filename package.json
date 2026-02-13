@@ -13,6 +13,9 @@
     "@heroicons/react": "^2.0.18",
     "@hotjar/browser": "^1.0.9",
     "@tailwindcss/forms": "^0.5.4",
+    "@tanstack/query-sync-storage-persister": "^5.90.22",
+    "@tanstack/react-query": "^5.90.21",
+    "@tanstack/react-query-persist-client": "^5.90.22",
     "@vercel/analytics": "^1.0.2",
     "autoprefixer": "10.4.14",
     "eslint": "8.46.0",
@@ -22,7 +25,9 @@
     "postcss": "8.4.27",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
-    "tailwindcss": "3.3.3"
+    "react-map-gl": "^7.1.9",
+    "tailwindcss": "3.3.3",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "prettier": "^3.0.3",
