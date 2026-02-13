@@ -818,8 +818,7 @@ const PopupContent = ({ selectedResort, snowData, stats }) => {
 
   return (
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", minWidth: '200px', maxWidth: '280px' }}>
-      <a href={'/skimail-mvp/resorts/' + p.slug} target="_blank" rel="noopener noreferrer"
-        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+      <div style={{ display: 'block' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
           {passLink ? (
             <a href={passLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{
@@ -892,10 +891,7 @@ const PopupContent = ({ selectedResort, snowData, stats }) => {
           </div>
         )}
 
-        <div style={{ fontSize: '11px', fontWeight: '600', color: passColor, display: 'flex', alignItems: 'center', gap: '4px' }}>
-          View details <span style={{ fontSize: '13px' }}>→</span>
-        </div>
-      </a>
+      </div>
     </div>
   );
 };

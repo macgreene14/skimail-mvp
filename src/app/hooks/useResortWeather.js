@@ -64,12 +64,18 @@ export function useResortWeather(lat, lng, enabled = true) {
 
 /**
  * Hook to batch-fetch snow data for an array of resorts.
+ * Only fetches pass resorts (Ikon/Epic/MC/Indy) — not all 4K independents.
  * Splits into batches of BATCH_SIZE and fetches in parallel.
  */
 export function useBatchSnowData(resorts, enabled = true) {
+  // Only fetch weather for pass-affiliated resorts to avoid 100+ API calls
+  const passResorts = resorts.filter(
+    (r) => r.properties.pass && r.properties.pass !== 'Independent'
+  );
+
   const batches = [];
-  for (let i = 0; i < resorts.length; i += BATCH_SIZE) {
-    batches.push(resorts.slice(i, i + BATCH_SIZE));
+  for (let i = 0; i < passResorts.length; i += BATCH_SIZE) {
+    batches.push(passResorts.slice(i, i + BATCH_SIZE));
   }
 
   const queries = useQueries({

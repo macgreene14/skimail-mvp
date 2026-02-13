@@ -105,18 +105,7 @@ export function Card({ resort, isSelected, onClick, resortsLength }) {
         </div>
       </div>
 
-      {/* Right: link */}
-      <Link
-        href={`/resorts/${slug}`}
-        target="_blank"
-        onClick={(e) => e.stopPropagation()}
-        className="shrink-0 rounded-lg bg-slate-100 p-2 transition-colors hover:bg-slate-200"
-        style={{ minHeight: "44px", minWidth: "44px", display: "flex", alignItems: "center", justifyContent: "center" }}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 6.90909C10.8999 5.50893 9.20406 4.10877 5.00119 4.00602C4.72513 3.99928 4.5 4.22351 4.5 4.49965C4.5 6.54813 4.5 14.3034 4.5 16.597C4.5 16.8731 4.72515 17.09 5.00114 17.099C9.20405 17.2364 10.8999 19.0998 12 20.5M12 6.90909C13.1001 5.50893 14.7959 4.10877 18.9988 4.00602C19.2749 3.99928 19.5 4.21847 19.5 4.49461C19.5 6.78447 19.5 14.3064 19.5 16.5963C19.5 16.8724 19.2749 17.09 18.9989 17.099C14.796 17.2364 13.1001 19.0998 12 20.5M12 6.90909L12 20.5" stroke="#475569" strokeWidth="1.5" strokeLinejoin="round"/>
-        </svg>
-      </Link>
+      {/* Spacer for layout */}
     </div>
   );
 }
