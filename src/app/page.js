@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import { MapExplore } from "./components/MapExplore.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { MobileCarousel } from "./components/MobileCarousel.jsx";
@@ -10,12 +10,11 @@ import resortCollection from "../../assets/resorts.json";
 /**
  * AppContent — top-level layout.
  *
- * Filters live in Zustand (useMapStore). Pass toggles drive:
- *   1. Map layer visibility (via filteredGeoJSON in MapExplore)
- *   2. Carousel cards (via filteredResorts selector)
- *   3. Desktop sidebar results (same selector)
- *
- * No local filter state here — single source of truth in the store.
+ * Data flow:
+ *   Pass toggles (Zustand) → passFilteredResorts (this component)
+ *   Viewport query (MapExplore onMoveEnd) → filteredResorts (Zustand)
+ *   Display = intersection of both: viewport resorts filtered by active passes
+ *   Fallback: if no viewport data yet, show all pass-filtered resorts
  */
 function AppContent() {
   const resorts = resortCollection.features;
@@ -23,8 +22,28 @@ function AppContent() {
   const selectedResort = useMapStore((s) => s.selectedResort);
   const setSelectedResort = useMapStore((s) => s.setSelectedResort);
   const filteredResorts = useMapStore((s) => s.filteredResorts);
+  const showIkon = useMapStore((s) => s.showIkon);
+  const showEpic = useMapStore((s) => s.showEpic);
+  const showMC = useMapStore((s) => s.showMC);
+  const showIndy = useMapStore((s) => s.showIndy);
+  const showIndependent = useMapStore((s) => s.showIndependent);
 
-  const displayedResorts = filteredResorts.length ? filteredResorts : resorts;
+  // Active passes set — drives carousel/sidebar filtering
+  const activePasses = useMemo(() => {
+    const passes = new Set();
+    if (showIkon) passes.add("Ikon");
+    if (showEpic) passes.add("Epic");
+    if (showMC) passes.add("Mountain Collective");
+    if (showIndy) passes.add("Indy");
+    if (showIndependent) passes.add("Independent");
+    return passes;
+  }, [showIkon, showEpic, showMC, showIndy, showIndependent]);
+
+  // Display resorts: viewport-filtered if available, else all — always pass-filtered
+  const displayedResorts = useMemo(() => {
+    const base = filteredResorts.length > 0 ? filteredResorts : resorts;
+    return base.filter((r) => activePasses.has(r.properties?.pass));
+  }, [filteredResorts, resorts, activePasses]);
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
@@ -52,7 +71,6 @@ function AppContent() {
           <MapExplore resortCollection={resortCollection} />
         </div>
 
-        {/* Horizontal card carousel — driven by Zustand pass filters */}
         <MobileCarousel
           resorts={displayedResorts}
           selectedResort={selectedResort}

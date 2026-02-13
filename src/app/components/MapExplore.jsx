@@ -191,24 +191,21 @@ export function MapExplore({ resortCollection }) {
   }, [userStopped]);
 
   // Update rendered resorts on move
+  // Update rendered resorts on move — only when zoomed in enough for dots/markers.
+  // At globe zoom (<5), don't update — let pass filters in page.js handle it.
+  // Skip during spin to avoid constant resets from easeTo animation.
   const onMoveEnd = useCallback(() => {
+    if (spinning) return; // spin easeTo fires onMoveEnd constantly
     const map = mapRef.current;
     if (!map) return;
     const zoom = map.getZoom();
-    if (zoom < 3) {
-      setRenderedResorts(resorts);
-      return;
-    }
-    // Query visible features from both layers
+    if (zoom < 5) return; // dots layer starts at minzoom 5, no point querying before
     const layers = [];
     if (map.getLayer('resort-dots')) layers.push('resort-dots');
     if (map.getLayer('resort-markers')) layers.push('resort-markers');
-    if (layers.length === 0) {
-      setRenderedResorts(resorts);
-      return;
-    }
+    if (layers.length === 0) return;
     const features = map.queryRenderedFeatures(undefined, { layers });
-    if (features) {
+    if (features?.length) {
       const seen = new Set();
       const unique = features.filter((f) => {
         if (seen.has(f.properties.slug)) return false;
@@ -217,7 +214,7 @@ export function MapExplore({ resortCollection }) {
       });
       setRenderedResorts(unique);
     }
-  }, [resorts, setRenderedResorts]);
+  }, [spinning, setRenderedResorts]);
 
   // Uncontrolled mode — no onMove needed. Map manages its own viewState.
   // Read position from mapRef.current when needed (flyToResort, resetView, etc.)
