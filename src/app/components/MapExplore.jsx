@@ -214,8 +214,10 @@ export function MapExplore({ resortCollection }) {
   useEffect(() => {
     if (!spinning && mapRef.current) {
       const timer = setTimeout(() => {
-        const map = mapRef.current;
-        if (!map || map.getZoom() < 5) return;
+        const mapWrapper = mapRef.current;
+        if (!mapWrapper) return;
+        const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
+        if (map.getZoom() < 5) return;
         const layers = [];
         if (map.getLayer('resort-dots')) layers.push('resort-dots');
         if (map.getLayer('resort-markers')) layers.push('resort-markers');
@@ -236,11 +238,12 @@ export function MapExplore({ resortCollection }) {
   }, [spinning, setRenderedResorts]);
 
   const onMoveEnd = useCallback(() => {
-    if (spinningRef.current) return; // spin easeTo fires onMoveEnd constantly
-    const map = mapRef.current;
-    if (!map) return;
+    if (spinningRef.current) return;
+    const mapWrapper = mapRef.current;
+    if (!mapWrapper) return;
+    const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
     const zoom = map.getZoom();
-    if (zoom < 5) return; // dots layer starts at minzoom 5
+    if (zoom < 5) return;
     const layers = [];
     if (map.getLayer('resort-dots')) layers.push('resort-dots');
     if (map.getLayer('resort-markers')) layers.push('resort-markers');
@@ -323,8 +326,10 @@ export function MapExplore({ resortCollection }) {
   }, [selectedResort]); // intentionally minimal deps — flyToResort is stable via useCallback
 
   const onMapLoad = useCallback(() => {
-    const map = mapRef.current;
-    if (!map) return;
+    const mapWrapper = mapRef.current;
+    if (!mapWrapper) return;
+    // getMap() returns the raw Mapbox GL map instance for addImage/setFog
+    const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
 
     // Create SDF marker images for each pass type
     const size = 32;
@@ -412,8 +417,10 @@ export function MapExplore({ resortCollection }) {
 
   // Re-apply fog on style change
   const onStyleData = useCallback(() => {
-    const map = mapRef.current;
-    if (!map) return;
+    const mapWrapper = mapRef.current;
+    if (!mapWrapper) return;
+    const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
+    if (!map.setFog) return;
     const isDark = mapStyleKey === 'dark' || mapStyleKey === 'satellite';
     map.setFog({
       color: isDark ? 'rgb(20, 20, 40)' : 'rgb(186, 210, 235)',
