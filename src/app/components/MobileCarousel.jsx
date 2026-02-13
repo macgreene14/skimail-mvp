@@ -27,7 +27,7 @@ function CompactCard({ resort, isSelected, onClick }) {
     <div
       ref={ref}
       onClick={onClick}
-      className={`snap-center shrink-0 w-48 rounded-xl p-3 cursor-pointer transition-all border ${
+      className={`pointer-events-auto snap-center shrink-0 w-48 rounded-xl p-3 cursor-pointer transition-all border ${
         isSelected
           ? "bg-slate-800/95 border-sky-500/60 ring-1 ring-sky-500/30"
           : "bg-slate-900/90 border-white/10 hover:border-white/20"
@@ -100,7 +100,7 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
 
   return (
     <div className="absolute bottom-4 left-0 right-0 z-20 sm:hidden pointer-events-none">
-      <div className="pointer-events-auto flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2"
+      <div className="flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 pointer-events-none"
            style={{ WebkitOverflowScrolling: 'touch' }}>
         {sorted.map((resort) => (
           <CompactCard

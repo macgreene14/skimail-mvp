@@ -6,7 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import useMapStore from '../store/useMapStore';
 import { useBatchSnowData } from '../hooks/useResortWeather';
 import { getPercentile } from '../utils/percentiles';
-import BaseMapSwitcher from './BaseMapSwitcher';
+import MapControls from './MapControls';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
@@ -32,19 +32,7 @@ const PASS_LINKS = {
   Indy: 'https://www.indyskipass.com/',
 };
 
-const REGIONS = [
-  { label: '🌎 Global', lat: 20, lng: -30, zoom: 1.2 },
-  { label: '🇺🇸 USA', lat: 41.0, lng: -101.0, zoom: 2.7 },
-  { label: '⛰️ Rockies', lat: 40.7, lng: -109.7, zoom: 4.9 },
-  { label: '🌲 PNW', lat: 45.6, lng: -120.7, zoom: 5.5 },
-  { label: '☀️ California', lat: 37.0, lng: -121.0, zoom: 5.3 },
-  { label: '🏔️ Eastern US', lat: 41.4, lng: -78.9, zoom: 4.5 },
-  { label: '🍁 Canada', lat: 51.3, lng: -119.4, zoom: 4.6 },
-  { label: '🇪🇺 Europe', lat: 45.6, lng: 6.6, zoom: 4.4 },
-  { label: '🗾 Japan', lat: 38.4, lng: 136.2, zoom: 3.8 },
-  { label: '🌏 Oceania', lat: -38.1, lng: 156.2, zoom: 2.5 },
-  { label: '🏔️ S. America', lat: -34.9, lng: -72.4, zoom: 5.0 },
-];
+// REGIONS moved to MapControls.jsx
 
 export function MapExplore({ resortCollection }) {
   const resorts = resortCollection.features;
@@ -54,14 +42,12 @@ export function MapExplore({ resortCollection }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [spinning, setSpinning] = useState(true);
   const [userStopped, setUserStopped] = useState(false);
-  const [regionsOpen, setRegionsOpen] = useState(false);
   const [popupInfo, setPopupInfo] = useState(null);
 
   const {
     viewState, setViewState,
-    mapStyle, mapStyleKey, setMapStyle,
+    mapStyle, mapStyleKey,
     showIkon, showEpic, showMC, showIndy, showIndependent, showSnow,
-    togglePass,
     selectedResort, setSelectedResort,
     setRenderedResorts,
     showSnowCover,
@@ -102,13 +88,14 @@ export function MapExplore({ resortCollection }) {
   const flyToResort = useCallback((resort) => {
     const map = mapRef.current;
     if (!map) return;
-    // Save current view before flying
+    // Save current view before flying — read directly from map instance to avoid viewState dependency
+    const center = map.getCenter();
     setPreviousViewState({
-      longitude: viewState.longitude,
-      latitude: viewState.latitude,
-      zoom: viewState.zoom,
-      pitch: viewState.pitch || 0,
-      bearing: viewState.bearing || 0,
+      longitude: center.lng,
+      latitude: center.lat,
+      zoom: map.getZoom(),
+      pitch: map.getPitch() || 0,
+      bearing: map.getBearing() || 0,
     });
     setIsResortView(true);
     const coords = resort.geometry.coordinates;
@@ -120,7 +107,7 @@ export function MapExplore({ resortCollection }) {
       duration: 2000,
       essential: true,
     });
-  }, [viewState, setPreviousViewState, setIsResortView]);
+  }, [setPreviousViewState, setIsResortView]);
 
   // Reset view back to globe
   const resetView = useCallback(() => {
@@ -318,10 +305,6 @@ export function MapExplore({ resortCollection }) {
       'star-intensity': isDark ? 0.9 : 0.6,
     });
   }, [mapStyleKey]);
-
-  const toggleFullscreen = useCallback(() => {
-    setIsFullscreen((prev) => !prev);
-  }, []);
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -619,146 +602,16 @@ export function MapExplore({ resortCollection }) {
         )}
       </Map>
 
-      {/* UI overlay */}
-      <div className="pointer-events-none absolute inset-0" style={{ zIndex: 30 }}>
-        {/* Reset view button (visible when zoomed into a resort) */}
-        {isResortView && (
-          <button
-            onClick={resetView}
-            className="pointer-events-auto absolute bottom-28 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-2 text-xs font-semibold text-slate-800 shadow-lg transition-all hover:bg-white sm:bottom-14"
-          >
-            🌍 Back to Globe
-          </button>
-        )}
-
-        {/* Snow Cover toggle */}
-        <button
-          onClick={() => useMapStore.getState().toggleSnowCover()}
-          className="pointer-events-auto absolute rounded-full px-2.5 py-1.5 text-[11px] font-bold backdrop-blur-sm transition-all bottom-28 right-28 sm:bottom-14"
-          style={{
-            background: showSnowCover ? 'rgba(14,165,233,0.3)' : 'rgba(0,0,0,0.5)',
-            border: `2px solid ${showSnowCover ? '#0ea5e9' : 'rgba(255,255,255,0.2)'}`,
-            color: showSnowCover ? '#fff' : 'rgba(255,255,255,0.35)',
-            textShadow: showSnowCover ? '0 0 8px #0ea5e9' : 'none',
-          }}
-          title="Toggle NASA MODIS Snow Cover"
-        >
-          🛰️ Snow Cover
-        </button>
-
-        {/* Spin toggle */}
-        <button
-          onClick={() => {
-            if (spinning) {
-              stopSpin();
-            } else {
-              setUserStopped(false);
-              setSpinning(true);
-              if (mapRef.current && mapRef.current.getZoom() >= 3.5) {
-                mapRef.current.flyTo({ center: mapRef.current.getCenter(), zoom: 1.2 });
-              }
-            }
-          }}
-          className={`pointer-events-auto absolute flex items-center gap-1.5 rounded-full backdrop-blur-sm transition-all ${
-            spinning
-              ? 'bottom-28 right-3 bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90 sm:bottom-14'
-              : 'bottom-28 right-3 bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500 sm:bottom-14'
-          }`}
-        >
-          {spinning ? '⏸ Pause' : '🌍 Spin Globe'}
-        </button>
-
-        {/* Regions dropdown */}
-        <div className="pointer-events-auto absolute left-3 top-3">
-          <div className="relative">
-            <button
-              onClick={() => setRegionsOpen(!regionsOpen)}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-all"
-              style={{
-                background: regionsOpen ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.4)',
-                border: '1.5px solid rgba(255,255,255,0.15)',
-                color: 'rgba(255,255,255,0.8)',
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-              Regions
-            </button>
-            {regionsOpen && (
-              <div
-                className="absolute left-0 top-full mt-1 min-w-[140px] rounded-xl p-1 backdrop-blur-xl"
-                style={{
-                  background: 'rgba(15,23,42,0.92)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-                  zIndex: 100,
-                }}
-              >
-                {REGIONS.map((region) => (
-                  <button
-                    key={region.label}
-                    onClick={() => {
-                      const zoom = window.innerWidth <= 768 ? region.zoom - 0.75 : region.zoom;
-                      stopSpin();
-                      mapRef.current?.flyTo({ center: [region.lng, region.lat], zoom, bearing: 0 });
-                      setRegionsOpen(false);
-                    }}
-                    className="block w-full rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-white/80 transition-colors hover:bg-white/10"
-                  >
-                    {region.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Pass toggle pills */}
-        <div className="pointer-events-auto absolute right-3 top-3 flex flex-wrap items-start justify-end gap-1.5 max-w-[200px] sm:max-w-none sm:flex-nowrap">
-          {[
-            { label: 'Ikon', key: 'showIkon', active: showIkon, color: '#74a5f2' },
-            { label: 'Epic', key: 'showEpic', active: showEpic, color: '#f97316' },
-            { label: 'MC', key: 'showMC', active: showMC, color: '#7c3aed' },
-            { label: 'Indy', key: 'showIndy', active: showIndy, color: '#16a34a' },
-            { label: 'Other', key: 'showIndependent', active: showIndependent, color: '#9ca3af' },
-            { label: 'Snow', key: 'showSnow', active: showSnow, color: '#38bdf8' },
-          ].map((ctrl) => (
-            <button
-              key={ctrl.label}
-              onClick={() => {
-                if (ctrl.key === 'showSnow') {
-                  useMapStore.getState().toggleSnow();
-                } else {
-                  togglePass(ctrl.key);
-                }
-              }}
-              className="rounded-full px-2.5 py-1 text-[11px] font-bold backdrop-blur-sm transition-all"
-              style={{
-                background: ctrl.active ? `${ctrl.color}33` : 'rgba(0,0,0,0.5)',
-                border: `2px solid ${ctrl.active ? ctrl.color : 'rgba(255,255,255,0.2)'}`,
-                color: ctrl.active ? '#fff' : 'rgba(255,255,255,0.35)',
-                textShadow: ctrl.active ? `0 0 8px ${ctrl.color}` : 'none',
-              }}
-            >
-              {ctrl.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Bottom bar */}
-        <div className="pointer-events-auto absolute bottom-28 left-3 right-3 flex items-end justify-between sm:bottom-3">
-          <BaseMapSwitcher
-            activeStyle={mapStyleKey}
-            onStyleChange={(key) => setMapStyle(key, MAP_STYLES[key])}
-            mapboxToken={MAPBOX_TOKEN}
-          />
-          <button
-            onClick={toggleFullscreen}
-            className="hidden items-center rounded-lg bg-black/50 px-2.5 py-1.5 text-xs font-medium text-white/80 backdrop-blur-sm transition-all hover:bg-black/70 hover:text-white sm:flex"
-          >
-            {isFullscreen ? '✕' : '⛶'}
-          </button>
-        </div>
-      </div>
+      {/* Consolidated map controls */}
+      <MapControls
+        mapRef={mapRef}
+        spinning={spinning}
+        setSpinning={setSpinning}
+        stopSpin={stopSpin}
+        setUserStopped={setUserStopped}
+        isResortView={isResortView}
+        resetView={resetView}
+      />
     </div>
   );
 }

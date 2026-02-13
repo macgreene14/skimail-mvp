@@ -45,10 +45,10 @@ function AppContent() {
           <MapExplore resortCollection={resortCollection} />
         </div>
 
-        {/* Floating search bar */}
-        <div className="absolute top-3 left-3 right-14 z-20 pointer-events-none sm:hidden">
+        {/* Floating search bar — positioned to avoid regions (left) and filters (right) */}
+        <div className="absolute top-3 left-28 right-24 z-20 pointer-events-none sm:hidden">
           <div className="pointer-events-auto">
-          <SearchBar data={resorts} setSearchResults={setSearchResults} variant="dark" />
+            <SearchBar data={resorts} setSearchResults={setSearchResults} variant="dark" />
           </div>
         </div>
 
