@@ -60,14 +60,19 @@ export function MapExplore({ resortCollection }) {
   // Fetch snow data for pass resorts
   const { data: snowData } = useBatchSnowData(resorts, showSnow);
 
-  // Populate snowBySlug in Zustand so any component can look up snow data
+  // Populate snowBySlug in Zustand so any component can look up snow data.
+  // Key on snowData length + first/last slug to avoid infinite re-render loop
+  // (TanStack Query returns new array refs even when data is unchanged).
+  const snowKey = snowData?.length
+    ? `${snowData.length}-${snowData[0]?.slug}-${snowData[snowData.length - 1]?.slug}`
+    : '';
   useEffect(() => {
     if (snowData?.length) {
       const map = {};
       snowData.forEach((d) => { map[d.slug] = d; });
       setSnowBySlug(map);
     }
-  }, [snowData, setSnowBySlug]);
+  }, [snowKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Active passes set — used to filter snow data
   const activePasses = useMemo(() => {
