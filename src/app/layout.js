@@ -1,9 +1,6 @@
 import "./globals.css";
 import { NavBar } from "./components/NavBar.jsx";
 import { Inter } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
-import HotJar from "../../utils/HotJar";
-import GA from "../../utils/GA";
 
 const font = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
@@ -40,9 +37,6 @@ export default function RootLayout({ children }) {
         <NavBar />
         {children}
       </body>
-      <Analytics />
-      <GA />
-      <HotJar />
     </html>
   );
 }
