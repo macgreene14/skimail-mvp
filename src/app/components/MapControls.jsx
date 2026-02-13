@@ -81,7 +81,7 @@ export default function MapControls({
     { label: "Epic", key: "showEpic", active: showEpic, color: PASS_COLORS.Epic },
     { label: "MC", key: "showMC", active: showMC, color: PASS_COLORS["Mountain Collective"] },
     { label: "Indy", key: "showIndy", active: showIndy, color: PASS_COLORS.Indy },
-    { label: "Other", key: "showIndependent", active: showIndependent, color: PASS_COLORS.Independent },
+    { label: "Unaffiliated", key: "showIndependent", active: showIndependent, color: PASS_COLORS.Independent },
     { label: "Snow", key: "showSnow", active: showSnow, color: PASS_COLORS.Snow },
   ];
 
