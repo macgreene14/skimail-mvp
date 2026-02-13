@@ -267,6 +267,75 @@ export function MapExplore({ resortCollection }) {
   const onMapLoad = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
+
+    // Create SDF marker images for each pass type
+    const size = 32;
+    const createMarkerImage = (drawFn) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      drawFn(ctx, size);
+      return ctx.getImageData(0, 0, size, size);
+    };
+
+    // Circle (Ikon)
+    map.addImage('marker-ikon', createMarkerImage((ctx, s) => {
+      ctx.beginPath();
+      ctx.arc(s / 2, s / 2, s / 2 - 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }), { sdf: true });
+
+    // Diamond (Epic)
+    map.addImage('marker-epic', createMarkerImage((ctx, s) => {
+      const cx = s / 2, cy = s / 2, r = s / 2 - 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r);
+      ctx.lineTo(cx + r, cy);
+      ctx.lineTo(cx, cy + r);
+      ctx.lineTo(cx - r, cy);
+      ctx.closePath();
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }), { sdf: true });
+
+    // Triangle (Mountain Collective)
+    map.addImage('marker-mc', createMarkerImage((ctx, s) => {
+      const cx = s / 2, r = s / 2 - 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, 2);
+      ctx.lineTo(cx + r, s - 2);
+      ctx.lineTo(cx - r, s - 2);
+      ctx.closePath();
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }), { sdf: true });
+
+    // Star (Indy)
+    map.addImage('marker-indy', createMarkerImage((ctx, s) => {
+      const cx = s / 2, cy = s / 2, outerR = s / 2 - 2, innerR = outerR * 0.4;
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? outerR : innerR;
+        const angle = (Math.PI / 2) * -1 + (Math.PI / 5) * i;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }), { sdf: true });
+
+    // Small dot (Independent)
+    map.addImage('marker-independent', createMarkerImage((ctx, s) => {
+      ctx.beginPath();
+      ctx.arc(s / 2, s / 2, s / 4, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }), { sdf: true });
+
     // Set fog/atmosphere
     map.setFog({
       color: 'rgb(186, 210, 235)',
@@ -413,18 +482,29 @@ export function MapExplore({ resortCollection }) {
             }}
           />
 
-          {/* === Layer 3: Mid-zoom individual dots (zoom 7-11) === */}
+          {/* === Layer 3: Mid-zoom individual dots (zoom 5-11) === */}
           <Layer
             id="resort-dots"
-            type="circle"
+            type="symbol"
             minzoom={5}
             maxzoom={11}
             filter={['all', ['!', ['has', 'point_count']], passFilter]}
+            layout={{
+              'icon-image': [
+                'match', ['get', 'pass'],
+                'Ikon', 'marker-ikon',
+                'Epic', 'marker-epic',
+                'Mountain Collective', 'marker-mc',
+                'Indy', 'marker-indy',
+                'Independent', 'marker-independent',
+                'marker-independent',
+              ],
+              'icon-size': ['interpolate', ['linear'], ['zoom'], 5, 0.35, 10, 0.55],
+              'icon-allow-overlap': true,
+            }}
             paint={{
-              'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 4, 10, 6],
-              'circle-color': [
-                'match',
-                ['get', 'pass'],
+              'icon-color': [
+                'match', ['get', 'pass'],
                 'Ikon', '#3b82f6',
                 'Epic', '#f97316',
                 'Mountain Collective', '#7c3aed',
@@ -432,22 +512,31 @@ export function MapExplore({ resortCollection }) {
                 'Independent', '#6b7280',
                 '#6b7280',
               ],
-              'circle-stroke-width': 1,
-              'circle-stroke-color': 'rgba(255,255,255,0.5)',
             }}
           />
 
           {/* === Layer 4: Close-zoom large markers (zoom 11+) === */}
           <Layer
             id="resort-markers"
-            type="circle"
+            type="symbol"
             minzoom={11}
             filter={['all', ['!', ['has', 'point_count']], passFilter]}
+            layout={{
+              'icon-image': [
+                'match', ['get', 'pass'],
+                'Ikon', 'marker-ikon',
+                'Epic', 'marker-epic',
+                'Mountain Collective', 'marker-mc',
+                'Indy', 'marker-indy',
+                'Independent', 'marker-independent',
+                'marker-independent',
+              ],
+              'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.7, 14, 1.0],
+              'icon-allow-overlap': true,
+            }}
             paint={{
-              'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 10, 14, 14],
-              'circle-color': [
-                'match',
-                ['get', 'pass'],
+              'icon-color': [
+                'match', ['get', 'pass'],
                 'Ikon', '#3b82f6',
                 'Epic', '#f97316',
                 'Mountain Collective', '#7c3aed',
@@ -455,8 +544,6 @@ export function MapExplore({ resortCollection }) {
                 'Independent', '#6b7280',
                 '#6b7280',
               ],
-              'circle-stroke-width': 2,
-              'circle-stroke-color': 'rgba(255,255,255,0.7)',
             }}
           />
 
