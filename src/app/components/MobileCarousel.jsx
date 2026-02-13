@@ -93,13 +93,15 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
       const A = parseFloat(a.properties.avg_snowfall) || 0;
       const B = parseFloat(b.properties.avg_snowfall) || 0;
       return B - A;
-    });
+    })
+    .slice(0, 50); // Limit to 50 cards for performance
 
   if (!sorted?.length) return null;
 
   return (
-    <div className="absolute bottom-20 left-0 right-0 z-30 sm:hidden">
-      <div className="flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2">
+    <div className="absolute bottom-4 left-0 right-0 z-20 sm:hidden pointer-events-none">
+      <div className="pointer-events-auto flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2"
+           style={{ WebkitOverflowScrolling: 'touch' }}>
         {sorted.map((resort) => (
           <CompactCard
             key={resort.properties.slug || resort.properties.name}

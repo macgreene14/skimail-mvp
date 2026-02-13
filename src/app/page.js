@@ -46,8 +46,10 @@ function AppContent() {
         </div>
 
         {/* Floating search bar */}
-        <div className="absolute top-14 left-3 right-14 z-30 sm:hidden">
+        <div className="absolute top-3 left-3 right-14 z-20 pointer-events-none sm:hidden">
+          <div className="pointer-events-auto">
           <SearchBar data={resorts} setSearchResults={setSearchResults} variant="dark" />
+          </div>
         </div>
 
         {/* Horizontal card carousel */}

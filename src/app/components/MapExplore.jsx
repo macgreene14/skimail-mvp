@@ -625,7 +625,7 @@ export function MapExplore({ resortCollection }) {
         {isResortView && (
           <button
             onClick={resetView}
-            className="pointer-events-auto absolute bottom-[7.5rem] left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-2 text-xs font-semibold text-slate-800 shadow-lg transition-all hover:bg-white sm:bottom-14"
+            className="pointer-events-auto absolute bottom-28 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-2 text-xs font-semibold text-slate-800 shadow-lg transition-all hover:bg-white sm:bottom-14"
           >
             🌍 Back to Globe
           </button>
@@ -634,9 +634,7 @@ export function MapExplore({ resortCollection }) {
         {/* Snow Cover toggle */}
         <button
           onClick={() => useMapStore.getState().toggleSnowCover()}
-          className={`pointer-events-auto absolute rounded-full px-2.5 py-1.5 text-[11px] font-bold backdrop-blur-sm transition-all ${
-            isResortView ? 'bottom-[7.5rem] right-28 sm:bottom-14' : 'bottom-[7.5rem] right-28 sm:bottom-14'
-          }`}
+          className="pointer-events-auto absolute rounded-full px-2.5 py-1.5 text-[11px] font-bold backdrop-blur-sm transition-all bottom-28 right-28 sm:bottom-14"
           style={{
             background: showSnowCover ? 'rgba(14,165,233,0.3)' : 'rgba(0,0,0,0.5)',
             border: `2px solid ${showSnowCover ? '#0ea5e9' : 'rgba(255,255,255,0.2)'}`,
@@ -663,8 +661,8 @@ export function MapExplore({ resortCollection }) {
           }}
           className={`pointer-events-auto absolute flex items-center gap-1.5 rounded-full backdrop-blur-sm transition-all ${
             spinning
-              ? 'bottom-[7.5rem] right-3 bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90 sm:bottom-14'
-              : 'bottom-[7.5rem] right-3 bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500 sm:bottom-14'
+              ? 'bottom-28 right-3 bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90 sm:bottom-14'
+              : 'bottom-28 right-3 bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500 sm:bottom-14'
           }`}
         >
           {spinning ? '⏸ Pause' : '🌍 Spin Globe'}
@@ -747,7 +745,7 @@ export function MapExplore({ resortCollection }) {
         </div>
 
         {/* Bottom bar */}
-        <div className="pointer-events-auto absolute bottom-20 left-3 right-3 flex items-end justify-between sm:bottom-3">
+        <div className="pointer-events-auto absolute bottom-28 left-3 right-3 flex items-end justify-between sm:bottom-3">
           <BaseMapSwitcher
             activeStyle={mapStyleKey}
             onStyleChange={(key) => setMapStyle(key, MAP_STYLES[key])}
