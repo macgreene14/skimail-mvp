@@ -40,7 +40,7 @@ export function MapExplore({ resortCollection }) {
   const spinTimerRef = useRef(null);
   const idleTimerRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [spinning, setSpinning] = useState(true);
+  const [spinning, setSpinning] = useState(false);
   const [userStopped, setUserStopped] = useState(false);
   const [popupInfo, setPopupInfo] = useState(null);
 
@@ -160,21 +160,18 @@ export function MapExplore({ resortCollection }) {
     return { snowfall: vals('avg_snowfall'), vertical: vals('vertical_drop'), acres: vals('skiable_acres') };
   }, [resorts]);
 
-  // Globe spin
+  // Globe spin — updates viewState through Zustand (not imperative easeTo)
+  // so react-map-gl controlled mode stays in sync.
   useEffect(() => {
     if (!spinning || userStopped) return;
     spinTimerRef.current = setInterval(() => {
-      const map = mapRef.current;
-      if (!map) return;
-      const zoom = map.getZoom();
-      if (zoom < 3.5) {
-        const center = map.getCenter();
-        center.lng += 0.8;
-        map.easeTo({ center, duration: 50, easing: (t) => t });
+      const vs = useMapStore.getState().viewState;
+      if (vs.zoom < 3.5) {
+        setViewState({ ...vs, longitude: vs.longitude + 0.3 });
       }
     }, 50);
     return () => clearInterval(spinTimerRef.current);
-  }, [spinning, userStopped]);
+  }, [spinning, userStopped, setViewState]);
 
   const stopSpin = useCallback(() => {
     setSpinning(false);
