@@ -269,6 +269,9 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
   const currentZoom = useMapStore((s) => s.currentZoom);
   const isDetailView = currentZoom >= 11;
 
+  // Hide carousel at globe zoom — users pick a region first
+  if (currentZoom < 5 && !selectedResort) return null;
+
   const sorted = resorts
     ?.slice()
     .sort((a, b) => {

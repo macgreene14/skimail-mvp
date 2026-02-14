@@ -308,6 +308,17 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort })
   const currentZoom = useMapStore((s) => s.currentZoom);
   const isDetailView = currentZoom >= 11;
 
+  // Hide results at globe zoom — users pick a region first
+  if (currentZoom < 5 && !selectedResort) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center text-center px-6">
+        <div className="text-3xl mb-3">🌍</div>
+        <p className="text-sm font-medium text-slate-300">Select a region to explore</p>
+        <p className="text-[11px] text-slate-500 mt-1">Click a region marker on the globe</p>
+      </div>
+    );
+  }
+
   const sorted = resorts
     ?.slice()
     .sort((a, b) => {
