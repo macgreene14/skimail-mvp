@@ -11,7 +11,7 @@
 
 const BATCH_SIZE = 40;
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
-const MAX_API_CALLS = 30; // max batched requests per session
+const MAX_API_CALLS = 120; // max batched requests per session (increased for all resorts)
 
 let apiCallCount = 0;
 
@@ -27,7 +27,7 @@ async function fetchBatch(resorts) {
   const url =
     `https://api.open-meteo.com/v1/forecast?` +
     `latitude=${lats}&longitude=${lngs}` +
-    `&current=temperature_2m,snow_depth,snowfall` +
+    `&current=temperature_2m,snow_depth,snowfall,wind_speed_10m,weather_code` +
     `&daily=snowfall_sum` +
     `&forecast_days=7` +
     `&timezone=auto`;
@@ -51,6 +51,8 @@ async function fetchBatch(resorts) {
     snowfall_7d: d.daily?.snowfall_sum
       ? d.daily.snowfall_sum.reduce((a, b) => a + (b || 0), 0)
       : null,
+    wind_speed: d.current?.wind_speed_10m ?? null,
+    weather_code: d.current?.weather_code ?? null,
     fetchedAt: Date.now(),
   }));
 }

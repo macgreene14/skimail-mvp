@@ -57,8 +57,11 @@ export function MapExplore({ resortCollection }) {
 
   const setSnowBySlug = useMapStore((s) => s.setSnowBySlug);
 
-  // Fetch snow data for pass resorts
-  const { data: snowData } = useBatchSnowData(resorts, showSnow);
+  // Track viewport-visible slugs for tiered snow fetching
+  const [visibleSlugs, setVisibleSlugs] = useState(null);
+
+  // Fetch snow data: pass resorts + viewport independents, with prefetch seed
+  const { data: snowData } = useBatchSnowData(resorts, showSnow, visibleSlugs);
 
   // Populate snowBySlug in Zustand so any component can look up snow data.
   // Key on snowData length + first/last slug to avoid infinite re-render loop
@@ -247,6 +250,7 @@ export function MapExplore({ resortCollection }) {
             return true;
           });
           setRenderedResorts(unique);
+          setVisibleSlugs(unique.map((f) => f.properties.slug));
         }
       }, 300);
       return () => clearTimeout(timer);
@@ -273,6 +277,7 @@ export function MapExplore({ resortCollection }) {
         return true;
       });
       setRenderedResorts(unique);
+      setVisibleSlugs(unique.map((f) => f.properties.slug));
     }
   }, [setRenderedResorts]);
 
