@@ -6,6 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import useMapStore from '../store/useMapStore';
 import { useBatchSnowData } from '../hooks/useResortWeather';
 import MapControls from './MapControls';
+import useAutoSelect from '../hooks/useAutoSelect';
 import regionsManifest from '../../../assets/regions.json';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
@@ -38,6 +39,7 @@ export function MapExplore({ resortCollection }) {
   const spinTimerRef = useRef(null);
   const idleTimerRef = useRef(null);
   const lastFlewToRef = useRef(null);
+  const clickedFromMapRef = useRef(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [spinning, setSpinning] = useState(true);
   const [userStopped, setUserStopped] = useState(false);
@@ -56,6 +58,9 @@ export function MapExplore({ resortCollection }) {
   } = useMapStore();
 
   const setSnowBySlug = useMapStore((s) => s.setSnowBySlug);
+
+  // Auto-select/deselect based on zoom + viewport
+  useAutoSelect();
 
   const setPisteData = useMapStore((s) => s.setPisteData);
   const pisteData = useMapStore((s) => s.pisteData);
@@ -351,10 +356,14 @@ export function MapExplore({ resortCollection }) {
       const resort = resorts.find((r) => r.properties.slug === f.properties.slug);
       if (resort) {
         setHighlightedSlug(resort.properties.slug);
+        // Mark as map click so the useEffect doesn't double-fly
+        clickedFromMapRef.current = true;
+        lastFlewToRef.current = resort.properties.slug;
         setSelectedResort(resort);
+        flyToResort(resort);
       }
     },
-    [resorts, setSelectedResort, setHighlightedSlug, stopSpin]
+    [resorts, setSelectedResort, setHighlightedSlug, stopSpin, flyToResort]
   );
 
   // Region marker click — fly to region
@@ -396,9 +405,14 @@ export function MapExplore({ resortCollection }) {
     lastFlewToRef.current = null;
   }, [lastRegion, setSelectedResort, setIsResortView]);
 
-  // When selectedResort changes externally (e.g. from card click)
+  // When selectedResort changes externally (e.g. from card click or auto-select)
   useEffect(() => {
     if (!selectedResort || !mapRef.current) return;
+    // Skip if this was triggered by a map marker click (already flew)
+    if (clickedFromMapRef.current) {
+      clickedFromMapRef.current = false;
+      return;
+    }
     const slug = selectedResort.properties?.slug;
     if (slug === lastFlewToRef.current) return;
     lastFlewToRef.current = slug;
@@ -711,7 +725,7 @@ export function MapExplore({ resortCollection }) {
             }}
           />
 
-          {/* === Layer 4: Close-zoom large markers (zoom 11+) === */}
+          {/* === Layer 4: Close-zoom combined markers (icon + label + snow) (zoom 11+) === */}
           <Layer
             id="resort-markers"
             type="symbol"
@@ -729,6 +743,24 @@ export function MapExplore({ resortCollection }) {
               ],
               'icon-size': ['interpolate', ['linear'], ['zoom'], 11, 0.7, 14, 1.0],
               'icon-allow-overlap': true,
+              'icon-anchor': 'bottom',
+              'text-field': [
+                'case',
+                ['has', 'snow_7d'],
+                ['format',
+                  ['get', 'name'], {},
+                  '\n', {},
+                  ['concat', '❄ ', ['to-string', ['get', 'snow_7d']], '"'], { 'font-scale': 0.85 },
+                ],
+                ['get', 'name'],
+              ],
+              'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
+              'text-size': ['interpolate', ['linear'], ['zoom'], 11, 11, 14, 14],
+              'text-offset': [0, 0.3],
+              'text-anchor': 'top',
+              'text-allow-overlap': true,
+              'text-max-width': 8,
+              'text-line-height': 1.2,
             }}
             paint={{
               'icon-color': [
@@ -740,25 +772,6 @@ export function MapExplore({ resortCollection }) {
                 'Independent', '#6b7280',
                 '#6b7280',
               ],
-            }}
-          />
-
-          {/* === Layer 5: Resort name labels (zoom 11+) === */}
-          <Layer
-            id="resort-labels"
-            type="symbol"
-            minzoom={11}
-            filter={passFilter}
-            layout={{
-              'text-field': ['get', 'name'],
-              'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
-              'text-size': ['interpolate', ['linear'], ['zoom'], 11, 11, 14, 13],
-              'text-offset': [0, 1.8],
-              'text-allow-overlap': false,
-              'text-max-width': 8,
-              'text-optional': true,
-            }}
-            paint={{
               'text-color': isDark ? '#e2e8f0' : '#1e293b',
               'text-halo-color': isDark ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)',
               'text-halo-width': 1.5,
