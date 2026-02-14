@@ -233,7 +233,7 @@ export default function MapControls({
             ⏸ Pause
           </button>
         )}
-        {!spinning && currentZoom > 4 && (
+        {!spinning && (
           <button
             onClick={() => {
               setUserStopped(false);
