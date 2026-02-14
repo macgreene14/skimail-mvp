@@ -113,7 +113,8 @@ Single resort focus with 3D terrain and trail overlay.
 - Piste toggle (show/hide trails)
 
 **Transitions out:**
-- Click ‹ back → **Region View** (flyTo zoom 7, pitch 0, bearing 0)
+- Click ‹ back → **Region View** (flyTo last region center, zoom 7, pitch 0, bearing 0)
+- Click 🌍 Spin Globe → **Globe View** (flyTo zoom 1.8, pitch 0, bearing 0, auto-rotation resumes)
 - Click different resort card → **Detail View** for new resort
 - Pinch-zoom out past zoom 10 → natural transition to **Region View**
 
@@ -138,4 +139,5 @@ No explicit state machine needed — zoom is the single source of truth.
 3. **Piste data lazy-loaded** — fetched on first Detail View entry per resort, cached after
 4. **Cards update on `moveEnd`** — viewport query populates `filteredResorts` in Zustand
 5. **Search works at any zoom** — selecting a result always flies to Detail View
-6. **Back button context-aware** — Detail→Region, Region→Globe, Globe→hidden
+6. **‹ Back exits Detail→Region only** — does NOT go to globe
+7. **Spin Globe is the only way back to Globe View** — always available, resumes auto-rotation
