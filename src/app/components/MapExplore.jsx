@@ -9,10 +9,10 @@ import MapControls from './MapControls';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
-// Piste trail data URL (static GeoJSON served from public/data/)
-const PISTE_DATA_URL = typeof window !== 'undefined'
-  ? `${window.location.origin}/skimail-mvp/data/pistes.geojson`
-  : '/skimail-mvp/data/pistes.geojson';
+// Per-resort piste data base URL
+const PISTE_BASE_URL = typeof window !== 'undefined'
+  ? `${window.location.origin}/skimail-mvp/data/pistes`
+  : '/skimail-mvp/data/pistes';
 
 const MAP_STYLES = {
   skimail: 'mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8',
@@ -59,6 +59,21 @@ export function MapExplore({ resortCollection }) {
   } = useMapStore();
 
   const setSnowBySlug = useMapStore((s) => s.setSnowBySlug);
+
+  // Per-resort piste data (lazy loaded)
+  const [pisteData, setPisteData] = useState(null);
+  useEffect(() => {
+    if (!selectedResort || !showPistes) { setPisteData(null); return; }
+    const assets = selectedResort.properties?.assets;
+    const slug = selectedResort.properties?.slug;
+    if (!assets?.pistes || !slug) { setPisteData(null); return; }
+    let cancelled = false;
+    fetch(`${PISTE_BASE_URL}/${slug}.geojson`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (!cancelled) setPisteData(data); })
+      .catch(() => { if (!cancelled) setPisteData(null); });
+    return () => { cancelled = true; };
+  }, [selectedResort, showPistes]);
 
   // Track viewport-visible slugs for tiered snow fetching
   const [visibleSlugs, setVisibleSlugs] = useState(null);
@@ -531,8 +546,8 @@ export function MapExplore({ resortCollection }) {
         </Source>
 
         {/* Piste trails — visible at high zoom */}
-        {showPistes && (
-          <Source id="pistes" type="geojson" data={PISTE_DATA_URL}>
+        {showPistes && pisteData && (
+          <Source id="pistes" type="geojson" data={pisteData}>
             <Layer
               id="piste-runs"
               type="line"
