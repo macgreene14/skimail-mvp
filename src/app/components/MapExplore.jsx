@@ -58,6 +58,8 @@ export function MapExplore({ resortCollection }) {
   } = useMapStore();
 
   const setSnowBySlug = useMapStore((s) => s.setSnowBySlug);
+  const pendingBackToRegion = useMapStore((s) => s.pendingBackToRegion);
+  const clearPendingBackToRegion = useMapStore((s) => s.clearPendingBackToRegion);
 
   // Auto-select/deselect based on zoom + viewport
   // useAutoSelect(); // disabled — fights user zoom-out
@@ -404,6 +406,28 @@ export function MapExplore({ resortCollection }) {
     setIsResortView(false);
     lastFlewToRef.current = null;
   }, [lastRegion, setSelectedResort, setIsResortView]);
+
+  // Back-to-region triggered from cards/results panel
+  useEffect(() => {
+    if (pendingBackToRegion) {
+      clearPendingBackToRegion();
+      const map = mapRef.current;
+      if (!map) return;
+      let target = lastRegion;
+      if (!target) {
+        const center = map.getCenter();
+        let closest = REGION_MARKERS[0];
+        let minDist = Infinity;
+        REGION_MARKERS.forEach((r) => {
+          const d = Math.pow(r.lat - center.lat, 2) + Math.pow(r.lng - center.lng, 2);
+          if (d < minDist) { minDist = d; closest = r; }
+        });
+        target = { lng: closest.lng, lat: closest.lat, zoom: closest.zoom };
+      }
+      map.flyTo({ center: [target.lng, target.lat], zoom: 7, pitch: 0, bearing: 0, duration: 1500, essential: true });
+      lastFlewToRef.current = null;
+    }
+  }, [pendingBackToRegion, clearPendingBackToRegion, lastRegion]);
 
   // When selectedResort changes externally (e.g. from card click or auto-select)
   useEffect(() => {

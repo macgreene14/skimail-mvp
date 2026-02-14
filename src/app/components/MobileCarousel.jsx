@@ -149,7 +149,7 @@ function MobileSearchBar({ searchQuery, setSearchQuery }) {
   );
 }
 
-function ExpandedMobileCard({ resort }) {
+function ExpandedMobileCard({ resort, onBack }) {
   const snowBySlug = useMapStore((s) => s.snowBySlug);
   const pisteData = useMapStore((s) => s.pisteData);
   const p = resort.properties;
@@ -176,7 +176,16 @@ function ExpandedMobileCard({ resort }) {
   const totalTrails = Object.values(trailCounts).reduce((s, c) => s + c, 0);
 
   return (
-    <div className="snap-center shrink-0 w-72 rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl">
+    <div className="snap-center shrink-0 w-full rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl">
+      {/* Back button */}
+      {onBack && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onBack(); }}
+          className="flex items-center gap-1 mb-2 text-[11px] text-sky-400 hover:text-sky-300 transition-colors"
+        >
+          <span>‹</span> Back to Region
+        </button>
+      )}
       <div className="flex items-center gap-1.5 mb-1">
         {passLink ? (
           <a href={passLink} target="_blank" rel="noopener noreferrer"
@@ -288,7 +297,7 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {isDetailView && selectedResort && (
-          <ExpandedMobileCard key="expanded-detail" resort={selectedResort} />
+          <ExpandedMobileCard key="expanded-detail" resort={selectedResort} onBack={useMapStore.getState().triggerBackToRegion} />
         )}
         {sorted?.map((resort) => {
           const isSelected = resort.properties.name === selectedResort?.properties?.name;

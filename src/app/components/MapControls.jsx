@@ -247,24 +247,7 @@ export default function MapControls({
         )}
       </div>
 
-      {/* ── Top-left: Back arrow (visible in Detail View only — zoom ≥ 11) ── */}
-      {currentZoom >= 11 && (
-        <div className="pointer-events-auto absolute left-3 top-3">
-          <button
-            onClick={flyToRegion}
-            className="flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all hover:bg-white/20"
-            style={{
-              background: "rgba(15,23,42,0.7)",
-              border: "1px solid rgba(255,255,255,0.15)",
-            }}
-            title="Back to region"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-        </div>
-      )}
+      {/* Back button moved to detail card — no longer on map overlay */}
 
       {/* ── Bottom-left: Base map (above carousel on mobile) ── */}
       <div className="pointer-events-auto absolute bottom-28 left-3 flex items-end gap-2 sm:bottom-3">
