@@ -8,6 +8,7 @@ import { useBatchSnowData } from '../hooks/useResortWeather';
 import MapControls from './MapControls';
 // import useAutoSelect from '../hooks/useAutoSelect'; // disabled — fights user zoom-out
 import regionsManifest from '../../../assets/regions.json';
+import cameraAngles from '../../../public/data/camera-angles.json';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
@@ -185,12 +186,13 @@ export function MapExplore({ resortCollection }) {
       bearing: map.getBearing() || 0,
     });
     setIsResortView(true);
-    const coords = resort.geometry.coordinates;
+    const slug = resort.properties?.slug;
+    const cam = slug && cameraAngles[slug];
     map.flyTo({
-      center: coords,
-      zoom: 14.5,
-      pitch: 72,
-      bearing: -30,
+      center: cam ? cam.center : resort.geometry.coordinates,
+      zoom: cam ? cam.zoom : 14.5,
+      pitch: cam ? cam.pitch : 72,
+      bearing: cam ? cam.bearing : -30,
       duration: 2500,
       essential: true,
     });
@@ -438,7 +440,7 @@ export function MapExplore({ resortCollection }) {
       return;
     }
     const slug = selectedResort.properties?.slug;
-    if (slug === lastFlewToRef.current) return;
+    // Always fly — removed slug dedup check that blocked re-selection from global view
     lastFlewToRef.current = slug;
     flyToResort(selectedResort);
   }, [selectedResort]); // intentionally minimal deps — flyToResort is stable via useCallback

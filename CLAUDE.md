@@ -139,6 +139,18 @@ After every push, verify the deployed site via Playwright browser:
 - Safari-specific failures (test mobile viewport too)
 - `beforeId` referencing non-existent layers (timing-dependent)
 
+## Data Pipelines
+
+### `scripts/compute_camera_angles.py`
+Reads all `public/data/pistes/{slug}.geojson` files and computes optimal 3D camera parameters (center, zoom, pitch, bearing) for each resort based on piste geometry. Outputs `public/data/camera-angles.json`.
+
+- **Re-run when**: piste GeoJSON files are added/updated
+- **Command**: `python3 scripts/compute_camera_angles.py`
+- **Input**: `public/data/pistes/*.geojson`
+- **Output**: `public/data/camera-angles.json`
+
+The app imports `camera-angles.json` in `MapExplore.jsx` and uses it in `flyToResort` to set per-resort center, zoom, pitch, and bearing. Falls back to defaults if a slug isn't found.
+
 ## Stack
 - Next.js 13.4 (static export, `output: "export"`)
 - react-map-gl + Mapbox GL JS

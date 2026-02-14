@@ -1,0 +1,1136 @@
+{
+  "able_hakuba_goryu": {
+    "center": [
+      137.830288,
+      36.66408
+    ],
+    "zoom": 11.5,
+    "pitch": 75,
+    "bearing": 229.6
+  },
+  "afton_alps": {
+    "center": [
+      -92.782672,
+      44.858669
+    ],
+    "zoom": 13.5,
+    "pitch": 73.2,
+    "bearing": 262.4
+  },
+  "alpine_valley": {
+    "center": [
+      -81.262336,
+      41.528528
+    ],
+    "zoom": 14.5,
+    "pitch": 57.3,
+    "bearing": 309.7
+  },
+  "alta": {
+    "center": [
+      -111.61878,
+      40.588289
+    ],
+    "zoom": 11.5,
+    "pitch": 60.2,
+    "bearing": 172.9
+  },
+  "alyeska": {
+    "center": [
+      -149.115098,
+      60.966928
+    ],
+    "zoom": 12.5,
+    "pitch": 60.9,
+    "bearing": 120.0
+  },
+  "andermatt-sedrun": {
+    "center": [
+      8.598852,
+      46.627475
+    ],
+    "zoom": 11.5,
+    "pitch": 57.6,
+    "bearing": 164.1
+  },
+  "arapahoe_basin": {
+    "center": [
+      -105.892185,
+      39.649735
+    ],
+    "zoom": 11.5,
+    "pitch": 68.1,
+    "bearing": 163.5
+  },
+  "aspen_highlands": {
+    "center": [
+      -106.852389,
+      39.18388
+    ],
+    "zoom": 11.5,
+    "pitch": 64.0,
+    "bearing": 201.7
+  },
+  "aspen_mountain": {
+    "center": [
+      -106.835541,
+      39.188804
+    ],
+    "zoom": 11.5,
+    "pitch": 65.7,
+    "bearing": 201.7
+  },
+  "attitash": {
+    "center": [
+      -71.219507,
+      44.108463
+    ],
+    "zoom": 11.5,
+    "pitch": 58.6,
+    "bearing": 165.3
+  },
+  "banff_sunshine": {
+    "center": [
+      -115.768458,
+      51.091987
+    ],
+    "zoom": 12.5,
+    "pitch": 69.8,
+    "bearing": 131.2
+  },
+  "bear_mountain": {
+    "center": [
+      -116.875304,
+      34.234391
+    ],
+    "zoom": 12.5,
+    "pitch": 64.3,
+    "bearing": 183.9
+  },
+  "beaver_creek": {
+    "center": [
+      -106.528814,
+      39.599822
+    ],
+    "zoom": 12.5,
+    "pitch": 64.7,
+    "bearing": 193.8
+  },
+  "big_boulder": {
+    "center": [
+      -75.627258,
+      41.079424
+    ],
+    "zoom": 12.5,
+    "pitch": 69.1,
+    "bearing": 182.0
+  },
+  "big_sky": {
+    "center": [
+      -111.395608,
+      45.276408
+    ],
+    "zoom": 11.5,
+    "pitch": 61.0,
+    "bearing": 238.9
+  },
+  "blue_mountain": {
+    "center": [
+      -80.323295,
+      44.491224
+    ],
+    "zoom": 11.5,
+    "pitch": 66.8,
+    "bearing": 217.5
+  },
+  "boston_mills": {
+    "center": [
+      -81.539852,
+      41.246872
+    ],
+    "zoom": 12.5,
+    "pitch": 72.0,
+    "bearing": 226.3
+  },
+  "boyne_mountain": {
+    "center": [
+      -84.944248,
+      45.163614
+    ],
+    "zoom": 13.5,
+    "pitch": 60.4,
+    "bearing": 201.0
+  },
+  "brandywine": {
+    "center": [
+      -81.539852,
+      41.246872
+    ],
+    "zoom": 12.5,
+    "pitch": 72.0,
+    "bearing": 244.9
+  },
+  "breckenridge": {
+    "center": [
+      -106.066387,
+      39.470733
+    ],
+    "zoom": 10.5,
+    "pitch": 58.9,
+    "bearing": 228.3
+  },
+  "brighton": {
+    "center": [
+      -111.579799,
+      40.606135
+    ],
+    "zoom": 11.5,
+    "pitch": 58.8,
+    "bearing": 181.3
+  },
+  "buttermilk": {
+    "center": [
+      -106.871651,
+      39.200122
+    ],
+    "zoom": 11.5,
+    "pitch": 63.7,
+    "bearing": 202.8
+  },
+  "chamonix": {
+    "center": [
+      6.888204,
+      45.916057
+    ],
+    "zoom": 11.5,
+    "pitch": 68.8,
+    "bearing": 339.5
+  },
+  "copper_mountain": {
+    "center": [
+      -106.135438,
+      39.490082
+    ],
+    "zoom": 11.5,
+    "pitch": 60.1,
+    "bearing": 206.5
+  },
+  "coronet_peak": {
+    "center": [
+      168.738201,
+      -44.922286
+    ],
+    "zoom": 13.5,
+    "pitch": 58.1,
+    "bearing": 355.0
+  },
+  "crans_montana": {
+    "center": [
+      7.462269,
+      46.306664
+    ],
+    "zoom": 10.5,
+    "pitch": 67.0,
+    "bearing": 308.2
+  },
+  "crested_butte": {
+    "center": [
+      -106.961861,
+      38.902767
+    ],
+    "zoom": 10.5,
+    "pitch": 57.0,
+    "bearing": 184.5
+  },
+  "crotched": {
+    "center": [
+      -71.871964,
+      43.007664
+    ],
+    "zoom": 13.5,
+    "pitch": 55.8,
+    "bearing": 182.2
+  },
+  "crystal_mountain_wa": {
+    "center": [
+      -121.493451,
+      46.931017
+    ],
+    "zoom": 12.5,
+    "pitch": 71.5,
+    "bearing": 255.9
+  },
+  "cypress": {
+    "center": [
+      -123.191638,
+      49.392002
+    ],
+    "zoom": 12.5,
+    "pitch": 64.9,
+    "bearing": 324.6
+  },
+  "deer_valley": {
+    "center": [
+      -111.494331,
+      40.637378
+    ],
+    "zoom": 11.5,
+    "pitch": 64.4,
+    "bearing": 212.4
+  },
+  "eldora": {
+    "center": [
+      -105.581725,
+      39.93355
+    ],
+    "zoom": 12.5,
+    "pitch": 59.0,
+    "bearing": 239.3
+  },
+  "falls_creek": {
+    "center": [
+      147.299478,
+      -36.8798
+    ],
+    "zoom": 12.5,
+    "pitch": 57.5,
+    "bearing": 290.0
+  },
+  "fernie": {
+    "center": [
+      -115.121902,
+      49.472816
+    ],
+    "zoom": 11.5,
+    "pitch": 63.8,
+    "bearing": 256.3
+  },
+  "grandvalira": {
+    "center": [
+      1.641162,
+      42.557472
+    ],
+    "zoom": 11.5,
+    "pitch": 55.9,
+    "bearing": 181.9
+  },
+  "hakuba_47": {
+    "center": [
+      137.834166,
+      36.688856
+    ],
+    "zoom": 11.5,
+    "pitch": 75,
+    "bearing": 241.3
+  },
+  "hakuba_cortina": {
+    "center": [
+      137.856447,
+      36.751241
+    ],
+    "zoom": 11.5,
+    "pitch": 65.5,
+    "bearing": 280.8
+  },
+  "hakuba_happo-one": {
+    "center": [
+      137.838077,
+      36.707771
+    ],
+    "zoom": 11.5,
+    "pitch": 75,
+    "bearing": 241.5
+  },
+  "hakuba_iwatake": {
+    "center": [
+      137.845272,
+      36.712862
+    ],
+    "zoom": 11.5,
+    "pitch": 75,
+    "bearing": 252.8
+  },
+  "hakuba_norikura_": {
+    "center": [
+      137.851995,
+      36.74246
+    ],
+    "zoom": 11.5,
+    "pitch": 67.3,
+    "bearing": 275.1
+  },
+  "heavenly": {
+    "center": [
+      -119.91196,
+      38.939719
+    ],
+    "zoom": 12.5,
+    "pitch": 62.8,
+    "bearing": 187.2
+  },
+  "hidden_valley_mo": {
+    "center": [
+      -90.661432,
+      38.52502
+    ],
+    "zoom": 13.5,
+    "pitch": 68.2,
+    "bearing": 179.5
+  },
+  "hidden_valley_resort_pa": {
+    "center": [
+      -79.276433,
+      40.051588
+    ],
+    "zoom": 11.5,
+    "pitch": 65.7,
+    "bearing": 182.3
+  },
+  "hotham": {
+    "center": [
+      147.156594,
+      -36.993769
+    ],
+    "zoom": 11.5,
+    "pitch": 55.4,
+    "bearing": 231.8
+  },
+  "hunter": {
+    "center": [
+      -74.180613,
+      42.195294
+    ],
+    "zoom": 11.5,
+    "pitch": 55,
+    "bearing": 214.7
+  },
+  "jack_frost": {
+    "center": [
+      -75.627258,
+      41.079584
+    ],
+    "zoom": 12.5,
+    "pitch": 69.1,
+    "bearing": 181.5
+  },
+  "jackson_hole": {
+    "center": [
+      -110.848438,
+      43.5813
+    ],
+    "zoom": 11.5,
+    "pitch": 63.6,
+    "bearing": 303.7
+  },
+  "jiigatake": {
+    "center": [
+      137.81616,
+      36.593357
+    ],
+    "zoom": 12.5,
+    "pitch": 71.3,
+    "bearing": 269.3
+  },
+  "june_mountain": {
+    "center": [
+      -119.074517,
+      37.75502
+    ],
+    "zoom": 13.5,
+    "pitch": 64.3,
+    "bearing": 155.4
+  },
+  "kashimayari": {
+    "center": [
+      137.826033,
+      36.617157
+    ],
+    "zoom": 11.5,
+    "pitch": 75,
+    "bearing": 253.1
+  },
+  "keystone": {
+    "center": [
+      -105.909869,
+      39.612084
+    ],
+    "zoom": 11.5,
+    "pitch": 73.9,
+    "bearing": 151.9
+  },
+  "kicking_horse": {
+    "center": [
+      -117.070004,
+      51.296828
+    ],
+    "zoom": 12.5,
+    "pitch": 68.6,
+    "bearing": 223.7
+  },
+  "killington": {
+    "center": [
+      -72.803032,
+      43.626942
+    ],
+    "zoom": 11.5,
+    "pitch": 62.4,
+    "bearing": 220.1
+  },
+  "kimberley": {
+    "center": [
+      -116.026135,
+      49.679246
+    ],
+    "zoom": 12.5,
+    "pitch": 64.1,
+    "bearing": 243.5
+  },
+  "kirkwood": {
+    "center": [
+      -120.064658,
+      38.673846
+    ],
+    "zoom": 12.5,
+    "pitch": 60.9,
+    "bearing": 214.8
+  },
+  "kitzski": {
+    "center": [
+      12.391393,
+      47.450857
+    ],
+    "zoom": 11.5,
+    "pitch": 62.2,
+    "bearing": 171.4
+  },
+  "lake_louise": {
+    "center": [
+      -116.158365,
+      51.444509
+    ],
+    "zoom": 11.5,
+    "pitch": 59.6,
+    "bearing": 338.2
+  },
+  "laurel": {
+    "center": [
+      -79.169485,
+      40.166862
+    ],
+    "zoom": 14.5,
+    "pitch": 57.4,
+    "bearing": 161.8
+  },
+  "les_3_valles": {
+    "center": [
+      6.509383,
+      45.478119
+    ],
+    "zoom": 10.5,
+    "pitch": 65.2,
+    "bearing": 167.6
+  },
+  "liberty": {
+    "center": [
+      -77.368511,
+      39.759616
+    ],
+    "zoom": 14.5,
+    "pitch": 60.8,
+    "bearing": 196.0
+  },
+  "loon": {
+    "center": [
+      -71.642358,
+      44.046314
+    ],
+    "zoom": 13.5,
+    "pitch": 56.7,
+    "bearing": 162.2
+  },
+  "lotte_arai": {
+    "center": [
+      138.159157,
+      36.990086
+    ],
+    "zoom": 13.5,
+    "pitch": 55,
+    "bearing": 287.7
+  },
+  "mad_river_mountain": {
+    "center": [
+      -83.675126,
+      40.315745
+    ],
+    "zoom": 14.5,
+    "pitch": 60.4,
+    "bearing": 191.1
+  },
+  "mammoth": {
+    "center": [
+      -119.020452,
+      37.629679
+    ],
+    "zoom": 12.5,
+    "pitch": 59.7,
+    "bearing": 210.8
+  },
+  "mont_saint-anne": {
+    "center": [
+      -70.908816,
+      47.113508
+    ],
+    "zoom": 11.5,
+    "pitch": 69.5,
+    "bearing": 321.0
+  },
+  "mount_snow": {
+    "center": [
+      -72.905032,
+      42.944614
+    ],
+    "zoom": 12.5,
+    "pitch": 72.3,
+    "bearing": 239.8
+  },
+  "mount_sunapee": {
+    "center": [
+      -72.075721,
+      43.323926
+    ],
+    "zoom": 13.5,
+    "pitch": 62.2,
+    "bearing": 188.2
+  },
+  "mt_bachelor": {
+    "center": [
+      -121.654051,
+      43.999984
+    ],
+    "zoom": 11.5,
+    "pitch": 58.0,
+    "bearing": 190.2
+  },
+  "mt_brighton": {
+    "center": [
+      -83.790213,
+      42.512006
+    ],
+    "zoom": 12.5,
+    "pitch": 72.2,
+    "bearing": 287.4
+  },
+  "mt_buller": {
+    "center": [
+      146.46288,
+      -37.129681
+    ],
+    "zoom": 12.5,
+    "pitch": 61.1,
+    "bearing": 288.2
+  },
+  "mt_hutt": {
+    "center": [
+      171.535592,
+      -43.492144
+    ],
+    "zoom": 13.5,
+    "pitch": 61.1,
+    "bearing": 339.0
+  },
+  "mt_norquay": {
+    "center": [
+      -115.60373,
+      51.201164
+    ],
+    "zoom": 13.5,
+    "pitch": 68.2,
+    "bearing": 243.9
+  },
+  "nakiska": {
+    "center": [
+      -115.156438,
+      50.931481
+    ],
+    "zoom": 11.5,
+    "pitch": 75,
+    "bearing": 220.3
+  },
+  "niseko_united": {
+    "center": [
+      140.67595,
+      42.854852
+    ],
+    "zoom": 13.5,
+    "pitch": 71.0,
+    "bearing": 313.1
+  },
+  "northstar": {
+    "center": [
+      -120.109039,
+      39.239393
+    ],
+    "zoom": 11.5,
+    "pitch": 60.7,
+    "bearing": 182.7
+  },
+  "okemo": {
+    "center": [
+      -72.736727,
+      43.409388
+    ],
+    "zoom": 12.5,
+    "pitch": 66.4,
+    "bearing": 270.2
+  },
+  "palisades_tahoe": {
+    "center": [
+      -120.252133,
+      39.173658
+    ],
+    "zoom": 12.5,
+    "pitch": 63.7,
+    "bearing": 203.7
+  },
+  "panorama": {
+    "center": [
+      -116.234441,
+      50.442751
+    ],
+    "zoom": 12.5,
+    "pitch": 55.3,
+    "bearing": 136.5
+  },
+  "paoli_peaks": {
+    "center": [
+      -86.510196,
+      38.558391
+    ],
+    "zoom": 14.5,
+    "pitch": 66.3,
+    "bearing": 203.7
+  },
+  "park_city": {
+    "center": [
+      -111.518441,
+      40.665843
+    ],
+    "zoom": 10.5,
+    "pitch": 65.9,
+    "bearing": 217.5
+  },
+  "perisher": {
+    "center": [
+      148.379927,
+      -36.413851
+    ],
+    "zoom": 11.5,
+    "pitch": 60.2,
+    "bearing": 293.0
+  },
+  "pico": {
+    "center": [
+      -72.824337,
+      43.63952
+    ],
+    "zoom": 12.5,
+    "pitch": 65.1,
+    "bearing": 182.1
+  },
+  "red_mountain": {
+    "center": [
+      -117.834028,
+      49.11304
+    ],
+    "zoom": 12.5,
+    "pitch": 67.5,
+    "bearing": 277.8
+  },
+  "revelstoke": {
+    "center": [
+      -118.163755,
+      50.960352
+    ],
+    "zoom": 11.5,
+    "pitch": 56.0,
+    "bearing": 122.8
+  },
+  "roundtop": {
+    "center": [
+      -76.925984,
+      40.106344
+    ],
+    "zoom": 14.5,
+    "pitch": 59.3,
+    "bearing": 185.2
+  },
+  "rusutsu": {
+    "center": [
+      140.914696,
+      42.731333
+    ],
+    "zoom": 12.5,
+    "pitch": 65.6,
+    "bearing": 235.2
+  },
+  "schweitzer": {
+    "center": [
+      -116.617841,
+      48.373419
+    ],
+    "zoom": 12.5,
+    "pitch": 66.2,
+    "bearing": 251.6
+  },
+  "seven_springs": {
+    "center": [
+      -79.301376,
+      40.027253
+    ],
+    "zoom": 11.5,
+    "pitch": 65.6,
+    "bearing": 182.1
+  },
+  "silver_creek": {
+    "center": [
+      -80.000084,
+      38.424639
+    ],
+    "zoom": 12.5,
+    "pitch": 72.4,
+    "bearing": 195.9
+  },
+  "ski_arlberg": {
+    "center": [
+      10.143673,
+      47.184234
+    ],
+    "zoom": 10.5,
+    "pitch": 63.8,
+    "bearing": 193.6
+  },
+  "skirama_dolomiti": {
+    "center": [
+      11.65815,
+      46.575805
+    ],
+    "zoom": 10.5,
+    "pitch": 61.6,
+    "bearing": 202.8
+  },
+  "snow_creek": {
+    "center": [
+      -94.969325,
+      39.465472
+    ],
+    "zoom": 14.5,
+    "pitch": 61.6,
+    "bearing": 184.8
+  },
+  "snow_summit": {
+    "center": [
+      -116.885823,
+      34.234391
+    ],
+    "zoom": 12.5,
+    "pitch": 59.5,
+    "bearing": 187.7
+  },
+  "snowbasin": {
+    "center": [
+      -111.862828,
+      41.20123
+    ],
+    "zoom": 12.5,
+    "pitch": 64.0,
+    "bearing": 228.7
+  },
+  "snowbird": {
+    "center": [
+      -111.635151,
+      40.584234
+    ],
+    "zoom": 11.5,
+    "pitch": 63.2,
+    "bearing": 161.6
+  },
+  "snowmass": {
+    "center": [
+      -106.937385,
+      39.192268
+    ],
+    "zoom": 11.5,
+    "pitch": 60.3,
+    "bearing": 202.9
+  },
+  "snowshoe": {
+    "center": [
+      -80.000084,
+      38.424639
+    ],
+    "zoom": 12.5,
+    "pitch": 72.4,
+    "bearing": 195.9
+  },
+  "solitude": {
+    "center": [
+      -111.581956,
+      40.618591
+    ],
+    "zoom": 11.5,
+    "pitch": 62.5,
+    "bearing": 192.7
+  },
+  "steamboat": {
+    "center": [
+      -106.791836,
+      40.459549
+    ],
+    "zoom": 11.5,
+    "pitch": 57.0,
+    "bearing": 121.8
+  },
+  "stevens_pass": {
+    "center": [
+      -121.115629,
+      47.73624
+    ],
+    "zoom": 12.5,
+    "pitch": 55,
+    "bearing": 212.0
+  },
+  "stoneham": {
+    "center": [
+      -71.387517,
+      47.013754
+    ],
+    "zoom": 12.5,
+    "pitch": 74.3,
+    "bearing": 265.6
+  },
+  "stowe": {
+    "center": [
+      -72.775903,
+      44.516076
+    ],
+    "zoom": 11.5,
+    "pitch": 67.5,
+    "bearing": 224.3
+  },
+  "stratton": {
+    "center": [
+      -72.902415,
+      43.101079
+    ],
+    "zoom": 13.5,
+    "pitch": 58.2,
+    "bearing": 210.7
+  },
+  "sugarbush": {
+    "center": [
+      -72.902176,
+      44.13514
+    ],
+    "zoom": 11.5,
+    "pitch": 75,
+    "bearing": 248.4
+  },
+  "sugarloaf": {
+    "center": [
+      -70.300215,
+      45.065572
+    ],
+    "zoom": 12.5,
+    "pitch": 66.8,
+    "bearing": 196.4
+  },
+  "summit_at_snoqualmie": {
+    "center": [
+      -121.426648,
+      47.418912
+    ],
+    "zoom": 11.5,
+    "pitch": 73.4,
+    "bearing": 228.2
+  },
+  "sun_peaks": {
+    "center": [
+      -119.886454,
+      50.879261
+    ],
+    "zoom": 11.5,
+    "pitch": 65.4,
+    "bearing": 308.5
+  },
+  "sun_valley": {
+    "center": [
+      -114.372728,
+      43.673805
+    ],
+    "zoom": 12.5,
+    "pitch": 64.7,
+    "bearing": 199.4
+  },
+  "sunday_river": {
+    "center": [
+      -70.851228,
+      44.474786
+    ],
+    "zoom": 11.5,
+    "pitch": 55,
+    "bearing": 213.1
+  },
+  "taos": {
+    "center": [
+      -105.450953,
+      36.578903
+    ],
+    "zoom": 13.5,
+    "pitch": 70.7,
+    "bearing": 209.0
+  },
+  "telluride": {
+    "center": [
+      -107.887297,
+      37.925478
+    ],
+    "zoom": 11.5,
+    "pitch": 56.7,
+    "bearing": 166.4
+  },
+  "the_highlands": {
+    "center": [
+      -84.926026,
+      45.474933
+    ],
+    "zoom": 12.5,
+    "pitch": 58.8,
+    "bearing": 246.6
+  },
+  "the_remarkables": {
+    "center": [
+      168.816391,
+      -45.054117
+    ],
+    "zoom": 13.5,
+    "pitch": 60.2,
+    "bearing": 124.7
+  },
+  "thredbo": {
+    "center": [
+      148.280307,
+      -36.492458
+    ],
+    "zoom": 12.5,
+    "pitch": 55,
+    "bearing": 313.3
+  },
+  "tremblant": {
+    "center": [
+      -74.591294,
+      46.19581
+    ],
+    "zoom": 11.5,
+    "pitch": 59.0,
+    "bearing": 97.5
+  },
+  "tsugaike": {
+    "center": [
+      137.84536,
+      36.728477
+    ],
+    "zoom": 11.5,
+    "pitch": 69.6,
+    "bearing": 271.1
+  },
+  "vail": {
+    "center": [
+      -106.350729,
+      39.603
+    ],
+    "zoom": 11.5,
+    "pitch": 61.9,
+    "bearing": 168.0
+  },
+  "valle_nevado": {
+    "center": [
+      -70.27081,
+      -33.336165
+    ],
+    "zoom": 12.5,
+    "pitch": 58.1,
+    "bearing": 32.2
+  },
+  "verbier_4_valles": {
+    "center": [
+      7.302109,
+      46.085623
+    ],
+    "zoom": 10.5,
+    "pitch": 62.2,
+    "bearing": 147.2
+  },
+  "whistler": {
+    "center": [
+      -122.945193,
+      50.111994
+    ],
+    "zoom": 10.5,
+    "pitch": 65.0,
+    "bearing": 163.9
+  },
+  "whitetail": {
+    "center": [
+      -77.936972,
+      39.744115
+    ],
+    "zoom": 14.5,
+    "pitch": 64.7,
+    "bearing": 199.7
+  },
+  "wildcat": {
+    "center": [
+      -71.265732,
+      44.244941
+    ],
+    "zoom": 11.5,
+    "pitch": 61.2,
+    "bearing": 214.9
+  },
+  "wilmot": {
+    "center": [
+      -88.190857,
+      42.498419
+    ],
+    "zoom": 14.5,
+    "pitch": 64.4,
+    "bearing": 277.7
+  },
+  "windham": {
+    "center": [
+      -74.256603,
+      42.293007
+    ],
+    "zoom": 13.5,
+    "pitch": 57.7,
+    "bearing": 186.6
+  },
+  "winter_park": {
+    "center": [
+      -105.777986,
+      39.863926
+    ],
+    "zoom": 12.5,
+    "pitch": 68.1,
+    "bearing": 201.1
+  },
+  "zermatt": {
+    "center": [
+      7.748219,
+      45.997748
+    ],
+    "zoom": 11.5,
+    "pitch": 60.8,
+    "bearing": 141.6
+  }
+}
