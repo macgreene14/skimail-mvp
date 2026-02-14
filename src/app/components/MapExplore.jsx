@@ -6,7 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import useMapStore from '../store/useMapStore';
 import { useBatchSnowData } from '../hooks/useResortWeather';
 import MapControls from './MapControls';
-import useAutoSelect from '../hooks/useAutoSelect';
+// import useAutoSelect from '../hooks/useAutoSelect'; // disabled — fights user zoom-out
 import regionsManifest from '../../../assets/regions.json';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
@@ -60,7 +60,7 @@ export function MapExplore({ resortCollection }) {
   const setSnowBySlug = useMapStore((s) => s.setSnowBySlug);
 
   // Auto-select/deselect based on zoom + viewport
-  useAutoSelect();
+  // useAutoSelect(); // disabled — fights user zoom-out
 
   const setPisteData = useMapStore((s) => s.setPisteData);
   const pisteData = useMapStore((s) => s.pisteData);
