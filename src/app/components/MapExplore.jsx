@@ -2,20 +2,17 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import Map, { Source, Layer, NavigationControl, GeolocateControl, Marker } from 'react-map-gl';
-import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Protocol } from 'pmtiles';
 import useMapStore from '../store/useMapStore';
 import { useBatchSnowData } from '../hooks/useResortWeather';
 import MapControls from './MapControls';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
-// Register PMTiles protocol for vector tile sources (client-side only)
-if (typeof window !== 'undefined') {
-  const pmtilesProtocol = new Protocol();
-  mapboxgl.addProtocol('pmtiles', pmtilesProtocol.tile);
-}
+// Piste trail data URL (static GeoJSON served from public/data/)
+const PISTE_DATA_URL = typeof window !== 'undefined'
+  ? `${window.location.origin}/skimail-mvp/data/pistes.geojson`
+  : '/skimail-mvp/data/pistes.geojson';
 
 const MAP_STYLES = {
   skimail: 'mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8',
@@ -535,11 +532,11 @@ export function MapExplore({ resortCollection }) {
 
         {/* Piste trails — visible at high zoom */}
         {showPistes && (
-          <Source id="pistes" type="vector" url="pmtiles:///skimail-mvp/data/pistes.pmtiles">
+          <Source id="pistes" type="geojson" data={PISTE_DATA_URL}>
             <Layer
               id="piste-runs"
               type="line"
-              source-layer="runs"
+              filter={['==', ['get', 'type'], 'run']}
               minzoom={11}
               paint={{
                 'line-color': [
@@ -558,7 +555,7 @@ export function MapExplore({ resortCollection }) {
             <Layer
               id="piste-lifts"
               type="line"
-              source-layer="lifts"
+              filter={['==', ['get', 'type'], 'lift']}
               minzoom={11}
               paint={{
                 'line-color': '#facc15',
