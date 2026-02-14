@@ -49,6 +49,14 @@ const useMapStore = create(
       selectedResort: null,
       setSelectedResort: (r) => set({ selectedResort: r }),
 
+      // ── Search ──
+      searchQuery: '',
+      setSearchQuery: (q) => set({ searchQuery: q }),
+
+      // ── Highlighted resort (from map click → scroll to card) ──
+      highlightedSlug: null,
+      setHighlightedSlug: (slug) => set({ highlightedSlug: slug }),
+
       // ── Filter-driven resort list ──
       // Set by MapExplore whenever pass toggles or viewport change.
       // Read by MobileCarousel + ResultsContainer.

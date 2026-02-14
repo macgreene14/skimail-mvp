@@ -22,6 +22,7 @@ function AppContent() {
   const selectedResort = useMapStore((s) => s.selectedResort);
   const setSelectedResort = useMapStore((s) => s.setSelectedResort);
   const filteredResorts = useMapStore((s) => s.filteredResorts);
+  const searchQuery = useMapStore((s) => s.searchQuery);
   const showIkon = useMapStore((s) => s.showIkon);
   const showEpic = useMapStore((s) => s.showEpic);
   const showMC = useMapStore((s) => s.showMC);
@@ -39,16 +40,28 @@ function AppContent() {
     return passes;
   }, [showIkon, showEpic, showMC, showIndy, showIndependent]);
 
-  // Dynamic results: viewport-filtered resorts when zoomed in, all pass-filtered at globe zoom.
-  // This ensures all resorts appear in results (not just viewport) when at low zoom.
+  // Dynamic results: search overrides viewport, otherwise show viewport resorts
   const displayedResorts = useMemo(() => {
+    const query = (searchQuery || '').toLowerCase().trim();
+
+    if (query) {
+      // Search across ALL resorts regardless of viewport
+      return resorts.filter((r) => {
+        const p = r.properties;
+        if (!activePasses.has(p?.pass)) return false;
+        const name = (p?.name || '').toLowerCase();
+        const state = (p?.state || '').toLowerCase();
+        const country = (p?.country || '').toLowerCase();
+        const region = (p?.region || '').toLowerCase();
+        return name.includes(query) || state.includes(query) || country.includes(query) || region.includes(query);
+      });
+    }
+
     if (filteredResorts.length > 0) {
-      // Viewport results available — apply pass filter on top
       return filteredResorts.filter((r) => activePasses.has(r.properties?.pass));
     }
-    // No viewport data (globe zoom / spinning) — show all pass-filtered
     return resorts.filter((r) => activePasses.has(r.properties?.pass));
-  }, [filteredResorts, resorts, activePasses]);
+  }, [filteredResorts, resorts, activePasses, searchQuery]);
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">

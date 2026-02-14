@@ -11,30 +11,29 @@ const PASS_COLORS = {
   Independent: "bg-gray-500",
 };
 
-/**
- * CompactCard — individual resort card in the carousel.
- */
-function CompactCard({ resort, isSelected, onClick, snowInfo }) {
+function CompactCard({ resort, isSelected, isHighlighted, onClick, snowInfo }) {
   const ref = useRef(null);
   const p = resort.properties;
   const passColor = PASS_COLORS[p.pass] || "bg-gray-500";
   const passLabel = p.pass === "Mountain Collective" ? "MC" : p.pass;
 
   useEffect(() => {
-    if (isSelected && ref.current) {
+    if ((isSelected || isHighlighted) && ref.current) {
       ref.current.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }
-  }, [isSelected]);
+  }, [isSelected, isHighlighted]);
+
+  const borderClass = isHighlighted
+    ? "border-sky-400/70 ring-1 ring-sky-400/40"
+    : isSelected
+    ? "border-sky-500/60 ring-1 ring-sky-500/30"
+    : "border-white/10 hover:border-white/20";
 
   return (
     <div
       ref={ref}
       onClick={onClick}
-      className={`snap-center shrink-0 w-48 rounded-xl p-3 cursor-pointer transition-all border ${
-        isSelected
-          ? "bg-slate-800/95 border-sky-500/60 ring-1 ring-sky-500/30"
-          : "bg-slate-900/90 border-white/10 hover:border-white/20"
-      } backdrop-blur-xl`}
+      className={`snap-center shrink-0 w-52 rounded-xl p-3 cursor-pointer transition-all border bg-slate-900/90 backdrop-blur-xl ${borderClass}`}
     >
       <div className="flex items-center gap-1.5 mb-1">
         <span className={`shrink-0 rounded-full ${passColor} px-1.5 py-0.5 text-[9px] font-bold text-white leading-none`}>
@@ -46,31 +45,31 @@ function CompactCard({ resort, isSelected, onClick, snowInfo }) {
       </div>
 
       {(p.state !== "Unknown" || p.country !== "Unknown") && (
-        <p className="truncate text-[10px] text-slate-400 mb-1.5">
+        <p className="truncate text-[10px] text-slate-400 mb-1">
           {[p.state !== "Unknown" ? p.state : null, p.country !== "Unknown" ? p.country : null]
             .filter(Boolean)
             .join(", ")}
         </p>
       )}
 
-      <div className="flex items-center gap-2 text-[10px] text-slate-300">
-        {p.avg_snowfall && p.avg_snowfall !== "Unknown" && (
-          <span>❄ {p.avg_snowfall}&quot;</span>
-        )}
-        {p.vertical_drop && p.vertical_drop !== "Unknown" && (
-          <span>⛰ {p.vertical_drop}&apos;</span>
-        )}
-      </div>
-
-      {/* Live snow data */}
-      {snowInfo && snowInfo.snowfall_7d > 0 && (
-        <div className="flex items-center gap-1.5 mt-1 text-[9px] text-sky-300 font-semibold">
-          <span>❄ {Math.round(snowInfo.snowfall_7d)}cm/7d</span>
+      {/* Live snow */}
+      {snowInfo && (snowInfo.snowfall_7d > 0 || snowInfo.snow_depth > 0) && (
+        <div className="flex items-center gap-2 mb-1 text-[9px] font-semibold text-sky-300">
+          {snowInfo.snowfall_24h > 0 && <span>❄ {Math.round(snowInfo.snowfall_24h)}cm/24h</span>}
+          {snowInfo.snowfall_7d > 0 && <span>❄ {Math.round(snowInfo.snowfall_7d)}cm/7d</span>}
           {snowInfo.snow_depth > 0 && <span>· {Math.round(snowInfo.snow_depth)}cm base</span>}
         </div>
       )}
 
-      <div className="flex items-center gap-1.5 mt-1.5">
+      {/* Stats row */}
+      <div className="flex items-center gap-2 text-[10px] text-slate-300 mb-1.5">
+        {p.avg_snowfall && p.avg_snowfall !== "Unknown" && <span>❄ {p.avg_snowfall}&quot;</span>}
+        {p.vertical_drop && p.vertical_drop !== "Unknown" && <span>⛰ {p.vertical_drop}&apos;</span>}
+        {p.skiable_acres && p.skiable_acres !== "Unknown" && <span>⛷ {p.skiable_acres}ac</span>}
+      </div>
+
+      {/* Percentile bars */}
+      <div className="flex items-center gap-1.5">
         {[
           { stat: "avg_snowfall", val: p.avg_snowfall, color: "#38bdf8" },
           { stat: "vertical_drop", val: p.vertical_drop, color: "#4ade80" },
@@ -80,10 +79,7 @@ function CompactCard({ resort, isSelected, onClick, snowInfo }) {
           return (
             <div key={stat} className="flex-1">
               <div className="h-1 rounded-full bg-white/10">
-                <div
-                  className="h-1 rounded-full"
-                  style={{ width: `${pct}%`, background: color }}
-                />
+                <div className="h-1 rounded-full" style={{ width: `${pct}%`, background: color }} />
               </div>
             </div>
           );
@@ -93,18 +89,12 @@ function CompactCard({ resort, isSelected, onClick, snowInfo }) {
   );
 }
 
-/**
- * MobileCarousel — horizontal snap-scroll card strip.
- *
- * TOUCH ISOLATION:
- *  - Outer wrapper is pointer-events-none with fixed height matching card size
- *  - Scroll container is pointer-events-auto for horizontal scroll
- *  - Container height is constrained so vertical swipes above/below pass to map
- *  - onTouchStart with stopPropagation prevents scroll gestures from panning the map
- */
 export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
   const scrollRef = useRef(null);
   const snowBySlug = useMapStore((s) => s.snowBySlug);
+  const highlightedSlug = useMapStore((s) => s.highlightedSlug);
+  const searchQuery = useMapStore((s) => s.searchQuery);
+  const setSearchQuery = useMapStore((s) => s.setSearchQuery);
 
   const sorted = resorts
     ?.slice()
@@ -115,31 +105,62 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
     })
     .slice(0, 50);
 
-  // Prevent carousel touch from bubbling to map
   const onTouchStart = useCallback((e) => {
     e.stopPropagation();
   }, []);
 
-  if (!sorted?.length) return null;
+  if (!sorted?.length && !searchQuery) return null;
 
   return (
-    <div className="absolute bottom-2 left-0 right-0 z-20 sm:hidden pointer-events-none"
-         style={{ height: '110px' }}>
+    <div className="absolute bottom-2 left-0 right-0 z-20 sm:hidden pointer-events-none" style={{ height: "130px" }}>
+      {/* Search bar */}
+      <div className="pointer-events-auto mx-4 mb-1.5">
+        <div className="relative">
+          <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search resorts..."
+            className="w-full rounded-lg py-1.5 pl-7 pr-7 text-[11px] text-white placeholder-slate-500 outline-none backdrop-blur-xl"
+            style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(255,255,255,0.1)" }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-[10px] pointer-events-auto"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Cards */}
       <div
         ref={scrollRef}
         onTouchStart={onTouchStart}
         className="pointer-events-auto h-full flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar items-center"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {sorted.map((resort) => (
+        {sorted?.map((resort) => (
           <CompactCard
             key={resort.properties.slug || resort.properties.name}
             resort={resort}
             isSelected={resort.properties.name === selectedResort?.properties?.name}
+            isHighlighted={resort.properties.slug === highlightedSlug}
             onClick={() => setSelectedResort(resort)}
             snowInfo={snowBySlug[resort.properties.slug]}
           />
         ))}
+        {sorted?.length === 0 && (
+          <div className="shrink-0 w-full text-center text-xs text-slate-400 py-4">
+            No resorts found
+          </div>
+        )}
       </div>
     </div>
   );

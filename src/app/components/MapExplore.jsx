@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import Map, { Source, Layer, Popup, NavigationControl, GeolocateControl } from 'react-map-gl';
+import Map, { Source, Layer, NavigationControl, GeolocateControl, Marker } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import useMapStore from '../store/useMapStore';
 import { useBatchSnowData } from '../hooks/useResortWeather';
-import { getPercentile } from '../utils/percentiles';
 import MapControls from './MapControls';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
@@ -17,22 +16,21 @@ const MAP_STYLES = {
   outdoors: 'mapbox://styles/mapbox/outdoors-v12',
 };
 
-const PASS_COLORS = {
-  Ikon: '#3b82f6',
-  Epic: '#f97316',
-  'Mountain Collective': '#7c3aed',
-  Indy: '#16a34a',
-  Independent: '#6b7280',
-};
-
-const PASS_LINKS = {
-  Ikon: 'https://www.ikonpass.com/',
-  Epic: 'https://www.epicpass.com/',
-  'Mountain Collective': 'https://mountaincollective.com/',
-  Indy: 'https://www.indyskipass.com/',
-};
-
-// REGIONS moved to MapControls.jsx
+// Region nav markers for globe/low zoom
+const REGION_MARKERS = [
+  { id: 'rocky-mountain', label: '⛰️ Rockies', lat: 45.5, lng: -110.5, zoom: 6.5 },
+  { id: 'pnw', label: '🌲 PNW', lat: 46.8, lng: -121.7, zoom: 6.5 },
+  { id: 'california', label: '☀️ California', lat: 38.5, lng: -120.0, zoom: 6.5 },
+  { id: 'northeast', label: '🏔️ Northeast', lat: 44.0, lng: -72.0, zoom: 6.5 },
+  { id: 'midwest', label: '🌾 Midwest', lat: 45.0, lng: -89.0, zoom: 6.5 },
+  { id: 'western-canada', label: '🍁 W. Canada', lat: 51.0, lng: -117.0, zoom: 6.5 },
+  { id: 'eastern-canada', label: '🍁 E. Canada', lat: 47.0, lng: -71.0, zoom: 6.5 },
+  { id: 'alps', label: '🏔️ Alps', lat: 46.8, lng: 10.5, zoom: 6.5 },
+  { id: 'scandinavia', label: '❄️ Scandinavia', lat: 63.0, lng: 14.0, zoom: 6.0 },
+  { id: 'japan', label: '🗾 Japan', lat: 36.8, lng: 138.5, zoom: 6.5 },
+  { id: 'oceania', label: '🌏 Oceania', lat: -37.0, lng: 148.0, zoom: 6.5 },
+  { id: 'south-america', label: '🏔️ S. America', lat: -33.0, lng: -70.0, zoom: 6.5 },
+];
 
 export function MapExplore({ resortCollection }) {
   const resorts = resortCollection.features;
@@ -43,13 +41,13 @@ export function MapExplore({ resortCollection }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [spinning, setSpinning] = useState(true);
   const [userStopped, setUserStopped] = useState(false);
-  const [popupInfo, setPopupInfo] = useState(null);
+  const [currentZoom, setCurrentZoom] = useState(1.2);
 
   const {
     mapStyle, mapStyleKey,
     showIkon, showEpic, showMC, showIndy, showIndependent, showSnow,
     selectedResort, setSelectedResort,
-    setRenderedResorts,
+    setRenderedResorts, setHighlightedSlug,
     showSnowCover,
     previousViewState, setPreviousViewState,
     isResortView, setIsResortView,
@@ -181,16 +179,6 @@ export function MapExplore({ resortCollection }) {
     };
   }, [resorts, showIkon, showEpic, showMC, showIndy, showIndependent]);
 
-  // Dataset stats for percentile charts
-  const datasetStats = useMemo(() => {
-    const vals = (key) =>
-      resorts
-        .map((r) => parseFloat(r.properties[key]))
-        .filter((v) => !isNaN(v) && v > 0)
-        .sort((a, b) => a - b);
-    return { snowfall: vals('avg_snowfall'), vertical: vals('vertical_drop'), acres: vals('skiable_acres') };
-  }, [resorts]);
-
   // Globe spin — imperative easeTo (works with uncontrolled mode)
   useEffect(() => {
     if (!spinning || userStopped) return;
@@ -236,22 +224,20 @@ export function MapExplore({ resortCollection }) {
         const mapWrapper = mapRef.current;
         if (!mapWrapper) return;
         const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
-        if (map.getZoom() < 5) return;
+        setCurrentZoom(map.getZoom());
         const layers = [];
         if (map.getLayer('resort-dots')) layers.push('resort-dots');
         if (map.getLayer('resort-markers')) layers.push('resort-markers');
         if (layers.length === 0) return;
         const features = map.queryRenderedFeatures(undefined, { layers });
-        if (features?.length) {
-          const seen = new Set();
-          const unique = features.filter((f) => {
-            if (seen.has(f.properties.slug)) return false;
-            seen.add(f.properties.slug);
-            return true;
-          });
-          setRenderedResorts(unique);
-          setVisibleSlugs(unique.map((f) => f.properties.slug));
-        }
+        const seen = new Set();
+        const unique = (features || []).filter((f) => {
+          if (seen.has(f.properties.slug)) return false;
+          seen.add(f.properties.slug);
+          return true;
+        });
+        setRenderedResorts(unique);
+        setVisibleSlugs(unique.map((f) => f.properties.slug));
       }, 300);
       return () => clearTimeout(timer);
     }
@@ -263,86 +249,61 @@ export function MapExplore({ resortCollection }) {
     if (!mapWrapper) return;
     const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
     const zoom = map.getZoom();
-    if (zoom < 5) return;
+    setCurrentZoom(zoom);
+    // Query visible resorts at any zoom where dots/markers are rendered
     const layers = [];
     if (map.getLayer('resort-dots')) layers.push('resort-dots');
     if (map.getLayer('resort-markers')) layers.push('resort-markers');
-    if (layers.length === 0) return;
+    if (layers.length === 0) { setRenderedResorts([]); return; }
     const features = map.queryRenderedFeatures(undefined, { layers });
-    if (features?.length) {
-      const seen = new Set();
-      const unique = features.filter((f) => {
-        if (seen.has(f.properties.slug)) return false;
-        seen.add(f.properties.slug);
-        return true;
-      });
-      setRenderedResorts(unique);
-      setVisibleSlugs(unique.map((f) => f.properties.slug));
-    }
+    const seen = new Set();
+    const unique = (features || []).filter((f) => {
+      if (seen.has(f.properties.slug)) return false;
+      seen.add(f.properties.slug);
+      return true;
+    });
+    setRenderedResorts(unique);
+    setVisibleSlugs(unique.map((f) => f.properties.slug));
   }, [setRenderedResorts]);
 
   // Uncontrolled mode — no onMove needed. Map manages its own viewState.
   // Read position from mapRef.current when needed (flyToResort, resetView, etc.)
 
-  // Click on resort dot
+  // Click on resort dot — no popup, just highlight card
   const onClick = useCallback(
     (e) => {
       stopSpin();
       const features = e.features;
-      if (!features?.length) {
-        setPopupInfo(null);
-        return;
-      }
+      if (!features?.length) return;
       const f = features[0];
 
-      // Handle cluster click — fly to nearest matching REGION preset
-      if (f.properties.cluster) {
-        const map = mapRef.current;
-        if (!map) return;
-        const [lng, lat] = f.geometry.coordinates;
-        // Find closest region to the cluster center
-        const REGIONS = [
-          { lat: 41.0, lng: -101.0, zoom: 4.5 },   // USA
-          { lat: 40.7, lng: -109.7, zoom: 5.5 },    // Rockies
-          { lat: 45.6, lng: -120.7, zoom: 5.5 },    // PNW
-          { lat: 37.0, lng: -121.0, zoom: 5.5 },    // California
-          { lat: 41.4, lng: -78.9, zoom: 5.0 },     // Eastern US
-          { lat: 51.3, lng: -119.4, zoom: 5.0 },    // Canada
-          { lat: 45.6, lng: 6.6, zoom: 5.0 },       // Europe
-          { lat: 38.4, lng: 136.2, zoom: 5.0 },     // Japan
-          { lat: -38.1, lng: 156.2, zoom: 4.0 },    // Oceania
-          { lat: -34.9, lng: -72.4, zoom: 5.5 },    // S. America
-        ];
-        let closest = REGIONS[0];
-        let minDist = Infinity;
-        for (const r of REGIONS) {
-          const d = Math.hypot(r.lat - lat, r.lng - lng);
-          if (d < minDist) { minDist = d; closest = r; }
-        }
-        const zoom = window.innerWidth <= 768 ? closest.zoom - 0.5 : closest.zoom;
-        map.flyTo({ center: [closest.lng, closest.lat], zoom, duration: 1200 });
-        return;
-      }
+      // Clusters removed — shouldn't get cluster clicks anymore
+      if (f.properties.cluster) return;
 
       const resort = resorts.find((r) => r.properties.slug === f.properties.slug);
       if (resort) {
-        // Only set selection — the useEffect on selectedResort handles flyTo + popup
-        lastFlewToRef.current = null; // clear so effect will fly
+        setHighlightedSlug(resort.properties.slug);
         setSelectedResort(resort);
       }
     },
-    [resorts, setSelectedResort, stopSpin]
+    [resorts, setSelectedResort, setHighlightedSlug, stopSpin]
   );
 
+  // Region marker click — fly to region
+  const onRegionClick = useCallback((region) => {
+    stopSpin();
+    const map = mapRef.current;
+    if (!map) return;
+    const zoom = window.innerWidth <= 768 ? region.zoom - 0.5 : region.zoom;
+    map.flyTo({ center: [region.lng, region.lat], zoom, duration: 1200, essential: true });
+  }, [stopSpin]);
+
   // When selectedResort changes externally (e.g. from card click)
-  // Use a ref to track which resort we already flew to, preventing re-fly loops.
   useEffect(() => {
     if (!selectedResort || !mapRef.current) return;
     const slug = selectedResort.properties?.slug;
-    if (slug === lastFlewToRef.current) return; // already flying/flew here
+    if (slug === lastFlewToRef.current) return;
     lastFlewToRef.current = slug;
-    const snowInfo = snowData?.find((d) => d.slug === slug);
-    setPopupInfo({ resort: selectedResort, snowInfo });
     flyToResort(selectedResort);
   }, [selectedResort]); // intentionally minimal deps — flyToResort is stable via useCallback
 
@@ -461,7 +422,7 @@ export function MapExplore({ resortCollection }) {
   }, [isFullscreen]);
 
   const interactiveLayerIds = useMemo(
-    () => ['clusters', 'resort-dots', 'resort-markers'],
+    () => ['resort-dots', 'resort-markers'],
     []
   );
 
@@ -564,52 +525,13 @@ export function MapExplore({ resortCollection }) {
           />
         </Source>
 
-        {/* Resort source with clustering — filtered by active pass toggles */}
+        {/* Resort source — no clustering, filtered by active pass toggles */}
         <Source
           id="resorts"
           type="geojson"
           data={filteredGeoJSON}
-          cluster={true}
-          clusterMaxZoom={4}
-          clusterRadius={40}
+          cluster={false}
         >
-          {/* === Layer 1: Clusters (zoom 0-7) === */}
-          <Layer
-            id="clusters"
-            type="circle"
-            maxzoom={5}
-            filter={['has', 'point_count']}
-            paint={{
-              'circle-radius': ['step', ['get', 'point_count'], 16, 10, 20, 50, 26, 200, 32],
-              'circle-color': [
-                'step', ['get', 'point_count'],
-                '#3b82f6',  // small clusters — Ikon blue
-                10, '#7c3aed', // medium — purple
-                50, '#f97316', // large — orange
-                200, '#ef4444', // very large — red
-              ],
-              'circle-stroke-width': 2,
-              'circle-stroke-color': 'rgba(255,255,255,0.4)',
-              'circle-opacity': 0.85,
-            }}
-          />
-
-          {/* === Layer 2: Cluster count labels (zoom 0-7) === */}
-          <Layer
-            id="cluster-count"
-            type="symbol"
-            maxzoom={5}
-            filter={['has', 'point_count']}
-            layout={{
-              'text-field': ['get', 'point_count_abbreviated'],
-              'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
-              'text-size': 12,
-              'text-allow-overlap': true,
-            }}
-            paint={{
-              'text-color': '#ffffff',
-            }}
-          />
 
           {/* === Layer 3: Mid-zoom individual dots (zoom 5-11) === */}
           <Layer
@@ -617,7 +539,7 @@ export function MapExplore({ resortCollection }) {
             type="symbol"
             minzoom={5}
             maxzoom={11}
-            filter={['all', ['!', ['has', 'point_count']], passFilter]}
+            filter={passFilter}
             layout={{
               'icon-image': [
                 'match', ['get', 'pass'],
@@ -649,7 +571,7 @@ export function MapExplore({ resortCollection }) {
             id="resort-markers"
             type="symbol"
             minzoom={11}
-            filter={['all', ['!', ['has', 'point_count']], passFilter]}
+            filter={passFilter}
             layout={{
               'icon-image': [
                 'match', ['get', 'pass'],
@@ -681,7 +603,7 @@ export function MapExplore({ resortCollection }) {
             id="resort-labels"
             type="symbol"
             minzoom={11}
-            filter={['all', ['!', ['has', 'point_count']], passFilter]}
+            filter={passFilter}
             layout={{
               'text-field': ['get', 'name'],
               'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
@@ -699,25 +621,28 @@ export function MapExplore({ resortCollection }) {
           />
         </Source>
 
-        {/* Popup */}
-        {popupInfo && (
-          <Popup
-            longitude={popupInfo.resort.geometry.coordinates[0]}
-            latitude={popupInfo.resort.geometry.coordinates[1]}
-            anchor="bottom"
-            closeOnClick={true}
-            onClose={() => setPopupInfo(null)}
-            maxWidth="300px"
-            className="skimail-popup"
-            offset={-5}
+        {/* Region navigation markers — visible at low zoom only */}
+        {currentZoom < 6 && REGION_MARKERS.map((region) => (
+          <Marker
+            key={region.id}
+            longitude={region.lng}
+            latitude={region.lat}
+            anchor="center"
+            onClick={(e) => { e.originalEvent.stopPropagation(); onRegionClick(region); }}
           >
-            <PopupContent
-              selectedResort={popupInfo.resort}
-              snowData={popupInfo.snowInfo}
-              stats={datasetStats}
-            />
-          </Popup>
-        )}
+            <div
+              className="pointer-events-auto cursor-pointer select-none rounded-full px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur-sm transition-all hover:scale-110"
+              style={{
+                background: 'rgba(15,23,42,0.85)',
+                border: '1.5px solid rgba(56,189,248,0.5)',
+                boxShadow: '0 0 12px rgba(56,189,248,0.3), 0 4px 12px rgba(0,0,0,0.4)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {region.label}
+            </div>
+          </Marker>
+        ))}
       </Map>
 
       {/* Consolidated map controls */}
@@ -734,135 +659,5 @@ export function MapExplore({ resortCollection }) {
   );
 }
 
-// Percentile helper
-function percentile(sortedArr, val) {
-  if (!sortedArr.length || isNaN(val)) return 0;
-  let count = 0;
-  for (const v of sortedArr) { if (v <= val) count++; else break; }
-  return Math.round((count / sortedArr.length) * 100);
-}
-
-const DonutChart = ({ pct, color, bgColor, label, value, size = 52 }) => {
-  const r = 18;
-  const circ = 2 * Math.PI * r;
-  const filled = circ * (pct / 100);
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-      <svg width={size} height={size} viewBox="0 0 48 48">
-        <circle cx="24" cy="24" r={r} fill="none" stroke={bgColor} strokeWidth="5" />
-        <circle cx="24" cy="24" r={r} fill="none" stroke={color} strokeWidth="5"
-          strokeDasharray={`${filled} ${circ - filled}`}
-          strokeDashoffset={circ * 0.25}
-          strokeLinecap="round"
-        />
-        <text x="24" y="22" textAnchor="middle" dominantBaseline="middle"
-          style={{ fontSize: '10px', fontWeight: '700', fill: '#f8fafc' }}>
-          {Math.round(pct)}
-        </text>
-        <text x="24" y="31" textAnchor="middle" dominantBaseline="middle"
-          style={{ fontSize: '7px', fill: '#94a3b8' }}>
-          %ile
-        </text>
-      </svg>
-      <div style={{ fontSize: '10px', fontWeight: '600', color, lineHeight: '1.2', textAlign: 'center' }}>{value}</div>
-      <div style={{ fontSize: '8px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
-    </div>
-  );
-};
-
-const PopupContent = ({ selectedResort, snowData, stats }) => {
-  const p = selectedResort.properties;
-  const passColor = PASS_COLORS[p.pass] || '#6b7280';
-  const passLink = PASS_LINKS[p.pass];
-  const location = [
-    p.state !== 'Unknown' ? p.state : null,
-    p.country !== 'Unknown' ? p.country : null,
-  ].filter(Boolean).join(', ');
-
-  const snowVal = parseFloat(p.avg_snowfall);
-  const vertVal = parseFloat(p.vertical_drop);
-  const acresVal = parseFloat(p.skiable_acres);
-  const snowPct = stats ? percentile(stats.snowfall, snowVal) : 0;
-  const vertPct = stats ? percentile(stats.vertical, vertVal) : 0;
-  const acresPct = stats ? percentile(stats.acres, acresVal) : 0;
-  const hasCharts = stats && (!isNaN(snowVal) || !isNaN(vertVal) || !isNaN(acresVal));
-
-  return (
-    <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", minWidth: '200px', maxWidth: '280px' }}>
-      <div style={{ display: 'block' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          {passLink ? (
-            <a href={passLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} style={{
-              display: 'inline-block', padding: '2px 8px', borderRadius: '999px',
-              backgroundColor: passColor, color: 'white', fontSize: '10px', fontWeight: '700',
-              letterSpacing: '0.5px', textTransform: 'uppercase', flexShrink: '0',
-              textDecoration: 'none',
-            }}>{p.pass === 'Mountain Collective' ? 'MC' : p.pass}</a>
-          ) : (
-            <span style={{
-              display: 'inline-block', padding: '2px 8px', borderRadius: '999px',
-              backgroundColor: passColor, color: 'white', fontSize: '10px', fontWeight: '700',
-              letterSpacing: '0.5px', textTransform: 'uppercase', flexShrink: '0',
-            }}>{p.pass}</span>
-          )}
-          <span style={{ fontSize: '14px', fontWeight: '700', color: '#f8fafc', lineHeight: '1.2' }}>
-            {p.name !== 'Unknown' ? p.name : ''}
-          </span>
-        </div>
-
-        {location && (
-          <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '8px' }}>📍 {location}</div>
-        )}
-
-        {hasCharts && (
-          <div style={{
-            display: 'flex', justifyContent: 'space-around', marginBottom: '8px',
-            padding: '8px 4px', borderRadius: '10px',
-            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-          }}>
-            {!isNaN(snowVal) && snowVal > 0 && (
-              <DonutChart pct={snowPct} color="#38bdf8" bgColor="rgba(56,189,248,0.15)" label="Snowfall" value={`${p.avg_snowfall}"`} />
-            )}
-            {!isNaN(vertVal) && vertVal > 0 && (
-              <DonutChart pct={vertPct} color="#4ade80" bgColor="rgba(74,222,128,0.15)" label="Vert" value={`${p.vertical_drop}ft`} />
-            )}
-            {!isNaN(acresVal) && acresVal > 0 && (
-              <DonutChart pct={acresPct} color="#facc15" bgColor="rgba(250,204,21,0.15)" label="Acres" value={`${p.skiable_acres}ac`} />
-            )}
-          </div>
-        )}
-
-        {snowData && (snowData.snowfall_24h > 0 || snowData.snow_depth > 0 || snowData.snowfall_7d > 0) && (
-          <div style={{
-            display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '6px',
-            padding: '6px', borderRadius: '8px', background: 'rgba(14,165,233,0.1)',
-            border: '1px solid rgba(14,165,233,0.2)',
-          }}>
-            <span style={{ fontSize: '10px', fontWeight: '700', color: '#38bdf8', textTransform: 'uppercase', width: '100%', marginBottom: '2px' }}>❄️ Live Snow</span>
-            {snowData.snowfall_24h > 0 && (
-              <span style={{ padding: '1px 5px', borderRadius: '4px', background: 'rgba(56,189,248,0.2)', fontSize: '11px', fontWeight: '600', color: '#7dd3fc' }}>
-                24h: {Math.round(snowData.snowfall_24h)}cm
-              </span>
-            )}
-            {snowData.snowfall_7d > 0 && (
-              <span style={{ padding: '1px 5px', borderRadius: '4px', background: 'rgba(56,189,248,0.2)', fontSize: '11px', fontWeight: '600', color: '#7dd3fc' }}>
-                7d: {Math.round(snowData.snowfall_7d)}cm
-              </span>
-            )}
-            {snowData.snow_depth > 0 && (
-              <span style={{ padding: '1px 5px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', fontSize: '11px', fontWeight: '600', color: '#94a3b8' }}>
-                Base: {Math.round(snowData.snow_depth)}cm
-              </span>
-            )}
-            {snowData.temperature !== null && (
-              <span style={{ padding: '1px 5px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', fontSize: '11px', fontWeight: '600', color: '#94a3b8' }}>
-                {Math.round(snowData.temperature)}°C
-              </span>
-            )}
-          </div>
-        )}
-
-      </div>
-    </div>
-  );
-};
+// NOTE: PopupContent, DonutChart, percentile removed — cards now in ResultsContainer
+// Keep only the MapExplore export above
