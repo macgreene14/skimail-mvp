@@ -203,8 +203,9 @@ export function MapExplore({ resortCollection }) {
     });
     setSelectedResort(null);
     setIsResortView(false);
+    setLastRegion(null);
     lastFlewToRef.current = null;
-  }, [setIsResortView, setSelectedResort]);
+  }, [setIsResortView, setSelectedResort, setLastRegion]);
 
   // Build pass filter expressions
   const passFilter = useMemo(() => {
@@ -766,7 +767,7 @@ export function MapExplore({ resortCollection }) {
         </Source>
 
         {/* Region navigation markers — visible at low zoom only */}
-        {currentZoom < 4 && REGION_MARKERS.map((region) => (
+        {currentZoom < 5 && REGION_MARKERS.map((region) => (
           <Marker
             key={region.id}
             longitude={region.lng}
