@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import { getPercentile } from "../utils/percentiles";
 import useMapStore from "../store/useMapStore";
 
@@ -89,6 +89,66 @@ function CompactCard({ resort, isSelected, isHighlighted, onClick, snowInfo }) {
   );
 }
 
+function MobileSearchBar({ searchQuery, setSearchQuery }) {
+  const [expanded, setExpanded] = useState(false);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (expanded && inputRef.current) inputRef.current.focus();
+  }, [expanded]);
+
+  // If there's an active query, keep it expanded
+  const isOpen = expanded || !!searchQuery;
+
+  return (
+    <div className="pointer-events-auto mx-4 mb-1.5 flex justify-end">
+      {isOpen ? (
+        <div
+          className="relative w-full rounded-full backdrop-blur-md transition-all"
+          style={{
+            background: "rgba(15,23,42,0.6)",
+            border: "1px solid rgba(255,255,255,0.12)",
+          }}
+        >
+          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            ref={inputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onBlur={() => { if (!searchQuery) setExpanded(false); }}
+            placeholder="Search resorts..."
+            className="w-full rounded-full py-1 pl-7 pr-7 text-[11px] text-white placeholder-slate-500 outline-none bg-transparent"
+          />
+          <button
+            onClick={() => { setSearchQuery(""); setExpanded(false); }}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-[10px]"
+          >
+            ✕
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setExpanded(true)}
+          className="flex items-center justify-center w-8 h-8 rounded-full backdrop-blur-md transition-all"
+          style={{
+            background: "rgba(15,23,42,0.5)",
+            border: "1px solid rgba(255,255,255,0.12)",
+          }}
+        >
+          <svg className="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
   const scrollRef = useRef(null);
   const snowBySlug = useMapStore((s) => s.snowBySlug);
@@ -113,31 +173,8 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
 
   return (
     <div className="absolute bottom-2 left-0 right-0 z-20 sm:hidden pointer-events-none" style={{ height: "130px" }}>
-      {/* Search bar */}
-      <div className="pointer-events-auto mx-4 mb-1.5">
-        <div className="relative">
-          <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search resorts..."
-            className="w-full rounded-lg py-1.5 pl-7 pr-7 text-[11px] text-white placeholder-slate-500 outline-none backdrop-blur-xl"
-            style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(255,255,255,0.1)" }}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-[10px] pointer-events-auto"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      </div>
+      {/* Compact search — collapsed to icon, expands on tap */}
+      <MobileSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {/* Cards */}
       <div

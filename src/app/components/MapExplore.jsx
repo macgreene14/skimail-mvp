@@ -498,24 +498,24 @@ export function MapExplore({ resortCollection }) {
               'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.9, 9, 0],
             }}
           />
-          <Layer id="snow-circles" type="circle" minzoom={3}
+          <Layer id="snow-circles" type="circle" minzoom={5}
             layout={{ visibility: showSnow ? 'visible' : 'none' }}
             paint={{
-              'circle-radius': ['interpolate', ['linear'], ['get', 'snowfall_7d'], 0, 5, 15, 12, 50, 20, 150, 30],
+              'circle-radius': ['interpolate', ['linear'], ['get', 'snowfall_7d'], 0, 3, 15, 8, 50, 14, 150, 22],
               'circle-color': ['interpolate', ['linear'], ['get', 'snowfall_7d'],
                 0, 'rgba(100,181,246,0.7)', 15, 'rgba(66,165,245,0.8)', 40, 'rgba(30,136,229,0.9)', 100, 'rgba(255,255,255,1)'],
               'circle-stroke-width': 2, 'circle-stroke-color': 'rgba(255,255,255,0.7)',
               'circle-opacity': ['interpolate', ['linear'], ['zoom'], 3, 0, 4, 0.9],
             }}
           />
-          <Layer id="snow-labels" type="symbol" minzoom={2}
+          <Layer id="snow-labels" type="symbol" minzoom={7}
             layout={{
               visibility: showSnow ? 'visible' : 'none',
               'text-field': ['concat', '❄ ', ['get', 'name'], '\n', ['to-string', ['round', ['get', 'snowfall_7d']]], 'cm'],
               'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
-              'text-size': ['interpolate', ['linear'], ['zoom'], 2, 11, 4, 13, 7, 14],
+              'text-size': ['interpolate', ['linear'], ['zoom'], 7, 11, 10, 14],
               'text-allow-overlap': false, 'text-ignore-placement': false,
-              'text-offset': [0, -2.5], 'text-line-height': 1.2, 'text-max-width': 12, 'text-padding': 8,
+              'text-offset': [0, -2.5], 'text-line-height': 1.2, 'text-max-width': 12, 'text-padding': 20,
               'symbol-sort-key': ['*', -1, ['get', 'snowfall_7d']],
             }}
             paint={{
@@ -654,6 +654,7 @@ export function MapExplore({ resortCollection }) {
         setUserStopped={setUserStopped}
         isResortView={isResortView}
         resetView={resetView}
+        currentZoom={currentZoom}
       />
     </div>
   );

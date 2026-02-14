@@ -64,6 +64,7 @@ export default function MapControls({
   setUserStopped,
   isResortView,
   resetView,
+  currentZoom,
 }) {
   const [regionsOpen, setRegionsOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -230,7 +231,7 @@ export default function MapControls({
               setUserStopped(false);
               setSpinning(true);
               if (mapRef.current && mapRef.current.getZoom() >= 3.5) {
-                mapRef.current.flyTo({ center: mapRef.current.getCenter(), zoom: 1.2 });
+                mapRef.current.flyTo({ center: mapRef.current.getCenter(), zoom: 1.8 });
               }
             }
           }}
@@ -244,21 +245,32 @@ export default function MapControls({
         </button>
       </div>
 
-      {/* ── Bottom-left: Base map + Back to Globe (above carousel on mobile) ── */}
+      {/* ── Top-left: Back arrow (visible when zoomed past region level) ── */}
+      {(isResortView || currentZoom > 4) && (
+        <div className="pointer-events-auto absolute left-3 top-3">
+          <button
+            onClick={resetView}
+            className="flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all hover:bg-white/20"
+            style={{
+              background: "rgba(15,23,42,0.7)",
+              border: "1px solid rgba(255,255,255,0.15)",
+            }}
+            title="Back to globe"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* ── Bottom-left: Base map (above carousel on mobile) ── */}
       <div className="pointer-events-auto absolute bottom-28 left-3 flex items-end gap-2 sm:bottom-3">
         <BaseMapSwitcher
           activeStyle={mapStyleKey}
           onStyleChange={(key) => setMapStyle(key, MAP_STYLES[key])}
           mapboxToken={MAPBOX_TOKEN}
         />
-        {isResortView && (
-          <button
-            onClick={resetView}
-            className="flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-2 text-xs font-semibold text-slate-800 shadow-lg transition-all hover:bg-white"
-          >
-            🌍 Back to Globe
-          </button>
-        )}
       </div>
     </div>
   );
