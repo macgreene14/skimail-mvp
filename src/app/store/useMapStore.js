@@ -40,6 +40,10 @@ const useMapStore = create(
       isResortView: false,
       setIsResortView: (v) => set({ isResortView: v }),
 
+      // ── Last region center (for Back button in detail view) ──
+      lastRegion: null,
+      setLastRegion: (r) => set({ lastRegion: r }),
+
       // ── Map view (controlled mode for react-map-gl) ──
       viewState: { longitude: -98, latitude: 39, zoom: 1.2, pitch: 0, bearing: 0 },
       setViewState: (vs) => set({ viewState: vs }),
@@ -70,6 +74,14 @@ const useMapStore = create(
       // Legacy alias — renderedResorts → filteredResorts
       renderedResorts: [],
       setRenderedResorts: (r) => set({ renderedResorts: r, filteredResorts: r }),
+
+      // ── Current zoom level (set by MapExplore on moveEnd) ──
+      currentZoom: 1.2,
+      setCurrentZoom: (z) => set({ currentZoom: z }),
+
+      // ── Piste data for current detail resort ──
+      pisteData: null,
+      setPisteData: (d) => set({ pisteData: d }),
 
       // ── Snow data by slug ──
       // Set by MapExplore when batch snow data loads.

@@ -6,6 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import useMapStore from '../store/useMapStore';
 import { useBatchSnowData } from '../hooks/useResortWeather';
 import MapControls from './MapControls';
+import regionsManifest from '../../../assets/regions.json';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
@@ -21,21 +22,15 @@ const MAP_STYLES = {
   outdoors: 'mapbox://styles/mapbox/outdoors-v12',
 };
 
-// Region nav markers for globe/low zoom
-const REGION_MARKERS = [
-  { id: 'rocky-mountain', label: '⛰️ Rockies', lat: 45.5, lng: -110.5, zoom: 6.5 },
-  { id: 'pnw', label: '🌲 PNW', lat: 46.8, lng: -121.7, zoom: 6.5 },
-  { id: 'california', label: '☀️ California', lat: 38.5, lng: -120.0, zoom: 6.5 },
-  { id: 'northeast', label: '🏔️ Northeast', lat: 44.0, lng: -72.0, zoom: 6.5 },
-  { id: 'midwest', label: '🌾 Midwest', lat: 45.0, lng: -89.0, zoom: 6.5 },
-  { id: 'western-canada', label: '🍁 W. Canada', lat: 51.0, lng: -117.0, zoom: 6.5 },
-  { id: 'eastern-canada', label: '🍁 E. Canada', lat: 47.0, lng: -71.0, zoom: 6.5 },
-  { id: 'alps', label: '🏔️ Alps', lat: 46.8, lng: 10.5, zoom: 6.5 },
-  { id: 'scandinavia', label: '❄️ Scandinavia', lat: 63.0, lng: 14.0, zoom: 6.0 },
-  { id: 'japan', label: '🗾 Japan', lat: 36.8, lng: 138.5, zoom: 6.5 },
-  { id: 'oceania', label: '🌏 Oceania', lat: -37.0, lng: 148.0, zoom: 6.5 },
-  { id: 'south-america', label: '🏔️ S. America', lat: -33.0, lng: -70.0, zoom: 6.5 },
-];
+// Region nav markers derived from manifest
+const REGION_MARKERS = regionsManifest.map(r => ({
+  id: r.id,
+  label: `${r.emoji} ${r.label}`,
+  lat: r.center[1],
+  lng: r.center[0],
+  zoom: r.zoom,
+  bounds: r.bounds,
+}));
 
 export function MapExplore({ resortCollection }) {
   const resorts = resortCollection.features;
@@ -46,7 +41,8 @@ export function MapExplore({ resortCollection }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [spinning, setSpinning] = useState(true);
   const [userStopped, setUserStopped] = useState(false);
-  const [currentZoom, setCurrentZoom] = useState(1.2);
+  const currentZoom = useMapStore((s) => s.currentZoom);
+  const setCurrentZoom = useMapStore((s) => s.setCurrentZoom);
 
   const {
     mapStyle, mapStyleKey,
@@ -56,12 +52,15 @@ export function MapExplore({ resortCollection }) {
     showSnowCover, showPistes,
     previousViewState, setPreviousViewState,
     isResortView, setIsResortView,
+    lastRegion, setLastRegion,
   } = useMapStore();
 
   const setSnowBySlug = useMapStore((s) => s.setSnowBySlug);
 
+  const setPisteData = useMapStore((s) => s.setPisteData);
+  const pisteData = useMapStore((s) => s.pisteData);
+
   // Per-resort piste data (lazy loaded)
-  const [pisteData, setPisteData] = useState(null);
   useEffect(() => {
     if (!selectedResort || !showPistes) { setPisteData(null); return; }
     const assets = selectedResort.properties?.assets;
@@ -73,7 +72,7 @@ export function MapExplore({ resortCollection }) {
       .then(data => { if (!cancelled) setPisteData(data); })
       .catch(() => { if (!cancelled) setPisteData(null); });
     return () => { cancelled = true; };
-  }, [selectedResort, showPistes]);
+  }, [selectedResort, showPistes, setPisteData]);
 
   // Track viewport-visible slugs for tiered snow fetching
   const [visibleSlugs, setVisibleSlugs] = useState(null);
@@ -127,6 +126,39 @@ export function MapExplore({ resortCollection }) {
     };
   }, [snowData, activePasses]);
 
+  // Compute average 7-day snowfall per region (for region marker indicators)
+  const snowBySlug = useMapStore((s) => s.snowBySlug);
+  const regionSnowAvg = useMemo(() => {
+    const result = {};
+    if (!Object.keys(snowBySlug).length) return result;
+    // Assign each resort with snow data to nearest region
+    const regionTotals = {};
+    const regionCounts = {};
+    REGION_MARKERS.forEach((r) => { regionTotals[r.id] = 0; regionCounts[r.id] = 0; });
+    resorts.forEach((resort) => {
+      const slug = resort.properties?.slug;
+      const snow = snowBySlug[slug];
+      if (!snow || !snow.snowfall_7d) return;
+      // Only count pass resorts (not independent)
+      if (resort.properties.pass === 'Independent') return;
+      const [lng, lat] = resort.geometry.coordinates;
+      let closest = REGION_MARKERS[0];
+      let minDist = Infinity;
+      REGION_MARKERS.forEach((r) => {
+        const d = Math.pow(r.lat - lat, 2) + Math.pow(r.lng - lng, 2);
+        if (d < minDist) { minDist = d; closest = r; }
+      });
+      regionTotals[closest.id] += snow.snowfall_7d;
+      regionCounts[closest.id] += 1;
+    });
+    REGION_MARKERS.forEach((r) => {
+      result[r.id] = regionCounts[r.id] > 0
+        ? regionTotals[r.id] / regionCounts[r.id]
+        : 0;
+    });
+    return result;
+  }, [snowBySlug, resorts]);
+
   // MODIS snow cover tile date (yesterday for availability)
   const modisDate = useMemo(() => {
     return new Date(Date.now() - 86400000).toISOString().split('T')[0];
@@ -157,22 +189,22 @@ export function MapExplore({ resortCollection }) {
     });
   }, [setPreviousViewState, setIsResortView]);
 
-  // Reset view back to globe
+  // Reset view back to globe (Spin Globe button)
   const resetView = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
-    const prev = previousViewState || { longitude: -98, latitude: 39, zoom: 1.2, pitch: 0, bearing: 0 };
     map.flyTo({
-      center: [prev.longitude, prev.latitude],
-      zoom: prev.zoom,
+      center: [-98, 39],
+      zoom: 1.8,
       pitch: 0,
       bearing: 0,
       duration: 1500,
       essential: true,
     });
+    setSelectedResort(null);
     setIsResortView(false);
-    lastFlewToRef.current = null; // allow re-clicking same resort
-  }, [previousViewState, setIsResortView]);
+    lastFlewToRef.current = null;
+  }, [setIsResortView, setSelectedResort]);
 
   // Build pass filter expressions
   const passFilter = useMemo(() => {
@@ -186,6 +218,11 @@ export function MapExplore({ resortCollection }) {
   }, [showIkon, showEpic, showMC, showIndy, showIndependent]);
 
   // Filtered GeoJSON so clusters reflect active pass toggles
+  // Merge snow_7d from snowBySlug into properties for label display
+  const snowBySlugRef = useRef({});
+  useEffect(() => { snowBySlugRef.current = snowBySlug; }, [snowBySlug]);
+  const snowStableKey = useMemo(() => Object.keys(snowBySlug).length, [snowBySlug]);
+
   const filteredGeoJSON = useMemo(() => {
     const passes = new Set();
     if (showIkon) passes.add('Ikon');
@@ -193,11 +230,21 @@ export function MapExplore({ resortCollection }) {
     if (showMC) passes.add('Mountain Collective');
     if (showIndy) passes.add('Indy');
     if (showIndependent) passes.add('Independent');
+    const snow = snowBySlugRef.current;
     return {
       type: 'FeatureCollection',
-      features: resorts.filter((r) => passes.has(r.properties.pass)),
+      features: resorts
+        .filter((r) => passes.has(r.properties.pass))
+        .map((r) => {
+          const s = snow[r.properties.slug];
+          if (!s || !s.snowfall_7d) return r;
+          return {
+            ...r,
+            properties: { ...r.properties, snow_7d: Math.round(s.snowfall_7d) },
+          };
+        }),
     };
-  }, [resorts, showIkon, showEpic, showMC, showIndy, showIndependent]);
+  }, [resorts, showIkon, showEpic, showMC, showIndy, showIndependent, snowStableKey]);
 
   // Globe spin — imperative easeTo (works with uncontrolled mode)
   useEffect(() => {
@@ -314,9 +361,39 @@ export function MapExplore({ resortCollection }) {
     stopSpin();
     const map = mapRef.current;
     if (!map) return;
+    setLastRegion({ lng: region.lng, lat: region.lat, zoom: region.zoom });
     const zoom = window.innerWidth <= 768 ? region.zoom - 0.5 : region.zoom;
     map.flyTo({ center: [region.lng, region.lat], zoom, pitch: 0, bearing: 0, duration: 1200, essential: true });
-  }, [stopSpin]);
+  }, [stopSpin, setLastRegion]);
+
+  // Fly back to region view (from detail view)
+  const flyToRegion = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    // Use lastRegion if available, otherwise find nearest region to current position
+    let target = lastRegion;
+    if (!target) {
+      const center = map.getCenter();
+      let closest = REGION_MARKERS[0];
+      let minDist = Infinity;
+      REGION_MARKERS.forEach((r) => {
+        const d = Math.pow(r.lat - center.lat, 2) + Math.pow(r.lng - center.lng, 2);
+        if (d < minDist) { minDist = d; closest = r; }
+      });
+      target = { lng: closest.lng, lat: closest.lat, zoom: closest.zoom };
+    }
+    map.flyTo({
+      center: [target.lng, target.lat],
+      zoom: 7,
+      pitch: 0,
+      bearing: 0,
+      duration: 1500,
+      essential: true,
+    });
+    setSelectedResort(null);
+    setIsResortView(false);
+    lastFlewToRef.current = null;
+  }, [lastRegion, setSelectedResort, setIsResortView]);
 
   // When selectedResort changes externally (e.g. from card click)
   useEffect(() => {
@@ -518,31 +595,7 @@ export function MapExplore({ resortCollection }) {
               'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.9, 9, 0],
             }}
           />
-          <Layer id="snow-circles" type="circle" minzoom={5}
-            layout={{ visibility: showSnow ? 'visible' : 'none' }}
-            paint={{
-              'circle-radius': ['interpolate', ['linear'], ['get', 'snowfall_7d'], 0, 3, 15, 8, 50, 14, 150, 22],
-              'circle-color': ['interpolate', ['linear'], ['get', 'snowfall_7d'],
-                0, 'rgba(100,181,246,0.7)', 15, 'rgba(66,165,245,0.8)', 40, 'rgba(30,136,229,0.9)', 100, 'rgba(255,255,255,1)'],
-              'circle-stroke-width': 2, 'circle-stroke-color': 'rgba(255,255,255,0.7)',
-              'circle-opacity': ['interpolate', ['linear'], ['zoom'], 3, 0, 4, 0.9],
-            }}
-          />
-          <Layer id="snow-labels" type="symbol" minzoom={7}
-            layout={{
-              visibility: showSnow ? 'visible' : 'none',
-              'text-field': ['concat', '❄ ', ['get', 'name'], '\n', ['to-string', ['round', ['get', 'snowfall_7d']]], 'cm'],
-              'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'],
-              'text-size': ['interpolate', ['linear'], ['zoom'], 7, 11, 10, 14],
-              'text-allow-overlap': false, 'text-ignore-placement': false,
-              'text-offset': [0, -2.5], 'text-line-height': 1.2, 'text-max-width': 12, 'text-padding': 20,
-              'symbol-sort-key': ['*', -1, ['get', 'snowfall_7d']],
-            }}
-            paint={{
-              'text-color': '#ffffff', 'text-halo-color': 'rgba(14,165,233,0.6)',
-              'text-halo-width': 2, 'text-halo-blur': 1,
-            }}
-          />
+          {/* Snow circles removed — heatmap is sufficient */}
         </Source>
 
         {/* Piste trails — visible at high zoom */}
@@ -622,6 +675,41 @@ export function MapExplore({ resortCollection }) {
             }}
           />
 
+          {/* === Layer: Resort name labels at Region View (zoom 5-10) === */}
+          <Layer
+            id="resort-region-labels"
+            type="symbol"
+            minzoom={5}
+            maxzoom={11}
+            filter={passFilter}
+            layout={{
+              'text-field': [
+                'case',
+                ['has', 'snow_7d'],
+                ['format',
+                  ['get', 'name'], {},
+                  '\n', {},
+                  ['concat', '❄ ', ['to-string', ['get', 'snow_7d']], '"'], { 'font-scale': 0.8 },
+                ],
+                ['get', 'name'],
+              ],
+              'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
+              'text-size': ['interpolate', ['linear'], ['zoom'], 5, 9, 10, 12],
+              'text-offset': [0, 1.6],
+              'text-allow-overlap': false,
+              'text-optional': true,
+              'text-max-width': 8,
+              'text-line-height': 1.2,
+              'text-padding': 8,
+              'symbol-sort-key': ['case', ['has', 'snow_7d'], ['*', -1, ['get', 'snow_7d']], 0],
+            }}
+            paint={{
+              'text-color': isDark ? '#e2e8f0' : '#ffffff',
+              'text-halo-color': isDark ? 'rgba(0,0,0,0.8)' : 'rgba(15,23,42,0.85)',
+              'text-halo-width': 1.5,
+            }}
+          />
+
           {/* === Layer 4: Close-zoom large markers (zoom 11+) === */}
           <Layer
             id="resort-markers"
@@ -678,7 +766,7 @@ export function MapExplore({ resortCollection }) {
         </Source>
 
         {/* Region navigation markers — visible at low zoom only */}
-        {currentZoom < 6 && REGION_MARKERS.map((region) => (
+        {currentZoom < 4 && REGION_MARKERS.map((region) => (
           <Marker
             key={region.id}
             longitude={region.lng}
@@ -695,7 +783,12 @@ export function MapExplore({ resortCollection }) {
                 whiteSpace: 'nowrap',
               }}
             >
-              {region.label}
+              <div className="text-center">{region.label}</div>
+              {regionSnowAvg[region.id] > 0 && (
+                <div className="text-[9px] text-sky-300 text-center mt-0.5">
+                  ❄ {Math.round(regionSnowAvg[region.id])}&quot;
+                </div>
+              )}
             </div>
           </Marker>
         ))}
@@ -710,6 +803,7 @@ export function MapExplore({ resortCollection }) {
         setUserStopped={setUserStopped}
         isResortView={isResortView}
         resetView={resetView}
+        flyToRegion={flyToRegion}
         currentZoom={currentZoom}
       />
     </div>

@@ -26,6 +26,142 @@ const PASS_LINKS = {
   Indy: "https://www.indyskipass.com/",
 };
 
+function TrailBreakdown({ pisteData }) {
+  if (!pisteData?.features) return null;
+  const counts = {};
+  pisteData.features.forEach((f) => {
+    if (f.properties?.type !== "run") return;
+    let diff = f.properties?.difficulty || "unknown";
+    if (diff === "double-black") diff = "black";
+    counts[diff] = (counts[diff] || 0) + 1;
+  });
+  const known = ["green", "blue", "red", "black"].filter((d) => counts[d]);
+  if (known.length === 0) return null;
+  const total = known.reduce((s, d) => s + counts[d], 0);
+  const icons = { green: "🟢", blue: "🔵", red: "🔴", black: "⬛" };
+  return (
+    <div className="mb-2">
+      <div className="text-[9px] uppercase tracking-wider text-slate-500 mb-1">Trails ({total})</div>
+      <div className="flex gap-2">
+        {known.map((diff) => (
+          <div key={diff} className="flex items-center gap-1 text-[10px] text-slate-300">
+            <span>{icons[diff]}</span>
+            <span>{counts[diff]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ExpandedDetailCard({ resort, onClick }) {
+  const snowBySlug = useMapStore((s) => s.snowBySlug);
+  const pisteData = useMapStore((s) => s.pisteData);
+  const p = resort.properties;
+  const passColor = PASS_COLORS_BG[p.pass] || "bg-gray-500";
+  const passLabel = p.pass === "Mountain Collective" ? "MC" : p.pass;
+  const passLink = PASS_LINKS[p.pass];
+  const snow = snowBySlug[p.slug];
+
+  const location = [
+    p.state !== "Unknown" ? p.state : null,
+    p.country !== "Unknown" ? p.country : null,
+  ].filter(Boolean).join(", ");
+
+  const snowPct = getPercentile("avg_snowfall", p.avg_snowfall);
+  const vertPct = getPercentile("vertical_drop", p.vertical_drop);
+  const acresPct = getPercentile("skiable_acres", p.skiable_acres);
+
+  return (
+    <div
+      onClick={onClick}
+      className="cursor-pointer rounded-xl p-4 transition-all border border-sky-500/50 ring-1 ring-sky-500/20 backdrop-blur-xl"
+      style={{ background: "rgba(15,23,42,0.92)" }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-1.5">
+        {passLink ? (
+          <a href={passLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+            className={`shrink-0 rounded-full ${passColor} px-2 py-0.5 text-[9px] font-bold text-white hover:opacity-80 transition-opacity`}>
+            {passLabel}
+          </a>
+        ) : (
+          <span className={`shrink-0 rounded-full ${passColor} px-2 py-0.5 text-[9px] font-bold text-white`}>{passLabel}</span>
+        )}
+        <h3 className="truncate text-sm font-bold text-white">{p.name !== "Unknown" ? p.name : "Resort"}</h3>
+      </div>
+
+      {/* Location */}
+      <div className="flex items-center gap-3 mb-2 text-[10px] text-slate-400">
+        {location && <span>📍 {location}</span>}
+        {p.top_elevation && p.top_elevation !== "Unknown" && <span>🏔 {p.top_elevation}ft</span>}
+      </div>
+
+      {/* Live snow data */}
+      {snow && (snow.snowfall_7d > 0 || snow.snow_depth > 0) && (
+        <div className="flex gap-2 mb-2 p-2 rounded-lg" style={{ background: "rgba(14,165,233,0.1)", border: "1px solid rgba(14,165,233,0.15)" }}>
+          {snow.snowfall_24h > 0 && (
+            <div className="text-center">
+              <div className="text-sm font-bold text-sky-300">{Math.round(snow.snowfall_24h)}cm</div>
+              <div className="text-[8px] text-sky-400/70 uppercase">24h</div>
+            </div>
+          )}
+          {snow.snowfall_7d > 0 && (
+            <div className="text-center">
+              <div className="text-sm font-bold text-sky-300">{Math.round(snow.snowfall_7d)}cm</div>
+              <div className="text-[8px] text-sky-400/70 uppercase">7 day</div>
+            </div>
+          )}
+          {snow.snow_depth > 0 && (
+            <div className="text-center">
+              <div className="text-sm font-bold text-slate-300">{Math.round(snow.snow_depth)}cm</div>
+              <div className="text-[8px] text-slate-500 uppercase">base</div>
+            </div>
+          )}
+          {snow.temperature !== null && snow.temperature !== undefined && (
+            <div className="text-center ml-auto">
+              <div className="text-sm font-bold text-slate-300">{Math.round(snow.temperature)}°C</div>
+              <div className="text-[8px] text-slate-500 uppercase">temp</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Percentile bars */}
+      <div className="flex gap-3 mb-2">
+        {p.avg_snowfall && p.avg_snowfall !== "Unknown" && parseFloat(p.avg_snowfall) > 0 && (
+          <PercentileBar label="Snow" value={p.avg_snowfall} unit='"' pct={snowPct} color="#38bdf8" />
+        )}
+        {p.vertical_drop && p.vertical_drop !== "Unknown" && parseFloat(p.vertical_drop) > 0 && (
+          <PercentileBar label="Vert" value={p.vertical_drop} unit="'" pct={vertPct} color="#4ade80" />
+        )}
+        {p.skiable_acres && p.skiable_acres !== "Unknown" && parseFloat(p.skiable_acres) > 0 && (
+          <PercentileBar label="Acres" value={p.skiable_acres} unit="ac" pct={acresPct} color="#facc15" />
+        )}
+      </div>
+
+      {/* Trail breakdown */}
+      <TrailBreakdown pisteData={pisteData} />
+
+      {/* Website + CTA */}
+      <div className="flex items-center gap-2 mt-2">
+        {p.website && (
+          <a href={p.website} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+            className="text-[10px] text-sky-400 hover:text-sky-300 transition-colors truncate">
+            🌐 Website
+          </a>
+        )}
+        {passLink && (
+          <a href={passLink} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+            className="ml-auto rounded-full bg-sky-500/90 px-3 py-1 text-[10px] font-bold text-white hover:bg-sky-500 transition-colors">
+            Explore on {passLabel} →
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PercentileBar({ label, value, unit, pct, color }) {
   return (
     <div className="flex-1 min-w-0">
@@ -161,6 +297,8 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort })
   const searchQuery = useMapStore((s) => s.searchQuery);
   const setSearchQuery = useMapStore((s) => s.setSearchQuery);
   const highlightedSlug = useMapStore((s) => s.highlightedSlug);
+  const currentZoom = useMapStore((s) => s.currentZoom);
+  const isDetailView = currentZoom >= 11;
 
   const sorted = resorts
     ?.slice()
@@ -203,15 +341,26 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort })
 
       {/* Results */}
       <div className="results-scroll flex flex-col gap-2 overflow-auto px-2 py-1 flex-1">
-        {sorted?.map((resort) => (
-          <ResortCard
-            key={resort.properties.slug || resort.properties.name}
-            resort={resort}
-            isSelected={resort?.properties?.name === selectedResort?.properties?.name}
-            isHighlighted={resort?.properties?.slug === highlightedSlug}
-            onClick={() => setSelectedResort(resort)}
+        {isDetailView && selectedResort && (
+          <ExpandedDetailCard
+            resort={selectedResort}
+            onClick={() => setSelectedResort(selectedResort)}
           />
-        ))}
+        )}
+        {sorted?.map((resort) => {
+          const isSelected = resort?.properties?.name === selectedResort?.properties?.name;
+          // Skip the selected resort in detail view — it's shown expanded above
+          if (isDetailView && isSelected) return null;
+          return (
+            <ResortCard
+              key={resort.properties.slug || resort.properties.name}
+              resort={resort}
+              isSelected={isSelected}
+              isHighlighted={resort?.properties?.slug === highlightedSlug}
+              onClick={() => setSelectedResort(resort)}
+            />
+          );
+        })}
         {sorted?.length === 0 && (
           <p className="px-4 py-8 text-center text-sm text-slate-400">
             No resorts found. Try adjusting your search or map view.

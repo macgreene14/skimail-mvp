@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import useMapStore from "../store/useMapStore";
 import BaseMapSwitcher from "./BaseMapSwitcher";
+import regionsManifest from "../../../assets/regions.json";
 
 /**
  * MapControls — consolidated overlay for ALL map UI controls.
@@ -42,16 +43,12 @@ const MAP_STYLES = {
 
 const REGIONS = [
   { label: "🌎 Global", lat: 20, lng: -30, zoom: 1.2 },
-  { label: "🇺🇸 USA", lat: 41.0, lng: -101.0, zoom: 2.7 },
-  { label: "⛰️ Rockies", lat: 40.7, lng: -109.7, zoom: 4.9 },
-  { label: "🌲 PNW", lat: 45.6, lng: -120.7, zoom: 5.5 },
-  { label: "☀️ California", lat: 37.0, lng: -121.0, zoom: 5.3 },
-  { label: "🏔️ Eastern US", lat: 41.4, lng: -78.9, zoom: 4.5 },
-  { label: "🍁 Canada", lat: 51.3, lng: -119.4, zoom: 4.6 },
-  { label: "🇪🇺 Europe", lat: 45.6, lng: 6.6, zoom: 4.4 },
-  { label: "🗾 Japan", lat: 38.4, lng: 136.2, zoom: 3.8 },
-  { label: "🌏 Oceania", lat: -38.1, lng: 156.2, zoom: 2.5 },
-  { label: "🏔️ S. America", lat: -34.9, lng: -72.4, zoom: 5.0 },
+  ...regionsManifest.map(r => ({
+    label: `${r.emoji} ${r.label}`,
+    lat: r.center[1],
+    lng: r.center[0],
+    zoom: r.zoom,
+  })),
 ];
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
@@ -64,6 +61,7 @@ export default function MapControls({
   setUserStopped,
   isResortView,
   resetView,
+  flyToRegion,
   currentZoom,
 }) {
   const [regionsOpen, setRegionsOpen] = useState(false);
@@ -145,6 +143,7 @@ export default function MapControls({
                   onClick={() => {
                     const zoom = window.innerWidth <= 768 ? region.zoom - 0.75 : region.zoom;
                     stopSpin();
+                    useMapStore.getState().setLastRegion({ lng: region.lng, lat: region.lat, zoom: region.zoom });
                     mapRef.current?.flyTo({ center: [region.lng, region.lat], zoom, pitch: 0, bearing: 0 });
                     setRegionsOpen(false);
                   }}
@@ -224,41 +223,41 @@ export default function MapControls({
         )}
       </div>
 
-      {/* ── Bottom-right: Spin globe (above carousel on mobile) ── */}
-      <div className="pointer-events-auto absolute bottom-28 right-3 sm:bottom-3">
-        <button
-          onClick={() => {
-            if (spinning) {
-              stopSpin();
-            } else {
+      {/* ── Bottom-right: Spin Globe + Pause (above carousel on mobile) ── */}
+      <div className="pointer-events-auto absolute bottom-28 right-3 sm:bottom-3 flex flex-col gap-2 items-end">
+        {spinning && (
+          <button
+            onClick={stopSpin}
+            className="flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90 backdrop-blur-sm transition-all"
+          >
+            ⏸ Pause
+          </button>
+        )}
+        {!spinning && currentZoom > 4 && (
+          <button
+            onClick={() => {
               setUserStopped(false);
               setSpinning(true);
-              if (mapRef.current && mapRef.current.getZoom() >= 3.5) {
-                mapRef.current.flyTo({ center: mapRef.current.getCenter(), zoom: 1.8, pitch: 0, bearing: 0 });
-              }
-            }
-          }}
-          className={`flex items-center gap-1.5 rounded-full backdrop-blur-sm transition-all ${
-            spinning
-              ? "bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90"
-              : "bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500"
-          }`}
-        >
-          {spinning ? "⏸ Pause" : "🌍 Spin Globe"}
-        </button>
+              resetView();
+            }}
+            className="flex items-center gap-1.5 rounded-full bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500 backdrop-blur-sm transition-all"
+          >
+            🌍 Spin Globe
+          </button>
+        )}
       </div>
 
-      {/* ── Top-left: Back arrow (visible when zoomed past region level) ── */}
-      {(isResortView || currentZoom > 4) && (
+      {/* ── Top-left: Back arrow (visible in Detail View only — zoom ≥ 11) ── */}
+      {currentZoom >= 11 && (
         <div className="pointer-events-auto absolute left-3 top-3">
           <button
-            onClick={resetView}
+            onClick={flyToRegion}
             className="flex items-center justify-center w-9 h-9 rounded-full backdrop-blur-md transition-all hover:bg-white/20"
             style={{
               background: "rgba(15,23,42,0.7)",
               border: "1px solid rgba(255,255,255,0.15)",
             }}
-            title="Back to globe"
+            title="Back to region"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
