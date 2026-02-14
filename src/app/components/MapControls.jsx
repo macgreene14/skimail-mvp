@@ -70,7 +70,7 @@ export default function MapControls({
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const {
-    showIkon, showEpic, showMC, showIndy, showIndependent, showSnow,
+    showIkon, showEpic, showMC, showIndy, showIndependent, showSnow, showPistes,
     togglePass, showSnowCover,
     mapStyleKey, setMapStyle,
   } = useMapStore();
@@ -84,11 +84,14 @@ export default function MapControls({
     { label: "Indy", key: "showIndy", active: showIndy, color: PASS_COLORS.Indy },
     { label: "Unaffiliated", key: "showIndependent", active: showIndependent, color: PASS_COLORS.Independent },
     { label: "Snow", key: "showSnow", active: showSnow, color: PASS_COLORS.Snow },
+    { label: "Trails", key: "showPistes", active: showPistes, color: "#22c55e" },
   ];
 
   const handleFilterClick = (key) => {
     if (key === "showSnow") {
       useMapStore.getState().toggleSnow();
+    } else if (key === "showPistes") {
+      useMapStore.getState().togglePistes();
     } else {
       togglePass(key);
     }

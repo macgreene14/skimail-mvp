@@ -30,6 +30,10 @@ const useMapStore = create(
       showSnowCover: false,
       toggleSnowCover: () => set((s) => ({ showSnowCover: !s.showSnowCover })),
 
+      // ── Piste trails ──
+      showPistes: true,
+      togglePistes: () => set((s) => ({ showPistes: !s.showPistes })),
+
       // ── 3D terrain / fly-to state ──
       previousViewState: null,
       setPreviousViewState: (vs) => set({ previousViewState: vs }),
@@ -83,6 +87,7 @@ const useMapStore = create(
         showIndependent: state.showIndependent,
         showSnow: state.showSnow,
         showSnowCover: state.showSnowCover,
+        showPistes: state.showPistes,
         mapStyleKey: state.mapStyleKey,
         mapStyle: state.mapStyle,
       }),

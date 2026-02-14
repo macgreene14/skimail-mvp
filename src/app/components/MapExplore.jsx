@@ -2,12 +2,20 @@
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import Map, { Source, Layer, NavigationControl, GeolocateControl, Marker } from 'react-map-gl';
+import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { Protocol } from 'pmtiles';
 import useMapStore from '../store/useMapStore';
 import { useBatchSnowData } from '../hooks/useResortWeather';
 import MapControls from './MapControls';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
+
+// Register PMTiles protocol for vector tile sources (client-side only)
+if (typeof window !== 'undefined') {
+  const pmtilesProtocol = new Protocol();
+  mapboxgl.addProtocol('pmtiles', pmtilesProtocol.tile);
+}
 
 const MAP_STYLES = {
   skimail: 'mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8',
@@ -48,7 +56,7 @@ export function MapExplore({ resortCollection }) {
     showIkon, showEpic, showMC, showIndy, showIndependent, showSnow,
     selectedResort, setSelectedResort,
     setRenderedResorts, setHighlightedSlug,
-    showSnowCover,
+    showSnowCover, showPistes,
     previousViewState, setPreviousViewState,
     isResortView, setIsResortView,
   } = useMapStore();
@@ -524,6 +532,42 @@ export function MapExplore({ resortCollection }) {
             }}
           />
         </Source>
+
+        {/* Piste trails — visible at high zoom */}
+        {showPistes && (
+          <Source id="pistes" type="vector" url="pmtiles:///skimail-mvp/data/pistes.pmtiles">
+            <Layer
+              id="piste-runs"
+              type="line"
+              source-layer="runs"
+              minzoom={11}
+              paint={{
+                'line-color': [
+                  'match', ['get', 'difficulty'],
+                  'green', '#22c55e',
+                  'blue', '#3b82f6',
+                  'red', '#ef4444',
+                  'black', '#1e293b',
+                  'double-black', '#1e293b',
+                  '#94a3b8',
+                ],
+                'line-width': ['interpolate', ['linear'], ['zoom'], 11, 1, 14, 3],
+                'line-opacity': 0.8,
+              }}
+            />
+            <Layer
+              id="piste-lifts"
+              type="line"
+              source-layer="lifts"
+              minzoom={11}
+              paint={{
+                'line-color': '#facc15',
+                'line-width': 1.5,
+                'line-dasharray': [2, 2],
+              }}
+            />
+          </Source>
+        )}
 
         {/* Resort source — no clustering, filtered by active pass toggles */}
         <Source
