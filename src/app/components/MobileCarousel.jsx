@@ -176,7 +176,7 @@ function ExpandedMobileCard({ resort, onBack }) {
   const totalTrails = Object.values(trailCounts).reduce((s, c) => s + c, 0);
 
   return (
-    <div className="snap-center shrink-0 w-full rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl">
+    <div className="snap-center shrink-0 w-full rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl overflow-y-auto max-h-[55vh]">
       {/* Back button */}
       {onBack && (
         <button
@@ -285,7 +285,7 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
   if (!sorted?.length && !searchQuery) return null;
 
   return (
-    <div className="absolute bottom-2 left-0 right-0 z-20 sm:hidden pointer-events-none" style={{ height: "130px" }}>
+    <div className={`absolute bottom-2 left-0 right-0 z-20 sm:hidden pointer-events-none ${isDetailView && selectedResort ? 'bottom-0' : ''}`} style={{ height: isDetailView && selectedResort ? "auto" : "130px", maxHeight: "60vh" }}>
       {/* Compact search — collapsed to icon, expands on tap */}
       <MobileSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 

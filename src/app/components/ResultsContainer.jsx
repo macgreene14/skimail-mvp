@@ -74,7 +74,7 @@ function ExpandedDetailCard({ resort, onClick, onBack }) {
 
   return (
     <div
-      className="w-full rounded-xl p-4 transition-all border border-sky-500/50 ring-1 ring-sky-500/20 backdrop-blur-xl"
+      className="w-full rounded-xl p-4 transition-all border border-sky-500/50 ring-1 ring-sky-500/20 backdrop-blur-xl overflow-y-auto"
       style={{ background: "rgba(15,23,42,0.92)" }}
     >
       {/* Back button */}
