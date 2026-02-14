@@ -145,7 +145,7 @@ export default function MapControls({
                   onClick={() => {
                     const zoom = window.innerWidth <= 768 ? region.zoom - 0.75 : region.zoom;
                     stopSpin();
-                    mapRef.current?.flyTo({ center: [region.lng, region.lat], zoom, bearing: 0 });
+                    mapRef.current?.flyTo({ center: [region.lng, region.lat], zoom, pitch: 0, bearing: 0 });
                     setRegionsOpen(false);
                   }}
                   className="block w-full rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-white/80 transition-colors hover:bg-white/10"
@@ -234,7 +234,7 @@ export default function MapControls({
               setUserStopped(false);
               setSpinning(true);
               if (mapRef.current && mapRef.current.getZoom() >= 3.5) {
-                mapRef.current.flyTo({ center: mapRef.current.getCenter(), zoom: 1.8 });
+                mapRef.current.flyTo({ center: mapRef.current.getCenter(), zoom: 1.8, pitch: 0, bearing: 0 });
               }
             }
           }}

@@ -315,7 +315,7 @@ export function MapExplore({ resortCollection }) {
     const map = mapRef.current;
     if (!map) return;
     const zoom = window.innerWidth <= 768 ? region.zoom - 0.5 : region.zoom;
-    map.flyTo({ center: [region.lng, region.lat], zoom, duration: 1200, essential: true });
+    map.flyTo({ center: [region.lng, region.lat], zoom, pitch: 0, bearing: 0, duration: 1200, essential: true });
   }, [stopSpin]);
 
   // When selectedResort changes externally (e.g. from card click)
