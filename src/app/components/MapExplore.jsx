@@ -25,6 +25,9 @@ export function MapExplore({ resortCollection }) {
   const resorts = resortCollection.features;
   const mapRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [cursor, setCursor] = useState('auto');
+  const onMouseEnter = useCallback(() => setCursor('pointer'), []);
+  const onMouseLeave = useCallback(() => setCursor('auto'), []);
 
   const {
     mapStyle,
@@ -164,13 +167,15 @@ export function MapExplore({ resortCollection }) {
         onLoad={handleMapLoad}
         onStyleData={onStyleData}
         onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         interactiveLayerIds={interactiveLayerIds}
         mapStyle={mapStyle}
         mapboxAccessToken={MAPBOX_TOKEN}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.8 }}
         projection="globe"
         style={{ width: '100%', height: '100%' }}
-        cursor="auto"
+        cursor={cursor}
       >
         {/* Terrain DEM source */}
         <Source
