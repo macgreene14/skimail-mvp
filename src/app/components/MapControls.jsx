@@ -68,6 +68,7 @@ export default function MapControls({
     showIkon, showEpic, showMC, showIndy, showIndependent, showSnow, showPistes,
     togglePass, showSnowCover,
     mapStyleKey, setMapStyle,
+    satelliteEnabled,
   } = useMapStore();
 
   const filters = [
@@ -262,6 +263,26 @@ export default function MapControls({
         </div>
       )}
 
+      {/* ── Bottom-right: Satellite toggle (detail zoom only) ── */}
+      {isDetailView(currentZoom) && (
+        <div className="pointer-events-auto absolute bottom-[11.5rem] right-3 sm:bottom-[3.5rem]">
+          <button
+            onClick={() => useMapStore.getState().toggleSatellite()}
+            className={`flex items-center justify-center rounded-full w-11 h-11 sm:w-9 sm:h-9 text-base sm:text-sm backdrop-blur-sm transition-all ${
+              satelliteEnabled
+                ? "bg-emerald-500/80 text-white shadow-lg shadow-emerald-500/25 ring-1 ring-emerald-400/40"
+                : "text-white/50 hover:text-white/80 border border-white/10"
+            }`}
+            style={{
+              background: satelliteEnabled ? undefined : "rgba(15,23,42,0.8)",
+            }}
+            title={satelliteEnabled ? "Disable satellite imagery" : "Enable satellite imagery"}
+          >
+            🛰
+          </button>
+        </div>
+      )}
+
       {/* ── Bottom-right: Auto-rotate toggle ── */}
       <div className="pointer-events-auto absolute bottom-[8rem] right-3 sm:bottom-3">
         <button
@@ -284,7 +305,15 @@ export default function MapControls({
       <div className="pointer-events-auto absolute bottom-[8rem] left-3 sm:bottom-3">
         <BaseMapSwitcher
           activeStyle={mapStyleKey}
-          onStyleChange={(key) => setMapStyle(key, MAP_STYLES[key])}
+          onStyleChange={(key) => {
+            setMapStyle(key, MAP_STYLES[key]);
+            // If user manually picks a style, clear satellite toggle state
+            if (key !== 'satellite' && satelliteEnabled) {
+              useMapStore.setState({ satelliteEnabled: false });
+            } else if (key === 'satellite' && !satelliteEnabled) {
+              useMapStore.setState({ satelliteEnabled: true });
+            }
+          }}
           mapboxToken={MAPBOX_TOKEN}
         />
       </div>

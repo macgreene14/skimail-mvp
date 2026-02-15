@@ -59,6 +59,29 @@ const useMapStore = create(
       mapStyleKey: 'skimail',
       setMapStyle: (key, url) => set({ mapStyleKey: key, mapStyle: url }),
 
+      // ── Satellite toggle (detail zoom shortcut) ──
+      satelliteEnabled: false,
+      _preSatelliteStyleKey: 'skimail',
+      _preSatelliteStyle: 'mapbox://styles/macgreene14/cllt2prpu004m01r9fw2v6yb8',
+      toggleSatellite: () => set((s) => {
+        if (s.satelliteEnabled) {
+          // Restore previous style
+          return {
+            satelliteEnabled: false,
+            mapStyleKey: s._preSatelliteStyleKey,
+            mapStyle: s._preSatelliteStyle,
+          };
+        }
+        // Save current and switch to satellite
+        return {
+          satelliteEnabled: true,
+          _preSatelliteStyleKey: s.mapStyleKey,
+          _preSatelliteStyle: s.mapStyle,
+          mapStyleKey: 'satellite',
+          mapStyle: 'mapbox://styles/mapbox/satellite-streets-v12',
+        };
+      }),
+
       // ── Selection ──
       selectedResort: null,
       setSelectedResort: (r) => set({ selectedResort: r }),
@@ -113,6 +136,7 @@ const useMapStore = create(
         showPistes: state.showPistes,
         mapStyleKey: state.mapStyleKey,
         mapStyle: state.mapStyle,
+        satelliteEnabled: state.satelliteEnabled,
       }),
     }
   )
