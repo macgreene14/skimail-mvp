@@ -299,12 +299,10 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
         className="pointer-events-auto h-full flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar items-center"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {isDetailView && selectedResort && (
+        {selectedResort && (
           <ExpandedMobileCard key="expanded-detail" resort={selectedResort} onBack={useMapStore.getState().triggerBackToRegion} />
         )}
-        {sorted?.map((resort) => {
-          const isSelected = resort.properties.name === selectedResort?.properties?.name;
-          if (isDetailView && isSelected) return null;
+        {!selectedResort && sorted?.map((resort) => {
           return (
             <CompactCard
               key={resort.properties.slug || resort.properties.name}

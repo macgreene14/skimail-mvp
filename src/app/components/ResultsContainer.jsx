@@ -360,21 +360,20 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort })
 
       {/* Results */}
       <div className="results-scroll flex flex-col gap-2 overflow-auto px-2 py-1 flex-1">
-        {isDetailView && selectedResort && (
+        {/* Detail view — show ONLY the selected resort */}
+        {selectedResort && (
           <ExpandedDetailCard
             resort={selectedResort}
             onBack={useMapStore.getState().triggerBackToRegion}
           />
         )}
-        {sorted?.map((resort) => {
-          const isSelected = resort?.properties?.name === selectedResort?.properties?.name;
-          // Skip the selected resort in detail view — it's shown expanded above
-          if (isDetailView && isSelected) return null;
+        {/* Resort list — hidden when a resort is selected */}
+        {!selectedResort && sorted?.map((resort) => {
           return (
             <ResortCard
               key={resort.properties.slug || resort.properties.name}
               resort={resort}
-              isSelected={isSelected}
+              isSelected={false}
               isHighlighted={resort?.properties?.slug === highlightedSlug}
               onClick={() => setSelectedResort(resort)}
             />
