@@ -140,7 +140,7 @@ export default function MapControls({
         <div className="relative">
           <button
             onClick={() => setRegionsOpen(!regionsOpen)}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-all"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 min-h-[44px] text-xs sm:text-[11px] sm:min-h-0 sm:px-2.5 sm:py-1.5 font-semibold backdrop-blur-sm transition-all"
             style={{
               background: regionsOpen ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.4)",
               border: "1.5px solid rgba(255,255,255,0.15)",
@@ -205,7 +205,7 @@ export default function MapControls({
       <div className="pointer-events-auto absolute right-3 top-3 sm:hidden">
         <button
           onClick={() => setFiltersOpen(!filtersOpen)}
-          className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur-sm transition-all"
+          className="flex items-center gap-1 rounded-lg px-3 py-2 min-h-[44px] text-xs font-semibold backdrop-blur-sm transition-all"
           style={{
             background: filtersOpen ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.4)",
             border: "1.5px solid rgba(255,255,255,0.15)",
@@ -245,14 +245,14 @@ export default function MapControls({
         )}
       </div>
 
-      {/* ── Bottom-right: Auto-rotate toggle (subtle, small) ── */}
-      <div className="pointer-events-auto absolute bottom-28 right-3 sm:bottom-3 flex flex-col gap-2 items-end">
+      {/* ── Bottom-right: Auto-rotate toggle (44px touch target for mobile) ── */}
+      <div className="pointer-events-auto absolute bottom-[7.5rem] right-3 sm:bottom-3 flex flex-col gap-2 items-end">
         <button
           onClick={handleAutoRotate}
-          className={`flex items-center justify-center rounded-full w-8 h-8 text-sm backdrop-blur-sm transition-all ${
+          className={`flex items-center justify-center rounded-full w-11 h-11 sm:w-9 sm:h-9 text-base sm:text-sm backdrop-blur-sm transition-all ${
             spinning
               ? "bg-sky-500/80 text-white shadow-lg shadow-sky-500/25 ring-1 ring-sky-400/40"
-              : "bg-black/40 text-white/50 hover:bg-black/60 hover:text-white/80 border border-white/10"
+              : "bg-slate-900/80 text-white/50 hover:bg-slate-900/90 hover:text-white/80 border border-white/10 backdrop-blur"
           }`}
           title={spinning ? "Stop auto-rotate" : "Start auto-rotate"}
         >
@@ -261,7 +261,7 @@ export default function MapControls({
       </div>
 
       {/* ── Bottom-left: Back button + Base map (above carousel on mobile) ── */}
-      <div className="pointer-events-auto absolute bottom-28 left-3 flex items-end gap-2 sm:bottom-3">
+      <div className="pointer-events-auto absolute bottom-[7.5rem] left-3 flex items-end gap-2 sm:bottom-3">
         <BaseMapSwitcher
           activeStyle={mapStyleKey}
           onStyleChange={(key) => setMapStyle(key, MAP_STYLES[key])}
@@ -270,7 +270,7 @@ export default function MapControls({
         {showBackButton && (
           <button
             onClick={handleBack}
-            className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-semibold backdrop-blur-md transition-all bg-black/50 text-white/90 hover:bg-black/70 hover:text-white border border-white/15"
+            className="flex items-center gap-1 rounded-full px-3.5 py-2 min-h-[44px] text-xs font-semibold backdrop-blur-md transition-all bg-slate-900/80 text-white/90 hover:bg-slate-900/95 hover:text-white border border-white/15 backdrop-blur"
           >
             {backLabel}
           </button>

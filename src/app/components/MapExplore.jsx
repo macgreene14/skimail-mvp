@@ -7,6 +7,7 @@ import useMapStore from '../store/useMapStore';
 import { useBatchSnowData } from '../hooks/useResortWeather';
 import MapControls from './MapControls';
 // import useAutoSelect from '../hooks/useAutoSelect'; // disabled — fights user zoom-out
+import useViewportResorts from '../hooks/useViewportResorts';
 import regionsManifest from '../../../assets/regions.json';
 import cameraAngles from '../../../public/data/camera-angles.json';
 
@@ -46,6 +47,9 @@ export function MapExplore({ resortCollection }) {
   const [userStopped, setUserStopped] = useState(false);
   const currentZoom = useMapStore((s) => s.currentZoom);
   const setCurrentZoom = useMapStore((s) => s.setCurrentZoom);
+
+  // Viewport resort filtering hook — must be called before any conditional returns
+  const { queryViewport } = useViewportResorts(mapRef);
 
   const {
     mapStyle, mapStyleKey,
@@ -289,63 +293,38 @@ export function MapExplore({ resortCollection }) {
     }, 5000);
   }, [userStopped]);
 
-  // Update rendered resorts on move
-  // Update rendered resorts on move — only when zoomed in enough for dots/markers.
-  // At globe zoom (<5), don't update — let pass filters in page.js handle it.
-  // Skip during spin to avoid constant resets from easeTo animation.
-  // Update carousel/sidebar with resorts visible in current viewport.
-  // Uses a ref for spinning check to avoid stale closure issues.
+  // Spinning ref for use in callbacks without stale closures
   const spinningRef = useRef(spinning);
   useEffect(() => { spinningRef.current = spinning; }, [spinning]);
 
-  // When spin stops, query viewport after a short delay so results update
+  // When spin stops, trigger a viewport query so results update
   useEffect(() => {
     if (!spinning && mapRef.current) {
-      const timer = setTimeout(() => {
-        const mapWrapper = mapRef.current;
-        if (!mapWrapper) return;
-        const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
-        setCurrentZoom(map.getZoom());
-        const layers = [];
-        if (map.getLayer('resort-dots')) layers.push('resort-dots');
-        if (map.getLayer('resort-markers')) layers.push('resort-markers');
-        if (layers.length === 0) return;
-        const features = map.queryRenderedFeatures(undefined, { layers });
-        const seen = new Set();
-        const unique = (features || []).filter((f) => {
-          if (seen.has(f.properties.slug)) return false;
-          seen.add(f.properties.slug);
-          return true;
-        });
-        setRenderedResorts(unique);
-        setVisibleSlugs(unique.map((f) => f.properties.slug));
-      }, 300);
+      const timer = setTimeout(() => queryViewport(), 300);
       return () => clearTimeout(timer);
     }
-  }, [spinning, setRenderedResorts, setCurrentZoom]);
+  }, [spinning, queryViewport]);
 
+  // onMoveEnd — just update visible slugs for snow fetching; viewport resorts handled by hook
   const onMoveEnd = useCallback(() => {
     if (spinningRef.current) return;
     const mapWrapper = mapRef.current;
     if (!mapWrapper) return;
     const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
-    const zoom = map.getZoom();
-    setCurrentZoom(zoom);
-    // Query visible resorts at any zoom where dots/markers are rendered
+    // Update visible slugs for tiered snow fetching
     const layers = [];
     if (map.getLayer('resort-dots')) layers.push('resort-dots');
     if (map.getLayer('resort-markers')) layers.push('resort-markers');
-    if (layers.length === 0) { setRenderedResorts([]); return; }
+    if (layers.length === 0) return;
     const features = map.queryRenderedFeatures(undefined, { layers });
     const seen = new Set();
-    const unique = (features || []).filter((f) => {
-      if (seen.has(f.properties.slug)) return false;
-      seen.add(f.properties.slug);
-      return true;
+    const slugs = [];
+    (features || []).forEach((f) => {
+      const slug = f.properties?.slug;
+      if (slug && !seen.has(slug)) { seen.add(slug); slugs.push(slug); }
     });
-    setRenderedResorts(unique);
-    setVisibleSlugs(unique.map((f) => f.properties.slug));
-  }, [setRenderedResorts, setCurrentZoom]);
+    setVisibleSlugs(slugs);
+  }, []);
 
   // Uncontrolled mode — no onMove needed. Map manages its own viewState.
   // Read position from mapRef.current when needed (flyToResort, resetView, etc.)

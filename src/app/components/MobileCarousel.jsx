@@ -93,7 +93,7 @@ function MobileSearchBar({ searchQuery, setSearchQuery }) {
   const isOpen = expanded || !!searchQuery;
 
   return (
-    <div className="pointer-events-auto mx-4 mb-1.5 flex justify-end">
+    <div className="flex justify-end">
       {isOpen ? (
         <div
           className="relative w-full rounded-full backdrop-blur-md transition-all"
@@ -274,9 +274,15 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
   // Hide carousel at globe zoom
   if (currentZoom < 5 && !selectedResort) return null;
 
+  // Sort by live snowfall first, then avg snowfall, then cap at 50
   const sorted = resorts
     ?.slice()
     .sort((a, b) => {
+      const snowA = snowBySlug[a.properties?.slug];
+      const snowB = snowBySlug[b.properties?.slug];
+      const s7dA = snowA?.snowfall_7d || 0;
+      const s7dB = snowB?.snowfall_7d || 0;
+      if (s7dB !== s7dA) return s7dB - s7dA;
       const A = parseFloat(a.properties.avg_snowfall) || 0;
       const B = parseFloat(b.properties.avg_snowfall) || 0;
       return B - A;
@@ -295,9 +301,14 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
         maxHeight: showExpanded ? "55vh" : "110px",
       }}
     >
-      {/* Compact search */}
+      {/* Resort count + search */}
       {!showExpanded && (
-        <MobileSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <div className="pointer-events-auto flex items-center justify-between px-4 mb-1">
+          <span className="text-[10px] text-slate-400 font-medium">
+            {sorted?.length ? `${sorted.length} resort${sorted.length !== 1 ? 's' : ''} in view` : ''}
+          </span>
+          <MobileSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        </div>
       )}
 
       {/* Cards */}
@@ -324,9 +335,9 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
             />
           );
         })}
-        {sorted?.length === 0 && (
+        {sorted?.length === 0 && !selectedResort && (
           <div className="shrink-0 w-full text-center text-xs text-slate-400 py-4">
-            No resorts found
+            No resorts in this area
           </div>
         )}
       </div>

@@ -314,6 +314,7 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort })
   const setSearchQuery = useMapStore((s) => s.setSearchQuery);
   const highlightedSlug = useMapStore((s) => s.highlightedSlug);
   const currentZoom = useMapStore((s) => s.currentZoom);
+  const snowBySlug = useMapStore((s) => s.snowBySlug);
   const isDetailView = currentZoom >= 11;
 
   // Hide results at globe zoom — users pick a region first
@@ -330,6 +331,11 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort })
   const sorted = resorts
     ?.slice()
     .sort((a, b) => {
+      const snowA = snowBySlug[a.properties?.slug];
+      const snowB = snowBySlug[b.properties?.slug];
+      const s7dA = snowA?.snowfall_7d || 0;
+      const s7dB = snowB?.snowfall_7d || 0;
+      if (s7dB !== s7dA) return s7dB - s7dA;
       const A = parseFloat(a.properties.avg_snowfall) || 0;
       const B = parseFloat(b.properties.avg_snowfall) || 0;
       return B - A;
@@ -362,7 +368,7 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort })
           )}
         </div>
         <div className="mt-1 text-[10px] text-slate-500 px-1">
-          {sorted?.length || 0} resorts
+          {sorted?.length || 0} resort{(sorted?.length || 0) !== 1 ? 's' : ''} in view
         </div>
       </div>
 
@@ -387,9 +393,9 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort })
             />
           );
         })}
-        {sorted?.length === 0 && (
+        {sorted?.length === 0 && !selectedResort && (
           <p className="px-4 py-8 text-center text-sm text-slate-400">
-            No resorts found. Try adjusting your search or map view.
+            No resorts in this area
           </p>
         )}
       </div>
