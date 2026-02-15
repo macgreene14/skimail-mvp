@@ -49,7 +49,7 @@ export function MapExplore({ resortCollection }) {
   const setCurrentZoom = useMapStore((s) => s.setCurrentZoom);
 
   // Viewport resort filtering hook — must be called before any conditional returns
-  const { queryViewport } = useViewportResorts(mapRef);
+  const { queryViewport, onMapReady } = useViewportResorts(mapRef);
 
   const {
     mapStyle, mapStyleKey,
@@ -517,7 +517,9 @@ export function MapExplore({ resortCollection }) {
     }
     // Initial rendered resorts
     setRenderedResorts(resorts);
-  }, [resorts, setRenderedResorts]);
+    // Signal to useViewportResorts that map is ready for event subscriptions
+    onMapReady();
+  }, [resorts, setRenderedResorts, onMapReady]);
 
   // Re-apply fog on style change
   const onStyleData = useCallback(() => {

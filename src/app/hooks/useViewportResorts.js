@@ -1,24 +1,24 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import useMapStore from "../store/useMapStore";
 
 /**
  * useViewportResorts — subscribes to map moveend events and updates
  * filteredResorts in Zustand with deduped, snowfall-sorted viewport resorts.
+ * Also updates currentZoom on every zoom tick for responsive UI.
  *
  * @param {React.RefObject} mapRef - react-map-gl map ref
+ * @returns {{ queryViewport: Function, onMapReady: Function }}
  */
 export default function useViewportResorts(mapRef) {
   const setRenderedResorts = useMapStore((s) => s.setRenderedResorts);
   const setCurrentZoom = useMapStore((s) => s.setCurrentZoom);
   const debounceRef = useRef(null);
-  const spinningRef = useRef(false);
+  const [mapReady, setMapReady] = useState(false);
 
-  // Track spinning state without causing re-subscriptions
-  const spinning = useMapStore((s) => s.spinning);
-  // We don't have spinning in store — it's local to MapExplore.
-  // Instead, we accept a spinningRef from outside or just always query.
+  /** Call this from MapExplore's onLoad callback */
+  const onMapReady = useCallback(() => setMapReady(true), []);
 
   const queryViewport = useCallback(() => {
     const mapWrapper = mapRef.current;
@@ -53,7 +53,7 @@ export default function useViewportResorts(mapRef) {
       return true;
     });
 
-    // Sort by snowfall: primary = snowfall_7d (from snow data), secondary = avg_snowfall
+    // Sort by snowfall: primary = snowfall_7d, secondary = avg_snowfall
     const snowBySlug = useMapStore.getState().snowBySlug;
     unique.sort((a, b) => {
       const snowA = snowBySlug[a.properties.slug];
@@ -69,14 +69,14 @@ export default function useViewportResorts(mapRef) {
     setRenderedResorts(unique);
   }, [mapRef, setRenderedResorts, setCurrentZoom]);
 
-  // Debounced version for moveend
   const debouncedQuery = useCallback(() => {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(queryViewport, 150);
   }, [queryViewport]);
 
-  // Subscribe to map moveend event directly on the raw Mapbox GL instance
+  // Subscribe to map events — only after map is ready
   useEffect(() => {
+    if (!mapReady) return;
     const mapWrapper = mapRef.current;
     if (!mapWrapper) return;
     const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
@@ -84,23 +84,18 @@ export default function useViewportResorts(mapRef) {
     map.on("moveend", debouncedQuery);
 
     // Update zoom during fly animations so region markers hide promptly
-    const onZoom = () => {
-      const z = map.getZoom();
-      setCurrentZoom(z);
-    };
+    const onZoom = () => setCurrentZoom(map.getZoom());
     map.on("zoom", onZoom);
 
-    // Initial query
-    if (map.isStyleLoaded()) {
-      queryViewport();
-    }
+    // Initial query now that map is loaded
+    queryViewport();
 
     return () => {
       map.off("moveend", debouncedQuery);
       map.off("zoom", onZoom);
       clearTimeout(debounceRef.current);
     };
-  }, [mapRef, debouncedQuery, queryViewport]);
+  }, [mapReady, mapRef, debouncedQuery, queryViewport, setCurrentZoom]);
 
-  return { queryViewport };
+  return { queryViewport, onMapReady };
 }
