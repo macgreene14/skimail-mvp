@@ -86,6 +86,9 @@ export default function useMapNavigation(mapRef, stopSpin) {
       setLastRegion({ lng: region.lng, lat: region.lat, zoom: region.zoom });
       const zoom =
         window.innerWidth <= 768 ? region.zoom - 0.5 : region.zoom;
+      // Immediately update currentZoom so region markers hide without
+      // waiting for the flyTo animation's zoom events to propagate.
+      useMapStore.getState().setCurrentZoom(zoom);
       map.flyTo({
         center: [region.lng, region.lat],
         zoom,

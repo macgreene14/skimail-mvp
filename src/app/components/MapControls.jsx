@@ -164,6 +164,7 @@ export default function MapControls({
                     const zoom = window.innerWidth <= 768 ? region.zoom - 0.75 : region.zoom;
                     stopSpin();
                     useMapStore.getState().setLastRegion({ lng: region.lng, lat: region.lat, zoom: region.zoom });
+                    useMapStore.getState().setCurrentZoom(zoom);
                     mapRef.current?.flyTo({ center: [region.lng, region.lat], zoom, pitch: 0, bearing: 0 });
                     setRegionsOpen(false);
                   }}
