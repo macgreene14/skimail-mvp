@@ -257,6 +257,7 @@ export function MapExplore({ resortCollection }) {
           };
         }),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resorts, showIkon, showEpic, showMC, showIndy, showIndependent, snowStableKey]);
 
   // Globe spin — imperative easeTo (works with uncontrolled mode)
@@ -321,7 +322,7 @@ export function MapExplore({ resortCollection }) {
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [spinning, setRenderedResorts]);
+  }, [spinning, setRenderedResorts, setCurrentZoom]);
 
   const onMoveEnd = useCallback(() => {
     if (spinningRef.current) return;
@@ -344,7 +345,7 @@ export function MapExplore({ resortCollection }) {
     });
     setRenderedResorts(unique);
     setVisibleSlugs(unique.map((f) => f.properties.slug));
-  }, [setRenderedResorts]);
+  }, [setRenderedResorts, setCurrentZoom]);
 
   // Uncontrolled mode — no onMove needed. Map manages its own viewState.
   // Read position from mapRef.current when needed (flyToResort, resetView, etc.)
@@ -446,6 +447,7 @@ export function MapExplore({ resortCollection }) {
     // Always fly — removed slug dedup check that blocked re-selection from global view
     lastFlewToRef.current = slug;
     flyToResort(selectedResort);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedResort]); // intentionally minimal deps — flyToResort is stable via useCallback
 
   const onMapLoad = useCallback(() => {
