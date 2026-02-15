@@ -19,7 +19,7 @@ export default function PisteLayers() {
         id="piste-runs"
         type="line"
         filter={["==", ["get", "type"], "run"]}
-        minzoom={11}
+        minzoom={PISTE_MIN}
         paint={{
           "line-color": [
             "match", ["get", "difficulty"],
@@ -38,7 +38,7 @@ export default function PisteLayers() {
         id="piste-lifts"
         type="line"
         filter={["==", ["get", "type"], "lift"]}
-        minzoom={11}
+        minzoom={PISTE_MIN}
         paint={{
           "line-color": "#facc15",
           "line-width": 1.5,

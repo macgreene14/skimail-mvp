@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import useMapStore from "../store/useMapStore";
+import { RESORT_MIN } from "../constants/zoom";
 
 /**
  * useViewportResorts — subscribes to map moveend events and updates
@@ -28,7 +29,7 @@ export default function useViewportResorts(mapRef) {
     setCurrentZoom(zoom);
 
     // At globe zoom, clear results — user should pick a region
-    if (zoom < 5) {
+    if (zoom < RESORT_MIN) {
       setRenderedResorts([]);
       return;
     }

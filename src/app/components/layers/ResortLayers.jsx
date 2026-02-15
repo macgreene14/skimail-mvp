@@ -34,8 +34,8 @@ export default function ResortLayers({ filteredGeoJSON }) {
       <Layer
         id="resort-dots-glow"
         type="circle"
-        minzoom={5}
-        maxzoom={11}
+        minzoom={RESORT_MIN}
+        maxzoom={RESORT_DETAIL_TRANSITION}
         filter={passFilter}
         paint={{
           "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 5, 10, 8],
@@ -57,8 +57,8 @@ export default function ResortLayers({ filteredGeoJSON }) {
       <Layer
         id="resort-dots"
         type="symbol"
-        minzoom={5}
-        maxzoom={11}
+        minzoom={RESORT_MIN}
+        maxzoom={RESORT_DETAIL_TRANSITION}
         filter={passFilter}
         layout={{
           "icon-image": [
@@ -90,8 +90,8 @@ export default function ResortLayers({ filteredGeoJSON }) {
       <Layer
         id="resort-region-labels"
         type="symbol"
-        minzoom={5}
-        maxzoom={11}
+        minzoom={RESORT_MIN}
+        maxzoom={RESORT_DETAIL_TRANSITION}
         filter={passFilter}
         layout={{
           "text-field": [
@@ -126,7 +126,7 @@ export default function ResortLayers({ filteredGeoJSON }) {
       <Layer
         id="resort-markers"
         type="symbol"
-        minzoom={11}
+        minzoom={RESORT_DETAIL_TRANSITION}
         filter={passFilter}
         layout={{
           "icon-image": [

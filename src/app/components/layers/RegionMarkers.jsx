@@ -12,7 +12,7 @@ import { REGION_MARKERS } from "../../hooks/useMapNavigation";
 export default function RegionMarkers({ regionSnowAvg, onRegionClick }) {
   const currentZoom = useMapStore((s) => s.currentZoom);
 
-  if (currentZoom >= 4) return null;
+  if (currentZoom >= REGION_MAX) return null;
 
   return (
     <>

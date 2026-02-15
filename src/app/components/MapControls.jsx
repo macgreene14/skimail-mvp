@@ -102,8 +102,8 @@ export default function MapControls({
   };
 
   // Back button state
-  const isDetailView = currentZoom >= 11;
-  const isRegionalView = currentZoom >= 5 && currentZoom < 11;
+  const _isDetailView = isDetailView(currentZoom);
+  const _isRegionalView = isRegionalView(currentZoom);
   const showBackButton = isDetailView || isRegionalView;
   const backLabel = isDetailView ? "‹ Region" : "‹ Globe";
 

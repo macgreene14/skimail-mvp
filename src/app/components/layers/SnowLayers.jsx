@@ -26,7 +26,7 @@ export default function SnowLayers({ snowGeoJSON }) {
           `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDSI_Snow_Cover/default/${modisDate}/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png`,
         ]}
         tileSize={256}
-        maxzoom={8}
+        maxzoom={SNOW_CIRCLES_MAX}
       />
       {showSnowCover && (
         <Layer
@@ -42,7 +42,7 @@ export default function SnowLayers({ snowGeoJSON }) {
         <Layer
           id="snow-heatmap"
           type="heatmap"
-          maxzoom={9}
+          maxzoom={SNOW_HEATMAP_MAX}
           layout={{ visibility: showSnow ? "visible" : "none" }}
           paint={{
             "heatmap-weight": [

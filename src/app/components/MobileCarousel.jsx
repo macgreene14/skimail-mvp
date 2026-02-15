@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { getPercentile } from "../utils/percentiles";
 import useMapStore from "../store/useMapStore";
+import { isGlobeView, isDetailView as isDetailZoom } from "../constants/zoom";
 
 const PASS_COLORS = {
   Ikon: "bg-sky-500",
@@ -265,14 +266,14 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
   const searchQuery = useMapStore((s) => s.searchQuery);
   const setSearchQuery = useMapStore((s) => s.setSearchQuery);
   const currentZoom = useMapStore((s) => s.currentZoom);
-  const isDetailView = currentZoom >= 11;
+  const isDetailView = isDetailZoom(currentZoom);
 
   const onTouchStart = useCallback((e) => {
     e.stopPropagation();
   }, []);
 
   // Hide carousel at globe zoom
-  if (currentZoom < 5 && !selectedResort) return null;
+  if (isGlobeView(currentZoom) && !selectedResort) return null;
 
   // Sort by live snowfall first, then avg snowfall, then cap at 50
   const sorted = resorts

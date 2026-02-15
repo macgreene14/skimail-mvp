@@ -315,10 +315,10 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort })
   const highlightedSlug = useMapStore((s) => s.highlightedSlug);
   const currentZoom = useMapStore((s) => s.currentZoom);
   const snowBySlug = useMapStore((s) => s.snowBySlug);
-  const isDetailView = currentZoom >= 11;
+  const isDetailView = isDetailZoom(currentZoom);
 
   // Hide results at globe zoom — users pick a region first
-  if (currentZoom < 5 && !selectedResort) {
+  if (isGlobeView(currentZoom) && !selectedResort) {
     return (
       <div className="flex flex-col h-full items-center justify-center text-center px-6">
         <div className="text-3xl mb-3">🌍</div>
