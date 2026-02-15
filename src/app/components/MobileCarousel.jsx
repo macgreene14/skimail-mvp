@@ -269,6 +269,10 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
   const currentZoom = useMapStore((s) => s.currentZoom);
   const isDetailView = currentZoom >= 11;
 
+  const onTouchStart = useCallback((e) => {
+    e.stopPropagation();
+  }, []);
+
   // Hide carousel at globe zoom — users pick a region first
   if (currentZoom < 5 && !selectedResort) return null;
 
@@ -280,10 +284,6 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
       return B - A;
     })
     .slice(0, 50);
-
-  const onTouchStart = useCallback((e) => {
-    e.stopPropagation();
-  }, []);
 
   if (!sorted?.length && !searchQuery) return null;
 
