@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useEffect } from "react";
 import { getPercentile } from "../utils/percentiles";
+import { getWebcam } from "../utils/webcamRegistry";
 import useMapStore from "../store/useMapStore";
 
 const PASS_COLORS_HEX = {
@@ -62,6 +63,7 @@ function ExpandedDetailCard({ resort, onClick, onBack }) {
   const passLabel = p.pass === "Mountain Collective" ? "MC" : p.pass;
   const passLink = PASS_LINKS[p.pass];
   const snow = snowBySlug[p.slug];
+  const webcam = getWebcam(p.slug);
 
   const location = [
     p.state !== "Unknown" ? p.state : null,
@@ -151,12 +153,18 @@ function ExpandedDetailCard({ resort, onClick, onBack }) {
       {/* Trail breakdown */}
       <TrailBreakdown pisteData={pisteData} />
 
-      {/* Website + CTA */}
+      {/* Website + Webcam + CTA */}
       <div className="flex items-center gap-2 mt-2">
         {p.website && (
           <a href={p.website} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
             className="text-[10px] text-sky-400 hover:text-sky-300 transition-colors truncate">
             🌐 Website
+          </a>
+        )}
+        {webcam && webcam.camPageUrl && (
+          <a href={webcam.camPageUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+            className="text-[10px] text-sky-400 hover:text-sky-300 transition-colors">
+            📷 Webcams
           </a>
         )}
         {passLink && (

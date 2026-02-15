@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { getPercentile } from "../utils/percentiles";
+import { getWebcam } from "../utils/webcamRegistry";
 import useMapStore from "../store/useMapStore";
 
 const PASS_COLORS = {
@@ -154,6 +155,7 @@ function ExpandedMobileCard({ resort, onBack }) {
   };
   const passLink = PASS_LINKS[p.pass];
   const snow = snowBySlug[p.slug];
+  const webcam = getWebcam(p.slug);
 
   const trailCounts = {};
   if (pisteData?.features) {
@@ -240,6 +242,10 @@ function ExpandedMobileCard({ resort, onBack }) {
         {p.website && (
           <a href={p.website} target="_blank" rel="noopener noreferrer"
             className="text-[9px] text-sky-400 hover:text-sky-300 truncate">🌐 Website</a>
+        )}
+        {webcam && webcam.camPageUrl && (
+          <a href={webcam.camPageUrl} target="_blank" rel="noopener noreferrer"
+            className="text-[9px] text-sky-400 hover:text-sky-300">📷 Webcams</a>
         )}
         {passLink && (
           <a href={passLink} target="_blank" rel="noopener noreferrer"
