@@ -223,28 +223,26 @@ export default function MapControls({
         )}
       </div>
 
-      {/* ── Bottom-right: Spin Globe + Pause (above carousel on mobile) ── */}
+      {/* ── Bottom-right: Globe home button (above carousel on mobile) ── */}
       <div className="pointer-events-auto absolute bottom-28 right-3 sm:bottom-3 flex flex-col gap-2 items-end">
-        {spinning && (
-          <button
-            onClick={stopSpin}
-            className="flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1.5 text-[11px] text-white/60 hover:text-white/90 backdrop-blur-sm transition-all"
-          >
-            ⏸ Pause
-          </button>
-        )}
-        {!spinning && (
-          <button
-            onClick={() => {
+        <button
+          onClick={() => {
+            if (spinning) {
+              stopSpin();
+            } else {
               setUserStopped(false);
               setSpinning(true);
               resetView();
-            }}
-            className="flex items-center gap-1.5 rounded-full bg-sky-500/90 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-sky-500/30 hover:bg-sky-500 backdrop-blur-sm transition-all"
-          >
-            🌍 Spin Globe
-          </button>
-        )}
+            }
+          }}
+          className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold backdrop-blur-sm transition-all ${
+            spinning
+              ? "bg-sky-500/90 text-white shadow-lg shadow-sky-500/30 ring-2 ring-sky-400/50 hover:bg-sky-600"
+              : "bg-black/50 text-white/80 hover:bg-black/70 hover:text-white border border-white/15"
+          }`}
+        >
+          🌍 Globe
+        </button>
       </div>
 
       {/* Back button moved to detail card — no longer on map overlay */}
