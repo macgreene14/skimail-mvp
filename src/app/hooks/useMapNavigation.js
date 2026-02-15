@@ -18,7 +18,7 @@ const REGION_MARKERS = regionsManifest.map((r) => ({
  * useMapNavigation — flyToResort, flyToRegion, resetView, onRegionClick,
  * and the back-to-region / selected-resort-change effects.
  */
-export default function useMapNavigation(mapRef, stopSpin) {
+export default function useMapNavigation(mapRef, stopSpin, nav) {
   const setSelectedResort = useMapStore((s) => s.setSelectedResort);
   const setPreviousViewState = useMapStore((s) => s.setPreviousViewState);
   const setIsResortView = useMapStore((s) => s.setIsResortView);
@@ -46,6 +46,9 @@ export default function useMapNavigation(mapRef, stopSpin) {
       });
       setIsResortView(true);
       const slug = resort.properties?.slug;
+      const regionId = resort.properties?.region;
+      // Update nav state — drives URL + UI
+      if (nav) nav.goToResort(slug, regionId);
       const cam = slug && cameraAngles[slug];
       map.flyTo({
         center: cam ? cam.center : resort.geometry.coordinates,
@@ -56,13 +59,14 @@ export default function useMapNavigation(mapRef, stopSpin) {
         essential: true,
       });
     },
-    [mapRef, setPreviousViewState, setIsResortView]
+    [mapRef, setPreviousViewState, setIsResortView, nav]
   );
 
   // Reset view back to globe
   const resetView = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
+    if (nav) nav.goToGlobe();
     map.flyTo({
       center: [-98, 39],
       zoom: 1.8,
@@ -75,7 +79,7 @@ export default function useMapNavigation(mapRef, stopSpin) {
     setIsResortView(false);
     setLastRegion(null);
     lastFlewToRef.current = null;
-  }, [mapRef, setIsResortView, setSelectedResort, setLastRegion]);
+  }, [mapRef, setIsResortView, setSelectedResort, setLastRegion, nav]);
 
   // Region marker click
   const onRegionClick = useCallback(
@@ -86,9 +90,8 @@ export default function useMapNavigation(mapRef, stopSpin) {
       setLastRegion({ lng: region.lng, lat: region.lat, zoom: region.zoom });
       const zoom =
         window.innerWidth <= 768 ? region.zoom - 0.5 : region.zoom;
-      // Immediately update currentZoom so region markers hide without
-      // waiting for the flyTo animation's zoom events to propagate.
-      useMapStore.getState().setCurrentZoom(zoom);
+      // Update nav state — this drives UI (region labels hide, results show)
+      if (nav) nav.goToRegion(region.id);
       map.flyTo({
         center: [region.lng, region.lat],
         zoom,
@@ -98,13 +101,15 @@ export default function useMapNavigation(mapRef, stopSpin) {
         essential: true,
       });
     },
-    [mapRef, stopSpin, setLastRegion]
+    [mapRef, stopSpin, setLastRegion, nav]
   );
 
   // Fly back to region from detail view
   const flyToRegion = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
+    // Nav back from resort → region
+    if (nav) nav.goBack();
     let target = lastRegion;
     if (!target) {
       const center = map.getCenter();
@@ -130,7 +135,7 @@ export default function useMapNavigation(mapRef, stopSpin) {
     setSelectedResort(null);
     setIsResortView(false);
     lastFlewToRef.current = null;
-  }, [mapRef, lastRegion, setSelectedResort, setIsResortView]);
+  }, [mapRef, lastRegion, setSelectedResort, setIsResortView, nav]);
 
   // Back-to-region triggered from cards
   useEffect(() => {

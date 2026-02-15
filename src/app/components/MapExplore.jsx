@@ -21,7 +21,7 @@ const PISTE_BASE_URL = typeof window !== 'undefined'
   ? `${window.location.origin}/skimail-mvp/data/pistes`
   : '/skimail-mvp/data/pistes';
 
-export function MapExplore({ resortCollection }) {
+export function MapExplore({ resortCollection, nav }) {
   const resorts = resortCollection.features;
   const mapRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -44,7 +44,7 @@ export function MapExplore({ resortCollection }) {
   const { queryViewport, bindMapEvents } = useViewportResorts(mapRef, resorts);
   const { spinning, setSpinning, spinningRef, setUserStopped, stopSpin } = useGlobeSpin(mapRef);
   const { flyToResort, resetView, flyToRegion, onRegionClick, clickedFromMapRef } =
-    useMapNavigation(mapRef, stopSpin);
+    useMapNavigation(mapRef, stopSpin, nav);
   const {
     snowGeoJSON, regionSnowAvg, setVisibleSlugs,
     snowBySlugRef, snowStableKey,
@@ -201,7 +201,7 @@ export function MapExplore({ resortCollection }) {
         <SnowLayers snowGeoJSON={snowGeoJSON} />
         <PisteLayers />
         <ResortLayers filteredGeoJSON={filteredGeoJSON} />
-        <RegionMarkers regionSnowAvg={regionSnowAvg} onRegionClick={onRegionClick} />
+        <RegionMarkers regionSnowAvg={regionSnowAvg} onRegionClick={onRegionClick} navView={nav.navView} />
       </Map>
 
       <MapControls
@@ -214,6 +214,7 @@ export function MapExplore({ resortCollection }) {
         resetView={resetView}
         flyToRegion={flyToRegion}
         currentZoom={currentZoom}
+        nav={nav}
       />
     </div>
   );
