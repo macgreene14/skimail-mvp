@@ -152,6 +152,12 @@ export function useBatchSnowData(resorts, enabled = true, visibleSlugs = null) {
     })),
   });
 
+  // Stable key from query data content — avoids infinite re-render loops
+  // caused by useQueries returning a new array reference every render.
+  const queriesDataKey = queries
+    .map((q) => (q.data ? q.data.length : 'p'))
+    .join(',');
+
   // Merge prefetch + live data (live overrides prefetch)
   const allData = useMemo(() => {
     const map = new Map();
@@ -173,7 +179,8 @@ export function useBatchSnowData(resorts, enabled = true, visibleSlugs = null) {
     }
 
     return Array.from(map.values());
-  }, [prefetchData, queries]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefetchData, queriesDataKey]);
 
   const isLoading = !prefetchLoaded || queries.some((q) => q.isLoading);
 
