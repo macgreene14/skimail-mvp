@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { getPercentile } from "../utils/percentiles";
 import useMapStore from "../store/useMapStore";
-import { isGlobeView, isDetailView as isDetailZoom } from "../constants/zoom";
+// zoom imports removed — nav state drives UI now
 
 const PASS_COLORS = {
   Ikon: "bg-sky-500",
@@ -259,21 +259,20 @@ function ExpandedMobileCard({ resort, onBack }) {
   );
 }
 
-export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
+export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav }) {
   const scrollRef = useRef(null);
   const snowBySlug = useMapStore((s) => s.snowBySlug);
   const highlightedSlug = useMapStore((s) => s.highlightedSlug);
   const searchQuery = useMapStore((s) => s.searchQuery);
   const setSearchQuery = useMapStore((s) => s.setSearchQuery);
-  const currentZoom = useMapStore((s) => s.currentZoom);
-  const isDetailView = isDetailZoom(currentZoom);
+  const isDetailView = nav?.isResort || false;
 
   const onTouchStart = useCallback((e) => {
     e.stopPropagation();
   }, []);
 
   // Hide carousel at globe zoom
-  if (isGlobeView(currentZoom) && !selectedResort) return null;
+  if (nav?.isGlobe && !selectedResort) return null;
 
   // Sort by live snowfall first, then avg snowfall, then cap at 50
   const sorted = resorts

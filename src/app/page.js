@@ -5,19 +5,23 @@ import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { MobileCarousel } from "./components/MobileCarousel.jsx";
 import QueryProvider from "./providers/QueryProvider.jsx";
 import useMapStore from "./store/useMapStore";
+import useNavState from "./hooks/useNavState";
 import resortCollection from "../../assets/resorts.json";
 
 /**
  * AppContent — top-level layout.
  *
- * Data flow:
- *   Pass toggles (Zustand) → passFilteredResorts (this component)
- *   Viewport query (MapExplore onMoveEnd) → filteredResorts (Zustand)
- *   Display = intersection of both: viewport resorts filtered by active passes
- *   Fallback: if no viewport data yet, show all pass-filtered resorts
+ * Navigation is driven by URL params via useNavState (nuqs):
+ *   ?region=alps        → regional view
+ *   ?resort=big-sky     → detail/resort view
+ *   (no params)         → globe view
+ *
+ * The URL is the single source of truth for navigation state.
+ * Camera follows nav state. No zoom-threshold UI logic.
  */
 function AppContent() {
   const resorts = resortCollection.features;
+  const nav = useNavState();
 
   const selectedResort = useMapStore((s) => s.selectedResort);
   const setSelectedResort = useMapStore((s) => s.setSelectedResort);
@@ -42,25 +46,25 @@ function AppContent() {
 
   // Dynamic results: search overrides viewport, otherwise show viewport resorts
   const displayedResorts = useMemo(() => {
-    const query = (searchQuery || '').toLowerCase().trim();
+    const query = (searchQuery || "").toLowerCase().trim();
 
     if (query) {
-      // Search across ALL resorts regardless of viewport
       return resorts.filter((r) => {
         const p = r.properties;
         if (!activePasses.has(p?.pass)) return false;
-        const name = (p?.name || '').toLowerCase();
-        const state = (p?.state || '').toLowerCase();
-        const country = (p?.country || '').toLowerCase();
-        const region = (p?.region || '').toLowerCase();
+        const name = (p?.name || "").toLowerCase();
+        const state = (p?.state || "").toLowerCase();
+        const country = (p?.country || "").toLowerCase();
+        const region = (p?.region || "").toLowerCase();
         return name.includes(query) || state.includes(query) || country.includes(query) || region.includes(query);
       });
     }
 
-    // filteredResorts is set by useViewportResorts based on map bounds.
-    // Empty means globe zoom (no region selected) — show nothing, not all resorts.
+    // At globe view, show nothing — user picks a region first
+    if (nav.isGlobe) return [];
+
     return filteredResorts.filter((r) => activePasses.has(r.properties?.pass));
-  }, [filteredResorts, resorts, activePasses, searchQuery]);
+  }, [filteredResorts, resorts, activePasses, searchQuery, nav.isGlobe]);
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
@@ -74,24 +78,26 @@ function AppContent() {
               resorts={displayedResorts}
               setSelectedResort={setSelectedResort}
               selectedResort={selectedResort}
+              nav={nav}
             />
           </div>
         </div>
         <div className="flex-1 overflow-hidden rounded-xl border border-slate-200 shadow-lg">
-          <MapExplore resortCollection={resortCollection} />
+          <MapExplore resortCollection={resortCollection} nav={nav} />
         </div>
       </div>
 
       {/* Mobile layout */}
       <div className="relative flex flex-1 flex-col overflow-hidden lg:hidden">
         <div className="flex-1">
-          <MapExplore resortCollection={resortCollection} />
+          <MapExplore resortCollection={resortCollection} nav={nav} />
         </div>
 
         <MobileCarousel
           resorts={displayedResorts}
           selectedResort={selectedResort}
           setSelectedResort={setSelectedResort}
+          nav={nav}
         />
       </div>
 

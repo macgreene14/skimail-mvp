@@ -2,18 +2,14 @@
 
 import React from "react";
 import { Marker } from "react-map-gl";
-import useMapStore from "../../store/useMapStore";
-import { REGION_MAX } from "../../constants/zoom";
 import { REGION_MARKERS } from "../../hooks/useMapNavigation";
 
 /**
- * RegionMarkers — 12 region nav markers visible at globe zoom (<4).
- * Styled by snow intensity with animated snowfall overlay.
+ * RegionMarkers — 12 region nav markers visible at globe view only.
+ * Visibility driven by navView (not zoom level).
  */
-export default function RegionMarkers({ regionSnowAvg, onRegionClick }) {
-  const currentZoom = useMapStore((s) => s.currentZoom);
-
-  if (currentZoom >= REGION_MAX) return null;
+export default function RegionMarkers({ regionSnowAvg, onRegionClick, navView }) {
+  if (navView !== "globe") return null;
 
   return (
     <>

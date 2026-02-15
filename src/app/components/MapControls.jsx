@@ -103,15 +103,12 @@ export default function MapControls({
     boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
   };
 
-  // Back button state — only show when there's navigation history to go back to
+  // Back button state — driven by nav state (URL params), not zoom thresholds
   const _isDetailView = isDetailView(currentZoom);
-  const _isRegionalView = isRegionalView(currentZoom);
   const selectedResort = useMapStore((s) => s.selectedResort);
   const lastRegion = useMapStore((s) => s.lastRegion);
-  // Detail view: show "‹ Region" (go back to region)
-  // Regional view: show "‹ Globe" only if user navigated here via region click
-  const showBackButton = _isDetailView || (_isRegionalView && !!lastRegion);
-  const backLabel = _isDetailView ? "‹ Region" : "‹ Globe";
+  const showBackButton = isResortView || (!!lastRegion && !isGlobeView(currentZoom));
+  const backLabel = isResortView ? "‹ Region" : "‹ Globe";
 
   const handleBack = () => {
     const map = mapRef.current;

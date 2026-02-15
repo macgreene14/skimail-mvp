@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { getPercentile } from "../utils/percentiles";
 import useMapStore from "../store/useMapStore";
-import { isGlobeView, isDetailView as isDetailZoom } from "../constants/zoom";
+// zoom imports removed — nav state drives UI now
 
 const PASS_COLORS_HEX = {
   Ikon: "#3b82f6",
@@ -310,16 +310,15 @@ function ResortCard({ resort, isSelected, isHighlighted, onClick }) {
   );
 }
 
-export function ResultsContainer({ resorts, setSelectedResort, selectedResort }) {
+export function ResultsContainer({ resorts, setSelectedResort, selectedResort, nav }) {
   const searchQuery = useMapStore((s) => s.searchQuery);
   const setSearchQuery = useMapStore((s) => s.setSearchQuery);
   const highlightedSlug = useMapStore((s) => s.highlightedSlug);
-  const currentZoom = useMapStore((s) => s.currentZoom);
   const snowBySlug = useMapStore((s) => s.snowBySlug);
-  const isDetailView = isDetailZoom(currentZoom);
+  const isDetailView = nav?.isResort || false;
 
   // Hide results at globe zoom — users pick a region first
-  if (isGlobeView(currentZoom) && !selectedResort) {
+  if (nav?.isGlobe && !selectedResort) {
     return (
       <div className="flex flex-col h-full items-center justify-center text-center px-6">
         <div className="text-3xl mb-3">🌍</div>
