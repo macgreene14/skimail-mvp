@@ -83,6 +83,13 @@ export default function useViewportResorts(mapRef) {
 
     map.on("moveend", debouncedQuery);
 
+    // Update zoom during fly animations so region markers hide promptly
+    const onZoom = () => {
+      const z = map.getZoom();
+      setCurrentZoom(z);
+    };
+    map.on("zoom", onZoom);
+
     // Initial query
     if (map.isStyleLoaded()) {
       queryViewport();
@@ -90,6 +97,7 @@ export default function useViewportResorts(mapRef) {
 
     return () => {
       map.off("moveend", debouncedQuery);
+      map.off("zoom", onZoom);
       clearTimeout(debounceRef.current);
     };
   }, [mapRef, debouncedQuery, queryViewport]);
