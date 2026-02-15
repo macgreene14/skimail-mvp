@@ -38,7 +38,7 @@ export function MapExplore({ resortCollection }) {
   const setPisteData = useMapStore((s) => s.setPisteData);
 
   // Hooks — called unconditionally before any returns
-  const { queryViewport, onMapReady } = useViewportResorts(mapRef);
+  const { queryViewport, bindMapEvents } = useViewportResorts(mapRef);
   const { spinning, setSpinning, spinningRef, setUserStopped, stopSpin } = useGlobeSpin(mapRef);
   const { flyToResort, resetView, flyToRegion, onRegionClick, clickedFromMapRef } =
     useMapNavigation(mapRef, stopSpin);
@@ -113,7 +113,9 @@ export function MapExplore({ resortCollection }) {
       if (slug && !seen.has(slug)) { seen.add(slug); slugs.push(slug); }
     });
     setVisibleSlugs(slugs);
-  }, [spinningRef, setVisibleSlugs]);
+    // Also trigger viewport query to keep results in sync
+    queryViewport();
+  }, [spinningRef, setVisibleSlugs, queryViewport]);
 
   // Click on resort
   const onClick = useCallback(
@@ -145,8 +147,8 @@ export function MapExplore({ resortCollection }) {
 
   const handleMapLoad = useCallback(() => {
     onMapLoad();
-    onMapReady();
-  }, [onMapLoad, onMapReady]);
+    bindMapEvents();
+  }, [onMapLoad, bindMapEvents]);
 
   const interactiveLayerIds = useMemo(() => ['resort-dots', 'resort-markers'], []);
   const currentZoom = useMapStore((s) => s.currentZoom);
