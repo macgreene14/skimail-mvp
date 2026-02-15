@@ -41,7 +41,7 @@ export function MapExplore({ resortCollection }) {
   const setPisteData = useMapStore((s) => s.setPisteData);
 
   // Hooks — called unconditionally before any returns
-  const { queryViewport, bindMapEvents } = useViewportResorts(mapRef);
+  const { queryViewport, bindMapEvents } = useViewportResorts(mapRef, resorts);
   const { spinning, setSpinning, spinningRef, setUserStopped, stopSpin } = useGlobeSpin(mapRef);
   const { flyToResort, resetView, flyToRegion, onRegionClick, clickedFromMapRef } =
     useMapNavigation(mapRef, stopSpin);
@@ -98,27 +98,29 @@ export function MapExplore({ resortCollection }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resorts, showIkon, showEpic, showMC, showIndy, showIndependent, snowStableKey]);
 
-  // onMoveEnd — update visible slugs for tiered snow fetching
+  // onMoveEnd — update visible slugs for tiered snow fetching using bounds
   const onMoveEnd = useCallback(() => {
     if (spinningRef.current) return;
     const mapWrapper = mapRef.current;
     if (!mapWrapper) return;
     const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
-    const layers = [];
-    if (map.getLayer('resort-dots')) layers.push('resort-dots');
-    if (map.getLayer('resort-markers')) layers.push('resort-markers');
-    if (layers.length === 0) return;
-    const features = map.queryRenderedFeatures(undefined, { layers });
-    const seen = new Set();
-    const slugs = [];
-    (features || []).forEach((f) => {
-      const slug = f.properties?.slug;
-      if (slug && !seen.has(slug)) { seen.add(slug); slugs.push(slug); }
-    });
+    const bounds = map.getBounds();
+    if (!bounds) return;
+    const west = bounds.getWest();
+    const east = bounds.getEast();
+    const south = bounds.getSouth();
+    const north = bounds.getNorth();
+    const slugs = resorts
+      .filter((r) => {
+        const coords = r.geometry?.coordinates;
+        if (!coords) return false;
+        const [lng, lat] = coords;
+        return lng >= west && lng <= east && lat >= south && lat <= north;
+      })
+      .map((r) => r.properties?.slug)
+      .filter(Boolean);
     setVisibleSlugs(slugs);
-    // Also trigger viewport query to keep results in sync
-    queryViewport();
-  }, [spinningRef, setVisibleSlugs, queryViewport]);
+  }, [spinningRef, resorts, setVisibleSlugs]);
 
   // Click on resort
   const onClick = useCallback(
