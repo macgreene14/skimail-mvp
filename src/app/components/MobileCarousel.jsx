@@ -307,7 +307,7 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
             <CompactCard
               key={resort.properties.slug || resort.properties.name}
               resort={resort}
-              isSelected={isSelected}
+              isSelected={resort.properties.slug === selectedResort?.properties?.slug}
               isHighlighted={resort.properties.slug === highlightedSlug}
               onClick={() => setSelectedResort(resort)}
               snowInfo={snowBySlug[resort.properties.slug]}
