@@ -1,7 +1,7 @@
-import { isGlobeView, isDetailView, isRegionalView } from "../constants/zoom";
 "use client";
 
 import React, { useState } from "react";
+import { isGlobeView, isDetailView, isRegionalView } from "../constants/zoom";
 import useMapStore from "../store/useMapStore";
 import BaseMapSwitcher from "./BaseMapSwitcher";
 import regionsManifest from "../../../assets/regions.json";

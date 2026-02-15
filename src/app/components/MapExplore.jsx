@@ -38,7 +38,7 @@ export function MapExplore({ resortCollection }) {
   const setPisteData = useMapStore((s) => s.setPisteData);
 
   // Hooks — called unconditionally before any returns
-  const { queryViewport } = useViewportResorts(mapRef);
+  const { queryViewport, onMapReady } = useViewportResorts(mapRef);
   const { spinning, setSpinning, spinningRef, setUserStopped, stopSpin } = useGlobeSpin(mapRef);
   const { flyToResort, resetView, flyToRegion, onRegionClick, clickedFromMapRef } =
     useMapNavigation(mapRef, stopSpin);
@@ -143,6 +143,11 @@ export function MapExplore({ resortCollection }) {
     return () => document.removeEventListener('keydown', handleKey);
   }, [isFullscreen]);
 
+  const handleMapLoad = useCallback(() => {
+    onMapLoad();
+    onMapReady();
+  }, [onMapLoad, onMapReady]);
+
   const interactiveLayerIds = useMemo(() => ['resort-dots', 'resort-markers'], []);
   const currentZoom = useMapStore((s) => s.currentZoom);
 
@@ -154,7 +159,7 @@ export function MapExplore({ resortCollection }) {
         onMoveEnd={onMoveEnd}
         onMouseDown={stopSpin}
         onTouchStart={stopSpin}
-        onLoad={onMapLoad}
+        onLoad={handleMapLoad}
         onStyleData={onStyleData}
         onClick={onClick}
         interactiveLayerIds={interactiveLayerIds}
