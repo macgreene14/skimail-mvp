@@ -812,7 +812,7 @@ export function MapExplore({ resortCollection }) {
         </Source>
 
         {/* Region navigation markers — visible at low zoom only */}
-        {currentZoom < 5 && REGION_MARKERS.map((region) => {
+        {currentZoom < 4 && REGION_MARKERS.map((region) => {
           const snow = regionSnowAvg[region.id] || { avg7d: 0, avg24h: 0 };
           const isSnowing = snow.avg24h > 2; // actively snowing if >2cm avg in 24h
           // Color intensity based on 7-day snowfall: 0cm=slate, 10cm=sky, 30cm+=white-blue
