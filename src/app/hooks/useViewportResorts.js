@@ -80,14 +80,23 @@ export default function useViewportResorts(mapRef, resorts) {
     if (!mapWrapper) return;
     const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
 
-    // moveend: fires after flyTo/pan/zoom completes — recompute visible resorts + zoom
-    // NOTE: we intentionally do NOT listen to 'zoom' event. The zoom event fires
-    // continuously during flyTo animations and overwrites eagerly-set currentZoom
-    // values (e.g. from onRegionClick), causing region labels to flash back.
-    // currentZoom is set eagerly by navigation actions and updated here on moveend.
+    // moveend: fires after flyTo/pan/zoom completes — definitive viewport update
     const onMoveEnd = () => queryViewport();
 
+    // move: fires DURING flyTo animation — keeps results populated
+    // so carousel doesn't flash empty. Throttled to ~10fps.
+    let moveTimer = null;
+    const onMove = () => {
+      if (!moveTimer) {
+        moveTimer = setTimeout(() => {
+          queryViewport();
+          moveTimer = null;
+        }, 100);
+      }
+    };
+
     map.on("moveend", onMoveEnd);
+    map.on("move", onMove);
 
     // Initial query
     queryViewport();
@@ -95,6 +104,8 @@ export default function useViewportResorts(mapRef, resorts) {
     // Store cleanup function
     cleanupRef.current = () => {
       map.off("moveend", onMoveEnd);
+      map.off("move", onMove);
+      if (moveTimer) clearTimeout(moveTimer);
     };
   }, [mapRef, queryViewport]);
 

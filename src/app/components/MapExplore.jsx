@@ -188,7 +188,7 @@ export function MapExplore({ resortCollection, nav }) {
           maxzoom={14}
         />
 
-        <NavigationControl position="top-left" />
+        <NavigationControl position="bottom-right" showCompass={false} />
         <GeolocateControl
           position="top-left"
           positionOptions={{ enableHighAccuracy: true }}

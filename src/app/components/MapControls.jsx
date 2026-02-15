@@ -284,8 +284,8 @@ export default function MapControls({
         </div>
       )}
 
-      {/* ── Bottom-right: Auto-rotate toggle ── */}
-      <div className="pointer-events-auto absolute bottom-[8rem] right-3 sm:bottom-3">
+      {/* ── Bottom-right: Auto-rotate toggle (above Mapbox zoom controls) ── */}
+      <div className="pointer-events-auto absolute bottom-[8rem] right-3 sm:bottom-[4.5rem]">
         <button
           onClick={handleAutoRotate}
           className={`flex items-center justify-center rounded-full w-11 h-11 sm:w-9 sm:h-9 text-base sm:text-sm backdrop-blur-sm transition-all ${
