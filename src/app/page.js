@@ -57,10 +57,9 @@ function AppContent() {
       });
     }
 
-    if (filteredResorts.length > 0) {
-      return filteredResorts.filter((r) => activePasses.has(r.properties?.pass));
-    }
-    return resorts.filter((r) => activePasses.has(r.properties?.pass));
+    // filteredResorts is set by useViewportResorts based on map bounds.
+    // Empty means globe zoom (no region selected) — show nothing, not all resorts.
+    return filteredResorts.filter((r) => activePasses.has(r.properties?.pass));
   }, [filteredResorts, resorts, activePasses, searchQuery]);
 
   return (
