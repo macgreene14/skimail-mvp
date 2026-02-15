@@ -141,8 +141,9 @@ export function MapExplore({ resortCollection }) {
     if (!Object.keys(snowBySlug).length) return result;
     // Assign each resort with snow data to nearest region
     const regionTotals = {};
+    const regionTotals24h = {};
     const regionCounts = {};
-    REGION_MARKERS.forEach((r) => { regionTotals[r.id] = 0; regionCounts[r.id] = 0; });
+    REGION_MARKERS.forEach((r) => { regionTotals[r.id] = 0; regionTotals24h[r.id] = 0; regionCounts[r.id] = 0; });
     resorts.forEach((resort) => {
       const slug = resort.properties?.slug;
       const snow = snowBySlug[slug];
@@ -157,12 +158,14 @@ export function MapExplore({ resortCollection }) {
         if (d < minDist) { minDist = d; closest = r; }
       });
       regionTotals[closest.id] += snow.snowfall_7d;
+      regionTotals24h[closest.id] += (snow.snowfall_24h || 0);
       regionCounts[closest.id] += 1;
     });
     REGION_MARKERS.forEach((r) => {
-      result[r.id] = regionCounts[r.id] > 0
-        ? regionTotals[r.id] / regionCounts[r.id]
-        : 0;
+      result[r.id] = {
+        avg7d: regionCounts[r.id] > 0 ? regionTotals[r.id] / regionCounts[r.id] : 0,
+        avg24h: regionCounts[r.id] > 0 ? regionTotals24h[r.id] / regionCounts[r.id] : 0,
+      };
     });
     return result;
   }, [snowBySlug, resorts]);
@@ -806,32 +809,53 @@ export function MapExplore({ resortCollection }) {
         </Source>
 
         {/* Region navigation markers — visible at low zoom only */}
-        {currentZoom < 5 && REGION_MARKERS.map((region) => (
-          <Marker
-            key={region.id}
-            longitude={region.lng}
-            latitude={region.lat}
-            anchor="center"
-            onClick={(e) => { e.originalEvent.stopPropagation(); onRegionClick(region); }}
-          >
-            <div
-              className="pointer-events-auto cursor-pointer select-none rounded-full px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur-sm transition-all hover:scale-110"
-              style={{
-                background: 'rgba(15,23,42,0.85)',
-                border: '1.5px solid rgba(56,189,248,0.5)',
-                boxShadow: '0 0 12px rgba(56,189,248,0.3), 0 4px 12px rgba(0,0,0,0.4)',
-                whiteSpace: 'nowrap',
-              }}
+        {currentZoom < 5 && REGION_MARKERS.map((region) => {
+          const snow = regionSnowAvg[region.id] || { avg7d: 0, avg24h: 0 };
+          const isSnowing = snow.avg24h > 2; // actively snowing if >2cm avg in 24h
+          // Color intensity based on 7-day snowfall: 0cm=slate, 10cm=sky, 30cm+=white-blue
+          const intensity = Math.min(snow.avg7d / 30, 1);
+          const borderColor = intensity > 0.5
+            ? `rgba(255,255,255,${0.4 + intensity * 0.4})`
+            : `rgba(56,189,248,${0.3 + intensity * 0.5})`;
+          const glowColor = intensity > 0.5
+            ? `rgba(255,255,255,${0.15 + intensity * 0.25})`
+            : `rgba(56,189,248,${0.15 + intensity * 0.2})`;
+          const bgAlpha = 0.75 + intensity * 0.15;
+
+          return (
+            <Marker
+              key={region.id}
+              longitude={region.lng}
+              latitude={region.lat}
+              anchor="center"
+              onClick={(e) => { e.originalEvent.stopPropagation(); onRegionClick(region); }}
             >
-              <div className="text-center">{region.label}</div>
-              {regionSnowAvg[region.id] > 0 && (
-                <div className="text-[9px] text-sky-300 text-center mt-0.5">
-                  ❄ {Math.round(regionSnowAvg[region.id])}&quot;
-                </div>
-              )}
-            </div>
-          </Marker>
-        ))}
+              <div
+                className="pointer-events-auto cursor-pointer select-none rounded-full px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur-sm transition-all hover:scale-110 relative overflow-hidden"
+                style={{
+                  background: `rgba(15,23,42,${bgAlpha})`,
+                  border: `1.5px solid ${borderColor}`,
+                  boxShadow: `0 0 ${12 + intensity * 16}px ${glowColor}, 0 4px 12px rgba(0,0,0,0.4)`,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {/* Snow animation overlay */}
+                {isSnowing && (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-full">
+                    <div className="snowfall-anim absolute inset-0" />
+                  </div>
+                )}
+                <div className="text-center relative z-10">{region.label}</div>
+                {snow.avg7d > 0 && (
+                  <div className={`text-[9px] text-center mt-0.5 relative z-10 ${intensity > 0.5 ? 'text-white font-semibold' : 'text-sky-300'}`}>
+                    {isSnowing ? '🌨' : '❄'} {Math.round(snow.avg7d)}cm/7d
+                    {isSnowing && <span className="ml-1 text-white/80">· {Math.round(snow.avg24h)}cm now</span>}
+                  </div>
+                )}
+              </div>
+            </Marker>
+          );
+        })}
       </Map>
 
       {/* Consolidated map controls */}
