@@ -3,6 +3,7 @@
 import React from "react";
 import { Marker } from "react-map-gl";
 import useMapStore from "../../store/useMapStore";
+import { REGION_MAX } from "../../constants/zoom";
 import { REGION_MARKERS } from "../../hooks/useMapNavigation";
 
 /**

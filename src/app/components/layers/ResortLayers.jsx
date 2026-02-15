@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import { Source, Layer } from "react-map-gl";
 import useMapStore from "../../store/useMapStore";
+import { RESORT_MIN, RESORT_DETAIL_TRANSITION } from "../../constants/zoom";
 
 /**
  * ResortLayers — dots, markers, and labels for resorts.

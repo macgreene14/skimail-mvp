@@ -2,6 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { getPercentile } from "../utils/percentiles";
 import useMapStore from "../store/useMapStore";
+import { isGlobeView, isDetailView as isDetailZoom } from "../constants/zoom";
 
 const PASS_COLORS_HEX = {
   Ikon: "#3b82f6",

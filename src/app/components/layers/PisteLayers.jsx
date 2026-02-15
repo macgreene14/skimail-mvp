@@ -3,6 +3,7 @@
 import React from "react";
 import { Source, Layer } from "react-map-gl";
 import useMapStore from "../../store/useMapStore";
+import { PISTE_MIN } from "../../constants/zoom";
 
 /**
  * PisteLayers — trail runs + lifts overlay at detail zoom.

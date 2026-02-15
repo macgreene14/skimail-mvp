@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import { Source, Layer } from "react-map-gl";
 import useMapStore from "../../store/useMapStore";
+import { SNOW_CIRCLES_MAX, SNOW_HEATMAP_MAX } from "../../constants/zoom";
 
 /**
  * SnowLayers — MODIS snow cover + snow heatmap.

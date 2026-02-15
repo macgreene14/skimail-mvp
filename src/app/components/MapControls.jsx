@@ -1,3 +1,4 @@
+import { isGlobeView, isDetailView, isRegionalView } from "../constants/zoom";
 "use client";
 
 import React, { useState } from "react";
@@ -104,15 +105,15 @@ export default function MapControls({
   // Back button state
   const _isDetailView = isDetailView(currentZoom);
   const _isRegionalView = isRegionalView(currentZoom);
-  const showBackButton = isDetailView || isRegionalView;
-  const backLabel = isDetailView ? "‹ Region" : "‹ Globe";
+  const showBackButton = _isDetailView || _isRegionalView;
+  const backLabel = _isDetailView ? "‹ Region" : "‹ Globe";
 
   const handleBack = () => {
     const map = mapRef.current;
     if (!map) return;
-    if (isDetailView) {
+    if (_isDetailView) {
       flyToRegion();
-    } else if (isRegionalView) {
+    } else if (_isRegionalView) {
       map.flyTo({ center: [-98, 39], zoom: 1.8, pitch: 0, bearing: 0, duration: 1500, essential: true });
       useMapStore.getState().setSelectedResort(null);
       useMapStore.getState().setIsResortView(false);
