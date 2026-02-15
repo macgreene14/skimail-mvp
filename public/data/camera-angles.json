@@ -14,7 +14,7 @@
       44.858669
     ],
     "zoom": 13.5,
-    "pitch": 73.2,
+    "pitch": 58.0,
     "bearing": 262.4
   },
   "alpine_valley": {
@@ -149,7 +149,7 @@
       41.246872
     ],
     "zoom": 12.5,
-    "pitch": 72.0,
+    "pitch": 55.0,
     "bearing": 226.3
   },
   "boyne_mountain": {
@@ -167,7 +167,7 @@
       41.246872
     ],
     "zoom": 12.5,
-    "pitch": 72.0,
+    "pitch": 55.0,
     "bearing": 244.9
   },
   "breckenridge": {
@@ -374,7 +374,7 @@
       38.52502
     ],
     "zoom": 13.5,
-    "pitch": 68.2,
+    "pitch": 55.0,
     "bearing": 179.5
   },
   "hidden_valley_resort_pa": {
@@ -617,7 +617,7 @@
       42.512006
     ],
     "zoom": 12.5,
-    "pitch": 72.2,
+    "pitch": 55.0,
     "bearing": 287.4
   },
   "mt_buller": {

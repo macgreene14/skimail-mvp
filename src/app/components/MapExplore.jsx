@@ -687,6 +687,28 @@ export function MapExplore({ resortCollection }) {
         >
 
           {/* === Layer 3: Mid-zoom individual dots (zoom 5-11) === */}
+          {/* Glow layer behind dots for visibility */}
+          <Layer
+            id="resort-dots-glow"
+            type="circle"
+            minzoom={5}
+            maxzoom={11}
+            filter={passFilter}
+            paint={{
+              'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 5, 10, 8],
+              'circle-color': [
+                'match', ['get', 'pass'],
+                'Ikon', '#3b82f6',
+                'Epic', '#f97316',
+                'Mountain Collective', '#7c3aed',
+                'Indy', '#16a34a',
+                'Independent', '#6b7280',
+                '#6b7280',
+              ],
+              'circle-opacity': 0.3,
+              'circle-blur': 1,
+            }}
+          />
           <Layer
             id="resort-dots"
             type="symbol"
@@ -703,18 +725,18 @@ export function MapExplore({ resortCollection }) {
                 'Independent', 'marker-independent',
                 'marker-independent',
               ],
-              'icon-size': ['interpolate', ['linear'], ['zoom'], 5, 0.35, 10, 0.55],
+              'icon-size': ['interpolate', ['linear'], ['zoom'], 5, 0.55, 8, 0.7, 10, 0.85],
               'icon-allow-overlap': true,
             }}
             paint={{
               'icon-color': [
                 'match', ['get', 'pass'],
-                'Ikon', '#3b82f6',
-                'Epic', '#f97316',
-                'Mountain Collective', '#7c3aed',
-                'Indy', '#16a34a',
-                'Independent', '#6b7280',
-                '#6b7280',
+                'Ikon', '#60a5fa',
+                'Epic', '#fb923c',
+                'Mountain Collective', '#a78bfa',
+                'Indy', '#4ade80',
+                'Independent', '#94a3b8',
+                '#94a3b8',
               ],
             }}
           />
@@ -738,19 +760,19 @@ export function MapExplore({ resortCollection }) {
                 ['get', 'name'],
               ],
               'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
-              'text-size': ['interpolate', ['linear'], ['zoom'], 5, 9, 10, 12],
-              'text-offset': [0, 1.6],
+              'text-size': ['interpolate', ['linear'], ['zoom'], 5, 10, 8, 13, 10, 14],
+              'text-offset': [0, 1.4],
               'text-allow-overlap': false,
               'text-optional': true,
               'text-max-width': 8,
               'text-line-height': 1.2,
-              'text-padding': 8,
+              'text-padding': 6,
               'symbol-sort-key': ['case', ['has', 'snow_7d'], ['*', -1, ['get', 'snow_7d']], 0],
             }}
             paint={{
-              'text-color': isDark ? '#e2e8f0' : '#ffffff',
-              'text-halo-color': isDark ? 'rgba(0,0,0,0.8)' : 'rgba(15,23,42,0.85)',
-              'text-halo-width': 1.5,
+              'text-color': isDark ? '#f1f5f9' : '#ffffff',
+              'text-halo-color': isDark ? 'rgba(0,0,0,0.9)' : 'rgba(15,23,42,0.9)',
+              'text-halo-width': 2,
             }}
           />
 
