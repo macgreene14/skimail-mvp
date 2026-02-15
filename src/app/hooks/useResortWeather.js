@@ -120,42 +120,21 @@ export function useBatchSnowData(resorts, enabled = true, visibleSlugs = null) {
     [resorts]
   );
 
-  // Tier 2: Viewport-visible independents (not in pass list)
-  const passSlugs = useMemo(
-    () => new Set(passResorts.map((r) => r.properties.slug)),
-    [passResorts]
-  );
-
-  const viewportIndependents = useMemo(() => {
-    if (!visibleSlugs) return [];
-    return visibleSlugs
-      .filter((slug) => !passSlugs.has(slug))
-      .map((slug) => resorts.find((r) => r.properties.slug === slug))
-      .filter(Boolean);
-  }, [visibleSlugs, passSlugs, resorts]);
-
-  // All resorts to fetch (pass + viewport independents)
-  const allToFetch = useMemo(
-    () => [...passResorts, ...viewportIndependents],
-    [passResorts, viewportIndependents]
-  );
+  // Only fetch pass-affiliated resorts — skip unaffiliated/independent entirely
+  const allToFetch = passResorts;
 
   // Check if prefetch covers pass resorts and is fresh
   const prefetchIsFresh = prefetchData && (Date.now() - prefetchData.fetchedAt < PREFETCH_STALE_MS);
 
-  // Build batches: skip pass resorts if prefetch is fresh, always include viewport independents
+  // Build batches: skip if prefetch is fresh (pass resorts already covered)
   const batches = useMemo(() => {
-    let toFetch = allToFetch;
-    if (prefetchIsFresh) {
-      // Only fetch viewport independents (pass resorts covered by prefetch)
-      toFetch = viewportIndependents;
-    }
+    if (prefetchIsFresh) return []; // prefetch covers all pass resorts
     const b = [];
-    for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
-      b.push(toFetch.slice(i, i + BATCH_SIZE));
+    for (let i = 0; i < allToFetch.length; i += BATCH_SIZE) {
+      b.push(allToFetch.slice(i, i + BATCH_SIZE));
     }
     return b;
-  }, [allToFetch, viewportIndependents, prefetchIsFresh]);
+  }, [allToFetch, prefetchIsFresh]);
 
   const queries = useQueries({
     queries: batches.map((batch, idx) => ({
