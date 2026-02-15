@@ -264,7 +264,7 @@ export default function MapControls({
       )}
 
       {/* ── Bottom-right: Satellite toggle (detail zoom only) ── */}
-      {isDetailView(currentZoom) && (
+      {_isDetailView && (
         <div className="pointer-events-auto absolute bottom-[11.5rem] right-3 sm:bottom-[3.5rem]">
           <button
             onClick={() => useMapStore.getState().toggleSatellite()}
