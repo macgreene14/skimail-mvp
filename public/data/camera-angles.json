@@ -653,7 +653,7 @@
       50.931481
     ],
     "zoom": 11.5,
-    "pitch": 75,
+    "pitch": 68.0,
     "bearing": 220.3
   },
   "niseko_united": {
@@ -905,7 +905,7 @@
       47.013754
     ],
     "zoom": 12.5,
-    "pitch": 74.3,
+    "pitch": 62.0,
     "bearing": 265.6
   },
   "stowe": {
@@ -932,7 +932,7 @@
       44.13514
     ],
     "zoom": 11.5,
-    "pitch": 75,
+    "pitch": 65.0,
     "bearing": 248.4
   },
   "sugarloaf": {
