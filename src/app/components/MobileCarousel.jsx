@@ -33,13 +33,13 @@ function CompactCard({ resort, isSelected, isHighlighted, onClick, snowInfo }) {
     <div
       ref={ref}
       onClick={onClick}
-      className={`snap-center shrink-0 w-52 rounded-xl p-3 cursor-pointer transition-all border bg-slate-900/90 backdrop-blur-xl ${borderClass}`}
+      className={`snap-center shrink-0 w-44 rounded-xl p-2.5 cursor-pointer transition-all border bg-slate-900/90 backdrop-blur-xl ${borderClass}`}
     >
       <div className="flex items-center gap-1.5 mb-1">
         <span className={`shrink-0 rounded-full ${passColor} px-1.5 py-0.5 text-[9px] font-bold text-white leading-none`}>
           {passLabel}
         </span>
-        <h3 className="truncate text-xs font-semibold text-white leading-tight">
+        <h3 className="truncate text-[11px] font-semibold text-white leading-tight">
           {p.name !== "Unknown" ? p.name : "Resort"}
         </h3>
       </div>
@@ -57,16 +57,8 @@ function CompactCard({ resort, isSelected, isHighlighted, onClick, snowInfo }) {
         <div className="flex items-center gap-2 mb-1 text-[9px] font-semibold text-sky-300">
           {snowInfo.snowfall_24h > 0 && <span>❄ {Math.round(snowInfo.snowfall_24h)}cm/24h</span>}
           {snowInfo.snowfall_7d > 0 && <span>❄ {Math.round(snowInfo.snowfall_7d)}cm/7d</span>}
-          {snowInfo.snow_depth > 0 && <span>· {Math.round(snowInfo.snow_depth)}cm base</span>}
         </div>
       )}
-
-      {/* Stats row */}
-      <div className="flex items-center gap-2 text-[10px] text-slate-300 mb-1.5">
-        {p.avg_snowfall && p.avg_snowfall !== "Unknown" && <span>❄ {p.avg_snowfall}&quot;</span>}
-        {p.vertical_drop && p.vertical_drop !== "Unknown" && <span>⛰ {p.vertical_drop}&apos;</span>}
-        {p.skiable_acres && p.skiable_acres !== "Unknown" && <span>⛷ {p.skiable_acres}ac</span>}
-      </div>
 
       {/* Percentile bars */}
       <div className="flex items-center gap-1.5">
@@ -97,7 +89,6 @@ function MobileSearchBar({ searchQuery, setSearchQuery }) {
     if (expanded && inputRef.current) inputRef.current.focus();
   }, [expanded]);
 
-  // If there's an active query, keep it expanded
   const isOpen = expanded || !!searchQuery;
 
   return (
@@ -164,7 +155,6 @@ function ExpandedMobileCard({ resort, onBack }) {
   const passLink = PASS_LINKS[p.pass];
   const snow = snowBySlug[p.slug];
 
-  // Trail counts from piste data
   const trailCounts = {};
   if (pisteData?.features) {
     pisteData.features.forEach((f) => {
@@ -176,7 +166,9 @@ function ExpandedMobileCard({ resort, onBack }) {
   const totalTrails = Object.values(trailCounts).reduce((s, c) => s + c, 0);
 
   return (
-    <div className="snap-center shrink-0 w-full rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl overflow-y-auto max-h-[55vh]">
+    <div className="snap-center shrink-0 w-full rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl overflow-y-auto"
+      style={{ maxHeight: "calc(50vh - env(safe-area-inset-bottom, 0px))" }}
+    >
       {/* Back button */}
       {onBack && (
         <button
@@ -273,7 +265,7 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
     e.stopPropagation();
   }, []);
 
-  // Hide carousel at globe zoom — users pick a region first
+  // Hide carousel at globe zoom
   if (currentZoom < 5 && !selectedResort) return null;
 
   const sorted = resorts
@@ -287,19 +279,31 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort }) {
 
   if (!sorted?.length && !searchQuery) return null;
 
+  const showExpanded = isDetailView && selectedResort;
+
   return (
-    <div className={`absolute bottom-2 left-0 right-0 z-20 sm:hidden pointer-events-none ${isDetailView && selectedResort ? 'bottom-0' : ''}`} style={{ height: isDetailView && selectedResort ? "auto" : "130px", maxHeight: "60vh" }}>
-      {/* Compact search — collapsed to icon, expands on tap */}
-      <MobileSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+    <div
+      className="absolute left-0 right-0 z-20 sm:hidden pointer-events-none"
+      style={{
+        bottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
+        maxHeight: showExpanded ? "55vh" : "110px",
+      }}
+    >
+      {/* Compact search */}
+      {!showExpanded && (
+        <MobileSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      )}
 
       {/* Cards */}
       <div
         ref={scrollRef}
         onTouchStart={onTouchStart}
-        className="pointer-events-auto h-full flex gap-3 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar items-center"
+        className={`pointer-events-auto flex gap-2.5 px-3 overflow-x-auto snap-x snap-mandatory no-scrollbar items-end ${
+          showExpanded ? "px-3" : ""
+        }`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {selectedResort && (
+        {showExpanded && (
           <ExpandedMobileCard key="expanded-detail" resort={selectedResort} onBack={useMapStore.getState().triggerBackToRegion} />
         )}
         {!selectedResort && sorted?.map((resort) => {

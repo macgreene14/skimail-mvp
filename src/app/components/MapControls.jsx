@@ -5,26 +5,6 @@ import useMapStore from "../store/useMapStore";
 import BaseMapSwitcher from "./BaseMapSwitcher";
 import regionsManifest from "../../../assets/regions.json";
 
-/**
- * MapControls — consolidated overlay for ALL map UI controls.
- *
- * LAYOUT (mobile):
- *   Top-left:     Regions dropdown
- *   Top-right:    Collapsible "Filters" button → pass/snow toggles
- *   Bottom-right: Spin globe (above carousel)
- *   Bottom-left:  Base map switcher + Back to Globe (above carousel)
- *
- * LAYOUT (desktop):
- *   Top-left:     Regions dropdown
- *   Top-right:    Always-visible filter pills
- *   Bottom-right: Spin globe
- *   Bottom-left:  Base map switcher + Back to Globe + Fullscreen
- *
- * EXTENSIBILITY:
- *   To add a new filter: add an entry to the `filters` array below.
- *   It will automatically appear in both mobile dropdown and desktop pills.
- */
-
 const PASS_COLORS = {
   Ikon: "#74a5f2",
   Epic: "#f97316",
@@ -71,10 +51,9 @@ export default function MapControls({
     showIkon, showEpic, showMC, showIndy, showIndependent, showSnow, showPistes,
     togglePass, showSnowCover,
     mapStyleKey, setMapStyle,
+    lastRegion,
   } = useMapStore();
 
-  // ── Filter definitions ──
-  // Add new filters here — they auto-render in both mobile and desktop.
   const filters = [
     { label: "Ikon", key: "showIkon", active: showIkon, color: PASS_COLORS.Ikon },
     { label: "Epic", key: "showEpic", active: showEpic, color: PASS_COLORS.Epic },
@@ -109,6 +88,49 @@ export default function MapControls({
     background: "rgba(15,23,42,0.92)",
     border: "1px solid rgba(255,255,255,0.1)",
     boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+  };
+
+  // ── Back button logic ──
+  // Detail view (zoom >= 11): back to region
+  // Regional view (zoom 5-10): back to globe
+  // Globe view (zoom < 5): hidden
+  const isDetailView = currentZoom >= 11;
+  const isRegionalView = currentZoom >= 5 && currentZoom < 11;
+  const showBackButton = isDetailView || isRegionalView;
+
+  const backLabel = isDetailView ? "‹ Region" : "‹ Globe";
+
+  const handleBack = () => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (isDetailView) {
+      // Fly back to regional view
+      flyToRegion();
+    } else if (isRegionalView) {
+      // Fly back to globe — but do NOT auto-start spinning
+      map.flyTo({
+        center: [-98, 39],
+        zoom: 1.8,
+        pitch: 0,
+        bearing: 0,
+        duration: 1500,
+        essential: true,
+      });
+      useMapStore.getState().setSelectedResort(null);
+      useMapStore.getState().setIsResortView(false);
+      useMapStore.getState().setLastRegion(null);
+    }
+  };
+
+  // ── Auto-rotate toggle ──
+  const handleAutoRotate = () => {
+    if (spinning) {
+      stopSpin();
+    } else {
+      setUserStopped(false);
+      setSpinning(true);
+    }
   };
 
   return (
@@ -223,37 +245,36 @@ export default function MapControls({
         )}
       </div>
 
-      {/* ── Bottom-right: Globe home button (above carousel on mobile) ── */}
+      {/* ── Bottom-right: Auto-rotate toggle (subtle, small) ── */}
       <div className="pointer-events-auto absolute bottom-28 right-3 sm:bottom-3 flex flex-col gap-2 items-end">
         <button
-          onClick={() => {
-            if (spinning) {
-              stopSpin();
-            } else {
-              setUserStopped(false);
-              setSpinning(true);
-              resetView();
-            }
-          }}
-          className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold backdrop-blur-sm transition-all ${
+          onClick={handleAutoRotate}
+          className={`flex items-center justify-center rounded-full w-8 h-8 text-sm backdrop-blur-sm transition-all ${
             spinning
-              ? "bg-sky-500/90 text-white shadow-lg shadow-sky-500/30 ring-2 ring-sky-400/50 hover:bg-sky-600"
-              : "bg-black/50 text-white/80 hover:bg-black/70 hover:text-white border border-white/15"
+              ? "bg-sky-500/80 text-white shadow-lg shadow-sky-500/25 ring-1 ring-sky-400/40"
+              : "bg-black/40 text-white/50 hover:bg-black/60 hover:text-white/80 border border-white/10"
           }`}
+          title={spinning ? "Stop auto-rotate" : "Start auto-rotate"}
         >
-          🌍 Globe
+          ⟳
         </button>
       </div>
 
-      {/* Back button moved to detail card — no longer on map overlay */}
-
-      {/* ── Bottom-left: Base map (above carousel on mobile) ── */}
+      {/* ── Bottom-left: Back button + Base map (above carousel on mobile) ── */}
       <div className="pointer-events-auto absolute bottom-28 left-3 flex items-end gap-2 sm:bottom-3">
         <BaseMapSwitcher
           activeStyle={mapStyleKey}
           onStyleChange={(key) => setMapStyle(key, MAP_STYLES[key])}
           mapboxToken={MAPBOX_TOKEN}
         />
+        {showBackButton && (
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-semibold backdrop-blur-md transition-all bg-black/50 text-white/90 hover:bg-black/70 hover:text-white border border-white/15"
+          >
+            {backLabel}
+          </button>
+        )}
       </div>
     </div>
   );
