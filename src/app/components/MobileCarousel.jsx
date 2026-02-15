@@ -1,7 +1,6 @@
 "use client";
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { getPercentile } from "../utils/percentiles";
-import { getWebcam } from "../utils/webcamRegistry";
 import useMapStore from "../store/useMapStore";
 
 const PASS_COLORS = {
@@ -143,6 +142,7 @@ function MobileSearchBar({ searchQuery, setSearchQuery }) {
 
 function ExpandedMobileCard({ resort, onBack }) {
   const snowBySlug = useMapStore((s) => s.snowBySlug);
+  const webcamBySlug = useMapStore((s) => s.webcamBySlug);
   const pisteData = useMapStore((s) => s.pisteData);
   const p = resort.properties;
   const passColor = PASS_COLORS[p.pass] || "bg-gray-500";
@@ -155,7 +155,7 @@ function ExpandedMobileCard({ resort, onBack }) {
   };
   const passLink = PASS_LINKS[p.pass];
   const snow = snowBySlug[p.slug];
-  const webcam = getWebcam(p.slug);
+  const webcam = webcamBySlug[p.slug] || null;
 
   const trailCounts = {};
   if (pisteData?.features) {

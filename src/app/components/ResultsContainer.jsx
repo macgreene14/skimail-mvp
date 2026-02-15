@@ -1,7 +1,6 @@
 "use client";
 import React, { useRef, useEffect } from "react";
 import { getPercentile } from "../utils/percentiles";
-import { getWebcam } from "../utils/webcamRegistry";
 import useMapStore from "../store/useMapStore";
 
 const PASS_COLORS_HEX = {
@@ -57,13 +56,14 @@ function TrailBreakdown({ pisteData }) {
 
 function ExpandedDetailCard({ resort, onClick, onBack }) {
   const snowBySlug = useMapStore((s) => s.snowBySlug);
+  const webcamBySlug = useMapStore((s) => s.webcamBySlug);
   const pisteData = useMapStore((s) => s.pisteData);
   const p = resort.properties;
   const passColor = PASS_COLORS_BG[p.pass] || "bg-gray-500";
   const passLabel = p.pass === "Mountain Collective" ? "MC" : p.pass;
   const passLink = PASS_LINKS[p.pass];
   const snow = snowBySlug[p.slug];
-  const webcam = getWebcam(p.slug);
+  const webcam = webcamBySlug[p.slug] || null;
 
   const location = [
     p.state !== "Unknown" ? p.state : null,

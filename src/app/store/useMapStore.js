@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import WEBCAM_REGISTRY from '../utils/webcamRegistry';
 
 /**
  * useMapStore — single source of truth for map + filter state.
@@ -93,6 +94,11 @@ const useMapStore = create(
       // Read by any component needing snow info for a resort.
       snowBySlug: {},
       setSnowBySlug: (map) => set({ snowBySlug: map }),
+
+      // ── Webcam data by slug ──
+      // Initialized from static registry; can be extended with dynamic sources.
+      webcamBySlug: { ...WEBCAM_REGISTRY },
+      setWebcamBySlug: (map) => set({ webcamBySlug: map }),
     }),
     {
       name: 'skimail-preferences',
