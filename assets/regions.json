@@ -2,116 +2,334 @@
   {
     "id": "rocky-mountain",
     "label": "Rockies",
-    "emoji": "⛰️",
-    "center": [-110.5, 45.5],
+    "emoji": "\u26f0\ufe0f",
+    "center": [
+      -110.5,
+      45.5
+    ],
     "zoom": 6.0,
-    "bounds": [[-115.0, 35.0], [-104.0, 52.0]],
-    "countries": ["USA", "Canada"],
-    "states": ["Montana", "Wyoming", "Colorado", "Utah", "Idaho", "New Mexico", "Alberta"]
+    "bounds": [
+      [
+        -115.0,
+        35.0
+      ],
+      [
+        -104.0,
+        52.0
+      ]
+    ],
+    "countries": [
+      "USA",
+      "Canada"
+    ],
+    "states": [
+      "Montana",
+      "Wyoming",
+      "Colorado",
+      "Utah",
+      "Idaho",
+      "New Mexico",
+      "Alberta"
+    ]
   },
   {
     "id": "pnw",
     "label": "PNW",
-    "emoji": "🌲",
-    "center": [-121.7, 46.8],
+    "emoji": "\ud83c\udf32",
+    "center": [
+      -121.7,
+      46.8
+    ],
     "zoom": 6.5,
-    "bounds": [[-125.0, 42.0], [-116.0, 50.0]],
-    "countries": ["USA"],
-    "states": ["Washington", "Oregon"]
+    "bounds": [
+      [
+        -125.0,
+        42.0
+      ],
+      [
+        -116.0,
+        50.0
+      ]
+    ],
+    "countries": [
+      "USA"
+    ],
+    "states": [
+      "Washington",
+      "Oregon"
+    ]
   },
   {
     "id": "california",
     "label": "California",
-    "emoji": "☀️",
-    "center": [-120.0, 38.5],
+    "emoji": "\u2600\ufe0f",
+    "center": [
+      -120.0,
+      38.5
+    ],
     "zoom": 6.5,
-    "bounds": [[-124.5, 32.0], [-114.0, 42.0]],
-    "countries": ["USA"],
-    "states": ["California", "Nevada"]
+    "bounds": [
+      [
+        -124.5,
+        32.0
+      ],
+      [
+        -114.0,
+        42.0
+      ]
+    ],
+    "countries": [
+      "USA"
+    ],
+    "states": [
+      "California",
+      "Nevada"
+    ]
   },
   {
     "id": "northeast",
     "label": "Northeast",
-    "emoji": "🏔️",
-    "center": [-72.0, 44.0],
+    "emoji": "\ud83c\udfd4\ufe0f",
+    "center": [
+      -72.0,
+      44.0
+    ],
     "zoom": 6.5,
-    "bounds": [[-80.0, 40.0], [-66.0, 48.0]],
-    "countries": ["USA"],
-    "states": ["Vermont", "New Hampshire", "Maine", "New York", "Massachusetts", "Connecticut", "Pennsylvania", "New Jersey", "West Virginia"]
+    "bounds": [
+      [
+        -80.0,
+        40.0
+      ],
+      [
+        -66.0,
+        48.0
+      ]
+    ],
+    "countries": [
+      "USA"
+    ],
+    "states": [
+      "Vermont",
+      "New Hampshire",
+      "Maine",
+      "New York",
+      "Massachusetts",
+      "Connecticut",
+      "Pennsylvania",
+      "New Jersey",
+      "West Virginia"
+    ]
   },
   {
     "id": "midwest",
     "label": "Midwest",
-    "emoji": "🌾",
-    "center": [-89.0, 45.0],
+    "emoji": "\ud83c\udf3e",
+    "center": [
+      -89.0,
+      45.0
+    ],
     "zoom": 6.0,
-    "bounds": [[-96.0, 38.0], [-82.0, 49.0]],
-    "countries": ["USA"],
-    "states": ["Minnesota", "Wisconsin", "Michigan", "Ohio", "Indiana", "Missouri", "Iowa"]
+    "bounds": [
+      [
+        -96.0,
+        38.0
+      ],
+      [
+        -82.0,
+        49.0
+      ]
+    ],
+    "countries": [
+      "USA"
+    ],
+    "states": [
+      "Minnesota",
+      "Wisconsin",
+      "Michigan",
+      "Ohio",
+      "Indiana",
+      "Missouri",
+      "Iowa"
+    ]
   },
   {
     "id": "western-canada",
     "label": "W. Canada",
-    "emoji": "🍁",
-    "center": [-117.0, 51.0],
+    "emoji": "\ud83c\udf41",
+    "center": [
+      -117.0,
+      51.0
+    ],
     "zoom": 6.0,
-    "bounds": [[-130.0, 48.0], [-110.0, 55.0]],
-    "countries": ["Canada"],
-    "states": ["British Columbia", "Alberta"]
+    "bounds": [
+      [
+        -130.0,
+        48.0
+      ],
+      [
+        -110.0,
+        55.0
+      ]
+    ],
+    "countries": [
+      "Canada"
+    ],
+    "states": [
+      "British Columbia",
+      "Alberta"
+    ]
   },
   {
     "id": "eastern-canada",
     "label": "E. Canada",
-    "emoji": "🍁",
-    "center": [-71.0, 47.0],
+    "emoji": "\ud83c\udf41",
+    "center": [
+      -71.0,
+      47.0
+    ],
     "zoom": 6.0,
-    "bounds": [[-80.0, 44.0], [-60.0, 52.0]],
-    "countries": ["Canada"],
-    "states": ["Quebec", "Ontario"]
+    "bounds": [
+      [
+        -80.0,
+        44.0
+      ],
+      [
+        -60.0,
+        52.0
+      ]
+    ],
+    "countries": [
+      "Canada"
+    ],
+    "states": [
+      "Quebec",
+      "Ontario"
+    ]
   },
   {
     "id": "alps",
     "label": "Alps",
-    "emoji": "🏔️",
-    "center": [10.5, 46.8],
-    "zoom": 5.5,
-    "bounds": [[5.0, 43.5], [17.0, 48.5]],
-    "countries": ["France", "Switzerland", "Austria", "Italy", "Germany", "Andorra", "Liechtenstein", "Slovenia"]
+    "emoji": "\ud83c\udfd4\ufe0f",
+    "center": [
+      10.5,
+      46.8
+    ],
+    "zoom": 6.0,
+    "bounds": [
+      [
+        5.0,
+        43.5
+      ],
+      [
+        17.0,
+        48.5
+      ]
+    ],
+    "countries": [
+      "France",
+      "Switzerland",
+      "Austria",
+      "Italy",
+      "Germany",
+      "Andorra",
+      "Liechtenstein",
+      "Slovenia"
+    ]
   },
   {
     "id": "scandinavia",
     "label": "Scandinavia",
-    "emoji": "❄️",
-    "center": [14.0, 63.0],
-    "zoom": 5.0,
-    "bounds": [[4.0, 55.0], [32.0, 72.0]],
-    "countries": ["Norway", "Sweden", "Finland"]
+    "emoji": "\u2744\ufe0f",
+    "center": [
+      14.0,
+      63.0
+    ],
+    "zoom": 6.0,
+    "bounds": [
+      [
+        4.0,
+        55.0
+      ],
+      [
+        32.0,
+        72.0
+      ]
+    ],
+    "countries": [
+      "Norway",
+      "Sweden",
+      "Finland"
+    ]
   },
   {
     "id": "japan",
     "label": "Japan",
-    "emoji": "🗾",
-    "center": [138.5, 36.8],
+    "emoji": "\ud83d\uddfe",
+    "center": [
+      138.5,
+      36.8
+    ],
     "zoom": 6.5,
-    "bounds": [[128.0, 30.0], [146.0, 46.0]],
-    "countries": ["Japan"]
+    "bounds": [
+      [
+        128.0,
+        30.0
+      ],
+      [
+        146.0,
+        46.0
+      ]
+    ],
+    "countries": [
+      "Japan"
+    ]
   },
   {
     "id": "oceania",
     "label": "Oceania",
-    "emoji": "🌏",
-    "center": [148.0, -37.0],
-    "zoom": 5.5,
-    "bounds": [[143.0, -47.0], [175.0, -34.0]],
-    "countries": ["Australia", "New Zealand"]
+    "emoji": "\ud83c\udf0f",
+    "center": [
+      148.0,
+      -37.0
+    ],
+    "zoom": 6.0,
+    "bounds": [
+      [
+        143.0,
+        -47.0
+      ],
+      [
+        175.0,
+        -34.0
+      ]
+    ],
+    "countries": [
+      "Australia",
+      "New Zealand"
+    ]
   },
   {
     "id": "south-america",
     "label": "S. America",
-    "emoji": "🏔️",
-    "center": [-70.0, -33.0],
-    "zoom": 5.5,
-    "bounds": [[-75.0, -55.0], [-65.0, -20.0]],
-    "countries": ["Chile", "Argentina"]
+    "emoji": "\ud83c\udfd4\ufe0f",
+    "center": [
+      -70.0,
+      -33.0
+    ],
+    "zoom": 6.0,
+    "bounds": [
+      [
+        -75.0,
+        -55.0
+      ],
+      [
+        -65.0,
+        -20.0
+      ]
+    ],
+    "countries": [
+      "Chile",
+      "Argentina"
+    ]
   }
 ]
