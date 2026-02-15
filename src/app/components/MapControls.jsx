@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { isGlobeView, isDetailView, isRegionalView } from "../constants/zoom";
 import useMapStore from "../store/useMapStore";
 import BaseMapSwitcher from "./BaseMapSwitcher";
 import regionsManifest from "../../../assets/regions.json";
@@ -23,8 +22,9 @@ const MAP_STYLES = {
 };
 
 const REGIONS = [
-  { label: "🌎 Global", lat: 20, lng: -30, zoom: 1.2 },
+  { id: null, label: "🌎 Global", lat: 20, lng: -30, zoom: 1.2 },
   ...regionsManifest.map(r => ({
+    id: r.id,
     label: `${r.emoji} ${r.label}`,
     lat: r.center[1],
     lng: r.center[0],
@@ -60,6 +60,7 @@ export default function MapControls({
   resetView,
   flyToRegion,
   currentZoom,
+  nav,
 }) {
   const [regionsOpen, setRegionsOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -104,22 +105,17 @@ export default function MapControls({
   };
 
   // Back button state — driven by nav state (URL params), not zoom thresholds
-  const _isDetailView = isDetailView(currentZoom);
   const selectedResort = useMapStore((s) => s.selectedResort);
   const lastRegion = useMapStore((s) => s.lastRegion);
-  const showBackButton = isResortView || (!!lastRegion && !isGlobeView(currentZoom));
-  const backLabel = isResortView ? "‹ Region" : "‹ Globe";
+  const showBackButton = nav?.isResort || (!!lastRegion && nav?.isRegion);
+  const backLabel = nav?.isResort ? "‹ Region" : "‹ Globe";
 
   const handleBack = () => {
-    const map = mapRef.current;
-    if (!map) return;
-    if (_isDetailView) {
+    if (!mapRef.current) return;
+    if (nav?.isResort) {
       flyToRegion();
-    } else if (_isRegionalView) {
-      map.flyTo({ center: [-98, 39], zoom: 1.8, pitch: 0, bearing: 0, duration: 1500, essential: true });
-      useMapStore.getState().setSelectedResort(null);
-      useMapStore.getState().setIsResortView(false);
-      useMapStore.getState().setLastRegion(null);
+    } else if (nav?.isRegion) {
+      resetView();
     }
   };
 
@@ -166,7 +162,11 @@ export default function MapControls({
                     const zoom = window.innerWidth <= 768 ? region.zoom - 0.75 : region.zoom;
                     stopSpin();
                     useMapStore.getState().setLastRegion({ lng: region.lng, lat: region.lat, zoom: region.zoom });
-                    useMapStore.getState().setCurrentZoom(zoom);
+                    // Update nav state (URL params) — null id means globe
+                    if (nav) {
+                      if (region.id) nav.goToRegion(region.id);
+                      else nav.goToGlobe();
+                    }
                     mapRef.current?.flyTo({ center: [region.lng, region.lat], zoom, pitch: 0, bearing: 0 });
                     setRegionsOpen(false);
                   }}
@@ -265,7 +265,7 @@ export default function MapControls({
       )}
 
       {/* ── Bottom-right: Satellite toggle (detail zoom only) ── */}
-      {_isDetailView && (
+      {nav?.isResort && (
         <div className="pointer-events-auto absolute bottom-[11.5rem] right-3 sm:bottom-[3.5rem]">
           <button
             onClick={() => useMapStore.getState().toggleSatellite()}

@@ -214,6 +214,7 @@ export function MapExplore({ resortCollection, nav }) {
         resetView={resetView}
         flyToRegion={flyToRegion}
         currentZoom={currentZoom}
+        nav={nav}
       />
     </div>
   );
