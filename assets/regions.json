@@ -64,10 +64,10 @@
     "label": "California",
     "emoji": "\u2600\ufe0f",
     "center": [
-      -120.0,
-      38.5
+      -119.8,
+      38.0
     ],
-    "zoom": 6.5,
+    "zoom": 7.5,
     "bounds": [
       [
         -124.5,
