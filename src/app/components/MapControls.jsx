@@ -288,15 +288,21 @@ export default function MapControls({
         <div className="pointer-events-auto absolute left-3 top-[7.5rem] sm:top-auto sm:bottom-3 sm:left-[calc(3rem+64px)]">
           <button
             onClick={handleBack}
-            className="flex items-center gap-1 rounded-full min-h-[44px] px-4 py-2.5 text-xs font-semibold backdrop-blur-md transition-all sm:min-h-0 sm:px-3 sm:py-1.5"
+            className="group flex items-center gap-2 rounded-2xl min-h-[44px] pl-3 pr-4 py-2 text-sm font-medium backdrop-blur-xl transition-all duration-200 hover:scale-[1.03] active:scale-95 sm:min-h-0 sm:pl-2.5 sm:pr-3.5 sm:py-1.5 sm:text-xs sm:rounded-xl"
             style={{
-              background: "rgba(15,23,42,0.85)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              color: "rgba(255,255,255,0.9)",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+              background: "rgba(15,23,42,0.75)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              color: "rgba(255,255,255,0.95)",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.05) inset",
             }}
           >
-            {backLabel}
+            <svg
+              className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-all duration-200 group-hover:-translate-x-0.5"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            <span>{nav?.isResort ? (regionMeta ? regionMeta.label : "Region") : "Globe"}</span>
           </button>
         </div>
       )}
