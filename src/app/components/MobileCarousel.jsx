@@ -34,7 +34,7 @@ function CompactCard({ resort, isSelected, isHighlighted, onClick, snowInfo }) {
     <div
       ref={ref}
       onClick={onClick}
-      className={`snap-center shrink-0 w-44 rounded-xl p-2.5 cursor-pointer transition-all border bg-slate-900/90 backdrop-blur-xl ${borderClass}`}
+      className={`snap-center shrink-0 w-44 max-h-[88px] rounded-xl p-2.5 cursor-pointer transition-all border bg-slate-900/90 backdrop-blur-xl overflow-hidden ${borderClass}`}
     >
       <div className="flex items-center gap-1.5 mb-1">
         <span className={`shrink-0 rounded-full ${passColor} px-1.5 py-0.5 text-[9px] font-bold text-white leading-none`}>
@@ -300,8 +300,8 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav
     <div
       className="absolute left-0 right-0 z-20 lg:hidden pointer-events-none"
       style={{
-        bottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
-        maxHeight: showExpanded ? "50vh" : "110px",
+        bottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
+        maxHeight: showExpanded ? "45vh" : "140px",
         overflow: "hidden",
       }}
     >
