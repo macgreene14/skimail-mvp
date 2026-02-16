@@ -166,7 +166,22 @@ export function MapExplore({ resortCollection, nav }) {
 
   const handleMapLoad = useCallback(() => {
     onMapLoad();
-  }, [onMapLoad]);
+    // Animate in from wide zoom on initial load
+    const map = mapRef.current;
+    if (map) {
+      setTimeout(() => {
+        map.flyTo({
+          center: [-30, 20],
+          zoom: 1.5,
+          pitch: 0,
+          bearing: 0,
+          duration: 3000,
+          curve: 1.2,
+          essential: true,
+        });
+      }, 300);
+    }
+  }, [onMapLoad, mapRef]);
 
   const interactiveLayerIds = useMemo(() => ['resort-dots', 'resort-markers'], []);
   const currentZoom = useMapStore((s) => s.currentZoom);
@@ -175,7 +190,7 @@ export function MapExplore({ resortCollection, nav }) {
     <div className={`relative h-full w-full ${isFullscreen ? 'map-wrapper-fullscreen' : ''}`}>
       <Map
         ref={mapRef}
-        initialViewState={{ longitude: -98, latitude: 39, zoom: 1.2, pitch: 0, bearing: 0 }}
+        initialViewState={{ longitude: -98, latitude: 39, zoom: 0.5, pitch: 0, bearing: 0 }}
         onMoveEnd={onMoveEnd}
         onMouseDown={stopSpin}
         onTouchStart={stopSpin}

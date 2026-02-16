@@ -64,9 +64,11 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
     const map = mapRef.current;
     if (!map) return;
     if (nav) nav.goToGlobe();
+    // Zoom out from current location — don't snap to hardcoded center
+    const center = map.getCenter();
     map.flyTo({
-      center: [-98, 39],
-      zoom: 1.8,
+      center: [center.lng, center.lat],
+      zoom: 1.5,
       pitch: 0,
       bearing: 0,
       speed: 0.8,
