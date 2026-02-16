@@ -35,10 +35,10 @@ function CompactCard({ resort, isSelected, isHighlighted, onClick, snowInfo }) {
     <div
       ref={ref}
       onClick={onClick}
-      className={`snap-center shrink-0 w-44 max-h-[88px] rounded-xl p-2.5 cursor-pointer transition-all border bg-slate-900/90 backdrop-blur-xl overflow-hidden ${borderClass}`}
+      className={`snap-center shrink-0 w-36 rounded-xl p-2.5 cursor-pointer transition-all border bg-slate-900/90 backdrop-blur-xl overflow-hidden ${borderClass}`}
     >
       <div className="flex items-center gap-1.5 mb-1">
-        <span className={`shrink-0 rounded-full ${passColor} px-1.5 py-0.5 text-[9px] font-bold text-white leading-none`}>
+        <span className={`shrink-0 rounded-full ${passColor} px-1 py-0.5 text-[8px] font-bold text-white leading-none`}>
           {passLabel}
         </span>
         <h3 className="truncate text-[11px] font-semibold text-white leading-tight">
@@ -46,39 +46,16 @@ function CompactCard({ resort, isSelected, isHighlighted, onClick, snowInfo }) {
         </h3>
       </div>
 
-      {(p.state !== "Unknown" || p.country !== "Unknown") && (
-        <p className="truncate text-[10px] text-slate-400 mb-1">
-          {[p.state !== "Unknown" ? p.state : null, p.country !== "Unknown" ? p.country : null]
-            .filter(Boolean)
-            .join(", ")}
-        </p>
-      )}
-
-      {/* Live snow */}
-      {snowInfo && (snowInfo.snowfall_7d > 0 || snowInfo.snow_depth > 0) && (
-        <div className="flex items-center gap-2 mb-1 text-[9px] font-semibold text-sky-300">
-          {snowInfo.snowfall_24h > 0 && <span>❄ {Math.round(snowInfo.snowfall_24h)}cm/24h</span>}
-          {snowInfo.snowfall_7d > 0 && <span>❄ {Math.round(snowInfo.snowfall_7d)}cm/7d</span>}
+      {/* Snow data — primary content for compact view */}
+      {snowInfo && (snowInfo.snowfall_7d > 0 || snowInfo.snowfall_24h > 0 || snowInfo.snow_depth > 0) ? (
+        <div className="flex flex-col gap-0.5 text-[10px] font-medium text-sky-300">
+          {snowInfo.snowfall_24h > 0 && <span>❄ {Math.round(snowInfo.snowfall_24h)}cm new</span>}
+          {snowInfo.snowfall_7d > 0 && <span>❄ {Math.round(snowInfo.snowfall_7d)}cm / 7d</span>}
+          {snowInfo.snow_depth > 0 && <span>📏 {Math.round(snowInfo.snow_depth)}cm base</span>}
         </div>
+      ) : (
+        <p className="text-[10px] text-slate-500">No recent snow</p>
       )}
-
-      {/* Percentile bars */}
-      <div className="flex items-center gap-1.5">
-        {[
-          { stat: "avg_snowfall", val: p.avg_snowfall, color: "#38bdf8" },
-          { stat: "vertical_drop", val: p.vertical_drop, color: "#4ade80" },
-          { stat: "skiable_acres", val: p.skiable_acres, color: "#facc15" },
-        ].map(({ stat, val, color }) => {
-          const pct = getPercentile(stat, val);
-          return (
-            <div key={stat} className="flex-1">
-              <div className="h-1 rounded-full bg-white/10">
-                <div className="h-1 rounded-full" style={{ width: `${pct}%`, background: color }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
