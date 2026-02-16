@@ -126,7 +126,11 @@ export default function MapControls({
   const selectedResort = useMapStore((s) => s.selectedResort);
   const lastRegion = useMapStore((s) => s.lastRegion);
   const showBackButton = nav?.isResort || (!!lastRegion && nav?.isRegion);
-  const backLabel = nav?.isResort ? "‹ Region" : "‹ Globe";
+  // Show region name in back button (e.g. "‹ ⛰️ Rockies")
+  const regionMeta = nav?.region ? REGIONS.find((r) => r.id === nav.region) : null;
+  const backLabel = nav?.isResort
+    ? `‹ ${regionMeta ? regionMeta.label : "Region"}`
+    : "‹ Globe";
 
   const handleBack = () => {
     if (!mapRef.current) return;
