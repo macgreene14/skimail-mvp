@@ -21,7 +21,7 @@ import resortCollection from "../../assets/resorts.json";
  */
 function AppContent() {
   const resorts = resortCollection.features;
-  const nav = useNavState();
+  const nav = useNavState(resortCollection);
 
   const selectedResort = useMapStore((s) => s.selectedResort);
   const setSelectedResort = useMapStore((s) => s.setSelectedResort);
