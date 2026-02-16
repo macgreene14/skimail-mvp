@@ -346,7 +346,7 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort, n
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search resorts..."
-            className="w-full rounded-xl py-2.5 pl-9 pr-9 text-xs text-white placeholder-slate-500 outline-none transition-colors focus:ring-1 focus:ring-sky-500/40"
+            className="w-full rounded-xl py-2.5 pl-9 pr-9 text-base sm:text-xs text-white placeholder-slate-500 outline-none transition-colors focus:ring-1 focus:ring-sky-500/40"
             style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
           />
           {searchQuery && (

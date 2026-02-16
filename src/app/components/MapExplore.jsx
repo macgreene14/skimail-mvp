@@ -48,7 +48,7 @@ export function MapExplore({ resortCollection, nav }) {
     snowGeoJSON, regionSnowAvg, setVisibleSlugs,
     snowBySlugRef, snowStableKey,
   } = useSnowData(resorts);
-  const { onMapLoad, onStyleData } = useMapSetup(mapRef, resorts);
+  const { onMapLoad, onStyleData } = useMapSetup(mapRef);
 
   // Piste data loading
   useEffect(() => {

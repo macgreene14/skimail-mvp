@@ -121,7 +121,7 @@ function MobileSearchBar({ searchQuery, setSearchQuery }) {
               onChange={(e) => setSearchQuery(e.target.value)}
               onBlur={() => { if (!searchQuery) setExpanded(false); }}
               placeholder="Search resorts, locations..."
-              className="w-full rounded-full min-h-[44px] pl-10 pr-11 text-[13px] text-white placeholder-slate-500 outline-none bg-transparent tracking-wide"
+              className="w-full rounded-full min-h-[44px] pl-10 pr-11 text-base text-white placeholder-slate-500 outline-none bg-transparent tracking-wide"
             />
             <button
               onClick={() => { setSearchQuery(""); setExpanded(false); }}
