@@ -112,8 +112,8 @@ function AppContent() {
       </div>
 
       {/* Mobile layout */}
-      <div className="relative flex flex-1 flex-col overflow-hidden lg:hidden">
-        <div className="flex-1">
+      <div className="relative flex-1 overflow-hidden lg:hidden">
+        <div className="absolute inset-0">
           <MapExplore resortCollection={resortCollection} nav={nav} />
         </div>
 
