@@ -149,8 +149,8 @@ export default function MapControls({
   return (
     <div className="pointer-events-none absolute inset-0" style={{ zIndex: 30 }}>
 
-      {/* ── Top-left: Regions dropdown ── */}
-      <div className="pointer-events-auto absolute left-3 top-3">
+      {/* ── Top-left: Regions dropdown + Base map switcher ── */}
+      <div className="pointer-events-auto absolute left-3 top-3 flex flex-col gap-2">
         <div className="relative">
           <button
             onClick={() => setRegionsOpen(!regionsOpen)}
@@ -196,6 +196,21 @@ export default function MapControls({
             </div>
           )}
         </div>
+
+        {/* Base map switcher — below regions dropdown */}
+        <BaseMapSwitcher
+          activeStyle={mapStyleKey}
+          onStyleChange={(key) => {
+            setMapStyle(key, MAP_STYLES[key]);
+            if (key !== 'satellite' && satelliteEnabled) {
+              useMapStore.setState({ satelliteEnabled: false });
+            } else if (key === 'satellite' && !satelliteEnabled) {
+              useMapStore.setState({ satelliteEnabled: true });
+            }
+          }}
+          mapboxToken={MAPBOX_TOKEN}
+          openDirection="down"
+        />
       </div>
 
       {/* ── Top-right: Filter pills (desktop — always visible) ── */}
@@ -342,22 +357,6 @@ export default function MapControls({
         </div>
       )}
 
-      {/* ── Bottom-left: Base map switcher ── */}
-      <div className="pointer-events-auto absolute bottom-[9rem] left-3 sm:bottom-3">
-        <BaseMapSwitcher
-          activeStyle={mapStyleKey}
-          onStyleChange={(key) => {
-            setMapStyle(key, MAP_STYLES[key]);
-            // If user manually picks a style, clear satellite toggle state
-            if (key !== 'satellite' && satelliteEnabled) {
-              useMapStore.setState({ satelliteEnabled: false });
-            } else if (key === 'satellite' && !satelliteEnabled) {
-              useMapStore.setState({ satelliteEnabled: true });
-            }
-          }}
-          mapboxToken={MAPBOX_TOKEN}
-        />
-      </div>
     </div>
   );
 }

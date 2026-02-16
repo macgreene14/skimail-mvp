@@ -30,15 +30,19 @@ const BASE_MAPS = [
   },
 ];
 
-export default function BaseMapSwitcher({ activeStyle, onStyleChange, mapboxToken }) {
+export default function BaseMapSwitcher({ activeStyle, onStyleChange, mapboxToken, openDirection = "up" }) {
   const [expanded, setExpanded] = useState(false);
   const active = BASE_MAPS.find((b) => b.key === activeStyle) || BASE_MAPS[0];
+
+  const popoverPosition = openDirection === "down"
+    ? "absolute top-16 left-0"
+    : "absolute bottom-16 left-0";
 
   return (
     <div className="relative">
       {/* Expanded: all options */}
       {expanded && (
-        <div className="absolute bottom-16 left-0 flex gap-2 rounded-xl bg-black/60 p-2 backdrop-blur-md">
+        <div className={`${popoverPosition} flex gap-2 rounded-xl bg-black/60 p-2 backdrop-blur-md`}>
           {BASE_MAPS.map((bm) => (
             <button
               key={bm.key}
@@ -73,7 +77,7 @@ export default function BaseMapSwitcher({ activeStyle, onStyleChange, mapboxToke
         <span className="absolute bottom-0 left-0 right-0 bg-black/70 py-0.5 text-center text-[9px] font-semibold text-white">
           {active.label}
         </span>
-        <span className="absolute right-0.5 top-0.5 text-[8px] text-white/60">▲</span>
+        <span className="absolute right-0.5 top-0.5 text-[8px] text-white/60">{openDirection === "down" ? "▼" : "▲"}</span>
       </button>
     </div>
   );
