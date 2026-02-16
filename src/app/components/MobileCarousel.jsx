@@ -94,7 +94,7 @@ function MobileSearchBar({ searchQuery, setSearchQuery }) {
   const isOpen = expanded || !!searchQuery;
 
   return (
-    <div className="flex justify-end" style={{ minWidth: isOpen ? "100%" : "44px" }}>
+    <div className="flex justify-start" style={{ minWidth: isOpen ? "100%" : "44px" }}>
       <div
         className="relative rounded-full overflow-hidden"
         style={{
@@ -337,10 +337,10 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav
       {/* Resort count + search */}
       {!showExpanded && (
         <div className="pointer-events-auto flex items-center justify-between px-4 mb-1">
+          <MobileSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           <span className="text-[10px] text-slate-400 font-medium">
             {sorted?.length ? `${sorted.length} resort${sorted.length !== 1 ? 's' : ''} in view` : ''}
           </span>
-          <MobileSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
       )}
 

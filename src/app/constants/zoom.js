@@ -32,7 +32,7 @@ export const SNOW_HEATMAP_MAX = 9;
 export const SNOW_CIRCLES_MAX = 8;
 
 /** Piste trails appear */
-export const PISTE_MIN = 11;
+export const PISTE_MIN = 8;
 
 /** Max zoom for snow overlay */
 export const SNOW_MAX = 14;
