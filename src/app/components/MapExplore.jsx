@@ -13,6 +13,7 @@ import SnowLayers from './layers/SnowLayers';
 import PisteLayers from './layers/PisteLayers';
 import ResortLayers from './layers/ResortLayers';
 import RegionMarkers from './layers/RegionMarkers';
+import regionsManifest from '../../../assets/regions.json';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
 
@@ -41,7 +42,7 @@ export function MapExplore({ resortCollection, nav }) {
 
   // Hooks — called unconditionally before any returns
   const setCurrentZoom = useMapStore((s) => s.setCurrentZoom);
-  const { spinning, setSpinning, spinningRef, setUserStopped, stopSpin } = useGlobeSpin(mapRef);
+  const { spinning, setSpinning, spinningRef, stopSpin } = useGlobeSpin(mapRef, nav.isGlobe);
   const { flyToResort, resetView, flyToRegion, onRegionClick, clickedFromMapRef } =
     useMapNavigation(mapRef, stopSpin, nav);
   const {
@@ -63,6 +64,27 @@ export function MapExplore({ resortCollection, nav }) {
       .catch(() => { if (!cancelled) setPisteData(null); });
     return () => { cancelled = true; };
   }, [selectedResort, showPistes, setPisteData]);
+
+  // Consume pendingRegionFly — fly to region when card clicked
+  const pendingRegionFly = useMapStore((s) => s.pendingRegionFly);
+  useEffect(() => {
+    if (!pendingRegionFly || !mapRef.current) return;
+    const region = regionsManifest.find((r) => r.id === pendingRegionFly);
+    if (!region) return;
+    useMapStore.getState().setPendingRegionFly(null);
+    stopSpin();
+    const zoom = window.innerWidth <= 768 ? region.zoom - 0.5 : region.zoom;
+    useMapStore.getState().setLastRegion({ lng: region.center[0], lat: region.center[1], zoom: region.zoom });
+    mapRef.current.flyTo({
+      center: region.center,
+      zoom,
+      pitch: 0,
+      bearing: 0,
+      duration: 1200,
+      curve: 1.5,
+      essential: true,
+    });
+  }, [pendingRegionFly, stopSpin]);
 
   // Filtered GeoJSON with snow data merged
   const filteredGeoJSON = useMemo(() => {
@@ -196,10 +218,7 @@ export function MapExplore({ resortCollection, nav }) {
 
       <MapControls
         mapRef={mapRef}
-        spinning={spinning}
-        setSpinning={setSpinning}
         stopSpin={stopSpin}
-        setUserStopped={setUserStopped}
         isResortView={isResortView}
         resetView={resetView}
         flyToRegion={flyToRegion}

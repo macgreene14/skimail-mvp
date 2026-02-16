@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { MapExplore } from "./components/MapExplore.jsx";
 import { ResultsContainer } from "./components/ResultsContainer.jsx";
 import { MobileCarousel } from "./components/MobileCarousel.jsx";
@@ -7,6 +7,7 @@ import QueryProvider from "./providers/QueryProvider.jsx";
 import useMapStore from "./store/useMapStore";
 import useNavState from "./hooks/useNavState";
 import resortCollection from "../../assets/resorts.json";
+import regionsManifest from "../../assets/regions.json";
 
 /**
  * AppContent — top-level layout.
@@ -62,7 +63,7 @@ function AppContent() {
       });
     }
 
-    // At globe view, show nothing — user picks a region first
+    // At globe view, show nothing — region cards are computed separately
     if (nav.isGlobe) return [];
 
     // Region-driven: filter by region + active passes
@@ -90,6 +91,46 @@ function AppContent() {
     return results.slice(0, 100); // Cap at 100
   }, [resorts, activePasses, searchQuery, nav.isGlobe, nav.region, snowBySlug]);
 
+  // Region summary cards for globe view
+  const regionSummaries = useMemo(() => {
+    if (!nav.isGlobe) return [];
+    const regionSnow = {};
+    resorts.forEach((r) => {
+      const rid = r.properties?.region_id;
+      if (!rid) return;
+      if (!activePasses.has(r.properties?.pass)) return;
+      const snow = snowBySlug[r.properties?.slug];
+      const s7d = snow?.snowfall_7d || 0;
+      if (!regionSnow[rid]) {
+        regionSnow[rid] = { regionId: rid, maxSnow: s7d, topResort: r.properties?.name, count: 1 };
+      } else {
+        regionSnow[rid].count++;
+        if (s7d > regionSnow[rid].maxSnow) {
+          regionSnow[rid].maxSnow = s7d;
+          regionSnow[rid].topResort = r.properties?.name;
+        }
+      }
+    });
+    // Enrich with region metadata
+    const regionsById = {};
+    regionsManifest.forEach((r) => { regionsById[r.id] = r; });
+    return Object.values(regionSnow)
+      .map((rs) => {
+        const meta = regionsById[rs.regionId];
+        if (!meta) return null;
+        return { ...rs, emoji: meta.emoji, label: meta.label, center: meta.center, zoom: meta.zoom };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.maxSnow - a.maxSnow);
+  }, [nav.isGlobe, resorts, activePasses, snowBySlug]);
+
+  // Fly map to region when clicking a region card
+  const handleRegionCardClick = useCallback((regionId) => {
+    nav.goToRegion(regionId);
+    // Store pending nav so MapExplore can pick it up
+    useMapStore.getState().setPendingRegionFly(regionId);
+  }, [nav]);
+
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
       <h1 className="sr-only">Explore</h1>
@@ -103,6 +144,8 @@ function AppContent() {
               setSelectedResort={setSelectedResort}
               selectedResort={selectedResort}
               nav={nav}
+              regionSummaries={regionSummaries}
+              onRegionCardClick={handleRegionCardClick}
             />
           </div>
         </div>
@@ -122,6 +165,8 @@ function AppContent() {
           selectedResort={selectedResort}
           setSelectedResort={setSelectedResort}
           nav={nav}
+          regionSummaries={regionSummaries}
+          onRegionCardClick={handleRegionCardClick}
         />
       </div>
 

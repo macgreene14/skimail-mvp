@@ -52,10 +52,7 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
  */
 export default function MapControls({
   mapRef,
-  spinning,
-  setSpinning,
   stopSpin,
-  setUserStopped,
   isResortView,
   resetView,
   flyToRegion,
@@ -138,15 +135,6 @@ export default function MapControls({
       flyToRegion();
     } else if (nav?.isRegion) {
       resetView();
-    }
-  };
-
-  const handleAutoRotate = () => {
-    if (spinning) {
-      stopSpin();
-    } else {
-      setUserStopped(false);
-      setSpinning(true);
     }
   };
 
@@ -327,24 +315,6 @@ export default function MapControls({
           </button>
         </div>
       )}
-
-      {/* ── Bottom-right: Auto-rotate toggle (above Mapbox zoom controls) ── */}
-      <div className="pointer-events-auto absolute bottom-[9rem] right-3 sm:bottom-[5rem]">
-        <button
-          onClick={handleAutoRotate}
-          className={`flex items-center justify-center rounded-full w-11 h-11 sm:w-9 sm:h-9 text-base sm:text-sm backdrop-blur-sm transition-all ${
-            spinning
-              ? "bg-sky-500/80 text-white shadow-lg shadow-sky-500/25 ring-1 ring-sky-400/40"
-              : "text-white/50 hover:text-white/80 border border-white/10"
-          }`}
-          style={{
-            background: spinning ? undefined : "rgba(15,23,42,0.8)",
-          }}
-          title={spinning ? "Stop auto-rotate" : "Start auto-rotate"}
-        >
-          ⟳
-        </button>
-      </div>
 
       {/* ── Bottom-right: Compass (resets bearing to north) ── */}
       {Math.abs(bearing) > 1 && (
