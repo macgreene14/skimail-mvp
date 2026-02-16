@@ -30,13 +30,13 @@ const BASE_MAPS = [
   },
 ];
 
-export default function BaseMapSwitcher({ activeStyle, onStyleChange, mapboxToken, openDirection = "up" }) {
+export default function BaseMapSwitcher({ activeStyle, onStyleChange, mapboxToken, openDirection = "up", openAlign = "left" }) {
   const [expanded, setExpanded] = useState(false);
   const active = BASE_MAPS.find((b) => b.key === activeStyle) || BASE_MAPS[0];
 
-  const popoverPosition = openDirection === "down"
-    ? "absolute top-16 left-0"
-    : "absolute bottom-16 left-0";
+  const verticalPos = openDirection === "down" ? "top-16" : "bottom-16";
+  const horizontalPos = openAlign === "right" ? "right-0" : "left-0";
+  const popoverPosition = `absolute ${verticalPos} ${horizontalPos}`;
 
   return (
     <div className="relative">
