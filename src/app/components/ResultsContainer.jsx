@@ -55,7 +55,7 @@ function TrailBreakdown({ pisteData }) {
   );
 }
 
-function ExpandedDetailCard({ resort, onClick, onBack }) {
+function ExpandedDetailCard({ resort, onClick }) {
   const snowBySlug = useMapStore((s) => s.snowBySlug);
   const webcamBySlug = useMapStore((s) => s.webcamBySlug);
   const pisteData = useMapStore((s) => s.pisteData);
@@ -80,15 +80,6 @@ function ExpandedDetailCard({ resort, onClick, onBack }) {
       className="w-full rounded-xl p-4 transition-all border border-sky-500/50 ring-1 ring-sky-500/20 backdrop-blur-xl overflow-y-auto"
       style={{ background: "rgba(15,23,42,0.92)" }}
     >
-      {/* Back button */}
-      {onBack && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onBack(); }}
-          className="flex items-center gap-1 mb-3 text-[11px] text-sky-400 hover:text-sky-300 transition-colors"
-        >
-          <span>‹</span> Back to Region
-        </button>
-      )}
       {/* Header */}
       <div className="flex items-center gap-2 mb-1.5">
         {passLink ? (
@@ -378,7 +369,6 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort, n
         {selectedResort && (
           <ExpandedDetailCard
             resort={selectedResort}
-            onBack={useMapStore.getState().triggerBackToRegion}
           />
         )}
         {/* Resort list — hidden when a resort is selected */}

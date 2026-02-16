@@ -23,16 +23,10 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
   const setPreviousViewState = useMapStore((s) => s.setPreviousViewState);
   const setIsResortView = useMapStore((s) => s.setIsResortView);
   const setLastRegion = useMapStore((s) => s.setLastRegion);
-  const lastRegion = useMapStore((s) => s.lastRegion);
   const selectedResort = useMapStore((s) => s.selectedResort);
-  const pendingBackToRegion = useMapStore((s) => s.pendingBackToRegion);
-  const clearPendingBackToRegion = useMapStore((s) => s.clearPendingBackToRegion);
 
   const lastFlewToRef = useRef(null);
   const clickedFromMapRef = useRef(false);
-  const navRef = useRef(nav);
-  navRef.current = nav;
-
   // Fly to resort in 3D
   const flyToResort = useCallback(
     (resort) => {
@@ -106,14 +100,22 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
     [mapRef, stopSpin, setLastRegion, nav]
   );
 
-  // Fly back to region from detail view
+  // Fly back to region from detail view — always use region manifest camera
   const flyToRegion = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
     // Nav back from resort → region
     if (nav) nav.goBack();
-    let target = lastRegion;
-    if (!target) {
+
+    // Look up the resort's region_id, then find exact camera from manifest
+    const regionId = selectedResort?.properties?.region_id || selectedResort?.properties?.region;
+    const manifest = regionId ? regionsManifest.find((r) => r.id === regionId) : null;
+
+    let target;
+    if (manifest) {
+      target = { lng: manifest.center[0], lat: manifest.center[1], zoom: manifest.zoom };
+    } else {
+      // Fallback: closest region heuristic (only if region_id missing)
       const center = map.getCenter();
       let closest = REGION_MARKERS[0];
       let minDist = Infinity;
@@ -126,9 +128,11 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
       });
       target = { lng: closest.lng, lat: closest.lat, zoom: closest.zoom };
     }
+
+    const zoom = window.innerWidth <= 768 ? target.zoom - 0.5 : target.zoom;
     map.flyTo({
       center: [target.lng, target.lat],
-      zoom: 7,
+      zoom,
       pitch: 0,
       bearing: 0,
       duration: 1500,
@@ -137,42 +141,7 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
     setSelectedResort(null);
     setIsResortView(false);
     lastFlewToRef.current = null;
-  }, [mapRef, lastRegion, setSelectedResort, setIsResortView, nav]);
-
-  // Back-to-region triggered from cards (ExpandedDetailCard "Back to Region" button)
-  useEffect(() => {
-    if (pendingBackToRegion) {
-      clearPendingBackToRegion();
-      // Update URL nav state — go back from resort to region (or region to globe)
-      if (navRef.current) navRef.current.goBack();
-      const map = mapRef.current;
-      if (!map) return;
-      let target = lastRegion;
-      if (!target) {
-        const center = map.getCenter();
-        let closest = REGION_MARKERS[0];
-        let minDist = Infinity;
-        REGION_MARKERS.forEach((r) => {
-          const d =
-            Math.pow(r.lat - center.lat, 2) + Math.pow(r.lng - center.lng, 2);
-          if (d < minDist) {
-            minDist = d;
-            closest = r;
-          }
-        });
-        target = { lng: closest.lng, lat: closest.lat, zoom: closest.zoom };
-      }
-      map.flyTo({
-        center: [target.lng, target.lat],
-        zoom: 7,
-        pitch: 0,
-        bearing: 0,
-        duration: 1500,
-        essential: true,
-      });
-      lastFlewToRef.current = null;
-    }
-  }, [pendingBackToRegion, clearPendingBackToRegion, lastRegion, mapRef]);
+  }, [mapRef, selectedResort, setSelectedResort, setIsResortView, nav]);
 
   // When selectedResort changes externally (card click, auto-select)
   useEffect(() => {

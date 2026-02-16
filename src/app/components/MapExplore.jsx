@@ -41,7 +41,7 @@ export function MapExplore({ resortCollection, nav }) {
   const setPisteData = useMapStore((s) => s.setPisteData);
 
   // Hooks — called unconditionally before any returns
-  const { queryViewport, bindMapEvents } = useViewportResorts(mapRef, resorts);
+  const { queryViewport, bindMapEvents } = useViewportResorts(mapRef, resorts, nav.navView);
   const { spinning, setSpinning, spinningRef, setUserStopped, stopSpin } = useGlobeSpin(mapRef);
   const { flyToResort, resetView, flyToRegion, onRegionClick, clickedFromMapRef } =
     useMapNavigation(mapRef, stopSpin, nav);

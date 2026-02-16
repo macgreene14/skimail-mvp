@@ -45,11 +45,6 @@ const useMapStore = create(
       lastRegion: null,
       setLastRegion: (r) => set({ lastRegion: r }),
 
-      // ── Back to region trigger (set by cards, consumed by MapExplore) ──
-      pendingBackToRegion: false,
-      triggerBackToRegion: () => set({ pendingBackToRegion: true, selectedResort: null, isResortView: false }),
-      clearPendingBackToRegion: () => set({ pendingBackToRegion: false }),
-
       // ── Map view (controlled mode for react-map-gl) ──
       viewState: { longitude: -98, latitude: 39, zoom: 1.2, pitch: 0, bearing: 0 },
       setViewState: (vs) => set({ viewState: vs }),
