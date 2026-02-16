@@ -14,8 +14,12 @@ import { useQueryState } from "nuqs";
  * The URL IS the nav state. Camera follows. No zoom-threshold logic needed.
  */
 export default function useNavState() {
-  const [region, setRegion] = useQueryState("region");
-  const [resort, setResort] = useQueryState("resort");
+  const [regionRaw, setRegion] = useQueryState("region");
+  const [resortRaw, setResort] = useQueryState("resort");
+
+  // Normalize empty strings to null (nuqs can return "" instead of null)
+  const region = regionRaw || null;
+  const resort = resortRaw || null;
 
   // Derived view — single source of truth
   const navView = useMemo(() => {

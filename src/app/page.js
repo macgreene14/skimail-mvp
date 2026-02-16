@@ -63,8 +63,17 @@ function AppContent() {
     // At globe view, show nothing — user picks a region first
     if (nav.isGlobe) return [];
 
-    return filteredResorts.filter((r) => activePasses.has(r.properties?.pass));
-  }, [filteredResorts, resorts, activePasses, searchQuery, nav.isGlobe]);
+    // Filter viewport resorts by active passes + current region
+    // Region filter prevents stale global results from showing during flyTo
+    // (viewport bounds at globe zoom contain the entire world)
+    return filteredResorts.filter((r) => {
+      if (!activePasses.has(r.properties?.pass)) return false;
+      if (nav.region) {
+        return r.properties?.region_id === nav.region;
+      }
+      return true;
+    });
+  }, [filteredResorts, resorts, activePasses, searchQuery, nav.isGlobe, nav.region]);
 
   return (
     <div className="flex h-[calc(100dvh-3rem)] flex-col overflow-hidden sm:h-[calc(100dvh-3.5rem)]">
