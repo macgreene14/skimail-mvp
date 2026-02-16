@@ -101,10 +101,15 @@ export function MapExplore({ resortCollection, nav }) {
         .filter((r) => passes.has(r.properties.pass))
         .map((r) => {
           const s = snow[r.properties.slug];
-          if (!s || !s.snowfall_7d) return r;
+          if (!s) return r;
+          const extra = {};
+          if (s.snowfall_7d) extra.snow_7d = Math.round(s.snowfall_7d);
+          if (s.snowfall_24h) extra.snow_24h = Math.round(s.snowfall_24h);
+          if (s.snow_depth) extra.snow_depth = Math.round(s.snow_depth);
+          if (!Object.keys(extra).length) return r;
           return {
             ...r,
-            properties: { ...r.properties, snow_7d: Math.round(s.snowfall_7d) },
+            properties: { ...r.properties, ...extra },
           };
         }),
     };

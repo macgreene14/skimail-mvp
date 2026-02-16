@@ -144,12 +144,19 @@ export default function ResortLayers({ filteredGeoJSON }) {
           "icon-anchor": "bottom",
           "text-field": [
             "case",
+            ["all", ["has", "snow_24h"], ["has", "snow_7d"]],
+            [
+              "format",
+              ["get", "name"], {},
+              "\n", {},
+              ["concat", "❄ ", ["to-string", ["get", "snow_24h"]], "cm new · ", ["to-string", ["get", "snow_7d"]], "cm/7d"], { "font-scale": 0.8 },
+            ],
             ["has", "snow_7d"],
             [
               "format",
               ["get", "name"], {},
               "\n", {},
-              ["concat", "❄ ", ["to-string", ["get", "snow_7d"]], '"'], { "font-scale": 0.85 },
+              ["concat", "❄ ", ["to-string", ["get", "snow_7d"]], "cm / 7d"], { "font-scale": 0.8 },
             ],
             ["get", "name"],
           ],
