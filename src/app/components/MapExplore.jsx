@@ -233,6 +233,7 @@ export function MapExplore({ resortCollection, nav }) {
 
       <MapControls
         mapRef={mapRef}
+        spinning={spinning}
         stopSpin={stopSpin}
         isResortView={isResortView}
         resetView={resetView}

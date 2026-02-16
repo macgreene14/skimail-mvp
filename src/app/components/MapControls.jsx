@@ -52,6 +52,7 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_APIKEY;
  */
 export default function MapControls({
   mapRef,
+  spinning,
   stopSpin,
   isResortView,
   resetView,
@@ -141,12 +142,13 @@ export default function MapControls({
   return (
     <div className="pointer-events-none absolute inset-0" style={{ zIndex: 30 }}>
 
-      {/* ── Top-left: Regions dropdown + Base map switcher ── */}
+      {/* ── Top-left: Regions dropdown + spin toggle ── */}
       <div className="pointer-events-auto absolute left-3 top-3 flex flex-col gap-2">
-        <div className="relative">
-          <button
-            onClick={() => setRegionsOpen(!regionsOpen)}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 min-h-[44px] text-xs font-semibold backdrop-blur-sm transition-all sm:min-h-0 sm:px-2.5 sm:py-1.5 sm:text-[11px]"
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <button
+              onClick={() => setRegionsOpen(!regionsOpen)}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 min-h-[44px] text-xs font-semibold backdrop-blur-sm transition-all sm:min-h-0 sm:px-2.5 sm:py-1.5 sm:text-[11px]"
             style={{
               background: regionsOpen ? "rgba(255,255,255,0.15)" : "rgba(15,23,42,0.8)",
               border: "1px solid rgba(255,255,255,0.15)",
@@ -189,7 +191,25 @@ export default function MapControls({
           )}
         </div>
 
-        {/* Base map switcher removed from top-left — now in top-right under filters */}
+          {/* Spin toggle — right of regions button */}
+          {nav?.isGlobe && (
+            <button
+              onClick={spinning ? stopSpin : undefined}
+              className={`flex items-center justify-center rounded-lg min-h-[44px] w-[44px] backdrop-blur-sm transition-all sm:min-h-0 sm:w-9 sm:h-9 ${
+                spinning ? "text-white/80" : "text-white/40"
+              }`}
+              style={{
+                background: "rgba(15,23,42,0.8)",
+                border: "1px solid rgba(255,255,255,0.15)",
+              }}
+              title={spinning ? "Pause rotation" : "Rotating..."}
+            >
+              <svg className={`w-4 h-4 ${spinning ? "animate-spin" : ""}`} style={{ animationDuration: "3s" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Top-right: Filter pills (desktop) + base map switcher ── */}

@@ -64,16 +64,12 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
     const map = mapRef.current;
     if (!map) return;
     if (nav) nav.goToGlobe();
-    // Zoom out from current location — don't snap to hardcoded center
-    const center = map.getCenter();
-    map.flyTo({
-      center: [center.lng, center.lat],
+    // Instant snap back to initial globe view — no animation
+    map.jumpTo({
+      center: [-98, 39],
       zoom: 1.5,
       pitch: 0,
       bearing: 0,
-      speed: 0.8,
-      curve: 1.8,
-      essential: true,
     });
     setSelectedResort(null);
     setIsResortView(false);
