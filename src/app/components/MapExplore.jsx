@@ -166,12 +166,12 @@ export function MapExplore({ resortCollection, nav }) {
 
   const handleMapLoad = useCallback(() => {
     onMapLoad();
-    // Animate in from wide zoom on initial load
+    // Animate in from wide zoom on initial load — centered over US
     const map = mapRef.current;
     if (map) {
       setTimeout(() => {
         map.flyTo({
-          center: [-30, 20],
+          center: [-98, 39],
           zoom: 1.5,
           pitch: 0,
           bearing: 0,
