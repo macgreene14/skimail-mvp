@@ -30,6 +30,8 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
 
   const lastFlewToRef = useRef(null);
   const clickedFromMapRef = useRef(false);
+  const navRef = useRef(nav);
+  navRef.current = nav;
 
   // Fly to resort in 3D
   const flyToResort = useCallback(
@@ -137,10 +139,12 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
     lastFlewToRef.current = null;
   }, [mapRef, lastRegion, setSelectedResort, setIsResortView, nav]);
 
-  // Back-to-region triggered from cards
+  // Back-to-region triggered from cards (ExpandedDetailCard "Back to Region" button)
   useEffect(() => {
     if (pendingBackToRegion) {
       clearPendingBackToRegion();
+      // Update URL nav state — go back from resort to region (or region to globe)
+      if (navRef.current) navRef.current.goBack();
       const map = mapRef.current;
       if (!map) return;
       let target = lastRegion;

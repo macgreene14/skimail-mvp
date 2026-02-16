@@ -248,7 +248,7 @@ export default function MapControls({
 
       {/* ── Back button: mid-left on mobile (clear of carousel + search), bottom-left on desktop ── */}
       {showBackButton && (
-        <div className="pointer-events-auto absolute left-3 bottom-[10rem] sm:bottom-3 sm:left-[calc(3rem+64px)]">
+        <div className="pointer-events-auto absolute left-3 bottom-[12.5rem] sm:bottom-3 sm:left-[calc(3rem+64px)]">
           <button
             onClick={handleBack}
             className="flex items-center gap-1 rounded-full min-h-[44px] px-4 py-2.5 text-xs font-semibold backdrop-blur-md transition-all sm:min-h-0 sm:px-3 sm:py-1.5"
@@ -266,7 +266,7 @@ export default function MapControls({
 
       {/* ── Bottom-right: Satellite toggle (detail zoom only) ── */}
       {nav?.isResort && (
-        <div className="pointer-events-auto absolute bottom-[11.5rem] right-3 sm:bottom-[3.5rem]">
+        <div className="pointer-events-auto absolute bottom-[12.5rem] right-3 sm:bottom-[8rem]">
           <button
             onClick={() => useMapStore.getState().toggleSatellite()}
             className={`flex items-center justify-center rounded-full w-11 h-11 sm:w-9 sm:h-9 text-base sm:text-sm backdrop-blur-sm transition-all ${
@@ -285,7 +285,7 @@ export default function MapControls({
       )}
 
       {/* ── Bottom-right: Auto-rotate toggle (above Mapbox zoom controls) ── */}
-      <div className="pointer-events-auto absolute bottom-[8rem] right-3 sm:bottom-[4.5rem]">
+      <div className="pointer-events-auto absolute bottom-[9rem] right-3 sm:bottom-[5rem]">
         <button
           onClick={handleAutoRotate}
           className={`flex items-center justify-center rounded-full w-11 h-11 sm:w-9 sm:h-9 text-base sm:text-sm backdrop-blur-sm transition-all ${
@@ -303,7 +303,7 @@ export default function MapControls({
       </div>
 
       {/* ── Bottom-left: Base map switcher ── */}
-      <div className="pointer-events-auto absolute bottom-[8rem] left-3 sm:bottom-3">
+      <div className="pointer-events-auto absolute bottom-[9rem] left-3 sm:bottom-3">
         <BaseMapSwitcher
           activeStyle={mapStyleKey}
           onStyleChange={(key) => {

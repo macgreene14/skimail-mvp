@@ -190,7 +190,7 @@ export function MapExplore({ resortCollection, nav }) {
 
         <NavigationControl position="bottom-right" showCompass={false} />
         <GeolocateControl
-          position="top-left"
+          position="top-right"
           positionOptions={{ enableHighAccuracy: true }}
           trackUserLocation={false}
           showUserHeading={true}

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import useMapStore from "../store/useMapStore";
-import { RESORT_MIN } from "../constants/zoom";
 
 /**
  * useViewportResorts — computes visible resorts from map bounds + GeoJSON data.
@@ -29,13 +28,10 @@ export default function useViewportResorts(mapRef, resorts) {
     const zoom = map.getZoom();
     setCurrentZoom(zoom);
 
-    // At globe zoom, clear results — user should pick a region
-    if (zoom < RESORT_MIN) {
-      setRenderedResorts([]);
-      return;
-    }
-
     // Get map bounds and filter resorts by geography
+    // NOTE: No zoom-based clearing here. Nav state (useNavState) controls
+    // whether results are shown in page.js and MobileCarousel. Clearing
+    // here caused flickering during flyTo animations.
     const bounds = map.getBounds();
     if (!bounds) {
       setRenderedResorts([]);
