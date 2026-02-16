@@ -195,7 +195,7 @@ export default function MapControls({
           {/* Spin toggle — right of regions button */}
           {nav?.isGlobe && (
             <button
-              onClick={toggleSpin}
+              onClick={(e) => { e.stopPropagation(); toggleSpin(); }}
               className={`flex items-center justify-center rounded-lg min-h-[44px] w-[44px] backdrop-blur-sm transition-all sm:min-h-0 sm:w-9 sm:h-9 ${
                 spinning ? "text-white/80" : "text-white/40"
               }`}
