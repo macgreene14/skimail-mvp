@@ -17,7 +17,7 @@
 export const REGION_MAX = 5;
 
 /** Resort dots/markers appear at this zoom */
-export const RESORT_MIN = 5;
+export const RESORT_MIN = 3;
 
 /** Resort dots disappear, large markers take over */
 export const RESORT_DETAIL_TRANSITION = 11;

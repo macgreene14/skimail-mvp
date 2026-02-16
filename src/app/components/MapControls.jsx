@@ -201,7 +201,30 @@ export default function MapControls({
           )}
         </div>
 
-        {/* Base map switcher — below regions dropdown */}
+      </div>
+
+      {/* ── Top-right: Filter pills (desktop) + base map switcher ── */}
+      <div className="pointer-events-auto absolute right-3 top-3 hidden sm:flex flex-col items-end gap-2">
+        <div className="flex flex-wrap items-start justify-end gap-1.5">
+          {filters.map((ctrl) => (
+            <button
+              key={ctrl.label}
+              onClick={() => handleFilterClick(ctrl.key)}
+              className={glassBtn}
+              style={pillStyle(ctrl.active, ctrl.color)}
+            >
+              {ctrl.label}
+            </button>
+          ))}
+          <button
+            onClick={() => useMapStore.getState().toggleSnowCover()}
+            className={glassBtn}
+            style={pillStyle(showSnowCover, "#0ea5e9")}
+            title="Toggle NASA MODIS Snow Cover"
+          >
+            🛰️ Snow
+          </button>
+        </div>
         <BaseMapSwitcher
           activeStyle={mapStyleKey}
           onStyleChange={(key) => {
@@ -215,28 +238,6 @@ export default function MapControls({
           mapboxToken={MAPBOX_TOKEN}
           openDirection="down"
         />
-      </div>
-
-      {/* ── Top-right: Filter pills (desktop — always visible) ── */}
-      <div className="pointer-events-auto absolute right-3 top-3 hidden sm:flex flex-wrap items-start justify-end gap-1.5">
-        {filters.map((ctrl) => (
-          <button
-            key={ctrl.label}
-            onClick={() => handleFilterClick(ctrl.key)}
-            className={glassBtn}
-            style={pillStyle(ctrl.active, ctrl.color)}
-          >
-            {ctrl.label}
-          </button>
-        ))}
-        <button
-          onClick={() => useMapStore.getState().toggleSnowCover()}
-          className={glassBtn}
-          style={pillStyle(showSnowCover, "#0ea5e9")}
-          title="Toggle NASA MODIS Snow Cover"
-        >
-          🛰️ Snow
-        </button>
       </div>
 
       {/* ── Top-right: Collapsible filters (mobile) ── */}
