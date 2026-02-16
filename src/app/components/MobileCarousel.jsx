@@ -176,8 +176,8 @@ function ExpandedMobileCard({ resort }) {
   const totalTrails = Object.values(trailCounts).reduce((s, c) => s + c, 0);
 
   return (
-    <div className="snap-center shrink-0 w-full rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl overflow-y-auto"
-      style={{ maxHeight: "calc(48vh - env(safe-area-inset-bottom, 0px) - 16px)" }}
+    <div className="snap-center shrink-0 w-full rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl overflow-y-auto overscroll-contain"
+      style={{ maxHeight: "calc(48vh - env(safe-area-inset-bottom, 0px) - 16px)", touchAction: "pan-y" }}
     >
       <div className="flex items-center gap-1.5 mb-1">
         {passLink ? (
@@ -269,6 +269,11 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav
     e.stopPropagation();
   }, []);
 
+  // Prevent vertical scroll on the carousel scroll container
+  const onTouchMove = useCallback((e) => {
+    e.stopPropagation();
+  }, []);
+
   // Hide carousel at globe zoom
   if (nav?.isGlobe && !selectedResort) return null;
 
@@ -293,7 +298,7 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav
 
   return (
     <div
-      className="absolute left-0 right-0 z-20 sm:hidden pointer-events-none"
+      className="absolute left-0 right-0 z-20 lg:hidden pointer-events-none"
       style={{
         bottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
         maxHeight: showExpanded ? "50vh" : "110px",
@@ -314,10 +319,11 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav
       <div
         ref={scrollRef}
         onTouchStart={onTouchStart}
-        className={`pointer-events-auto flex gap-2.5 px-3 overflow-x-auto snap-x snap-mandatory no-scrollbar items-end ${
+        onTouchMove={onTouchMove}
+        className={`pointer-events-auto flex gap-2.5 px-3 overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar items-end ${
           showExpanded ? "px-3" : ""
         }`}
-        style={{ WebkitOverflowScrolling: "touch" }}
+        style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
       >
         {showExpanded && (
           <ExpandedMobileCard key="expanded-detail" resort={selectedResort} />
