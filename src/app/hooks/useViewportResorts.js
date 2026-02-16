@@ -16,10 +16,14 @@ import useMapStore from "../store/useMapStore";
  * @param {Array} resorts - full resorts array from resortCollection.features
  * @returns {{ queryViewport: Function, bindMapEvents: Function }}
  */
-export default function useViewportResorts(mapRef, resorts) {
+export default function useViewportResorts(mapRef, resorts, navView) {
   const setRenderedResorts = useMapStore((s) => s.setRenderedResorts);
   const setCurrentZoom = useMapStore((s) => s.setCurrentZoom);
   const cleanupRef = useRef(null);
+
+  // Keep navView in a ref so the stable queryViewport callback always reads current value
+  const navViewRef = useRef(navView);
+  navViewRef.current = navView;
 
   const queryViewport = useCallback(() => {
     const mapWrapper = mapRef.current;
@@ -27,6 +31,12 @@ export default function useViewportResorts(mapRef, resorts) {
     const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
     const zoom = map.getZoom();
     setCurrentZoom(zoom);
+
+    // Skip expensive bounds filtering at globe view — page.js returns [] anyway
+    if (navViewRef.current === "globe") {
+      setRenderedResorts([]);
+      return;
+    }
 
     // Get map bounds and filter resorts by geography
     // NOTE: No zoom-based clearing here. Nav state (useNavState) controls

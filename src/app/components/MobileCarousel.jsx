@@ -141,7 +141,7 @@ function MobileSearchBar({ searchQuery, setSearchQuery }) {
   );
 }
 
-function ExpandedMobileCard({ resort, onBack }) {
+function ExpandedMobileCard({ resort }) {
   const snowBySlug = useMapStore((s) => s.snowBySlug);
   const webcamBySlug = useMapStore((s) => s.webcamBySlug);
   const pisteData = useMapStore((s) => s.pisteData);
@@ -172,15 +172,6 @@ function ExpandedMobileCard({ resort, onBack }) {
     <div className="snap-center shrink-0 w-full rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl overflow-y-auto"
       style={{ maxHeight: "calc(50vh - env(safe-area-inset-bottom, 0px))" }}
     >
-      {/* Back button */}
-      {onBack && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onBack(); }}
-          className="flex items-center gap-1 mb-2 text-[11px] text-sky-400 hover:text-sky-300 transition-colors"
-        >
-          <span>‹</span> Back to Region
-        </button>
-      )}
       <div className="flex items-center gap-1.5 mb-1">
         {passLink ? (
           <a href={passLink} target="_blank" rel="noopener noreferrer"
@@ -321,7 +312,7 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {showExpanded && (
-          <ExpandedMobileCard key="expanded-detail" resort={selectedResort} onBack={useMapStore.getState().triggerBackToRegion} />
+          <ExpandedMobileCard key="expanded-detail" resort={selectedResort} />
         )}
         {!selectedResort && sorted?.map((resort) => {
           return (
