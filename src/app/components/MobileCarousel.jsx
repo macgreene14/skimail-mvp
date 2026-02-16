@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { getPercentile } from "../utils/percentiles";
 import useMapStore from "../store/useMapStore";
+import { CompactRegionCard } from "./RegionCard";
 // zoom imports removed — nav state drives UI now
 
 const PASS_COLORS = {
@@ -257,7 +258,7 @@ function ExpandedMobileCard({ resort }) {
   );
 }
 
-export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav }) {
+export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav, regionSummaries, onRegionCardClick }) {
   const scrollRef = useRef(null);
   const snowBySlug = useMapStore((s) => s.snowBySlug);
   const highlightedSlug = useMapStore((s) => s.highlightedSlug);
@@ -274,8 +275,36 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav
     e.stopPropagation();
   }, []);
 
-  // Hide carousel at globe zoom
-  if (nav?.isGlobe && !selectedResort) return null;
+  // Globe view — show region cards instead of hiding
+  if (nav?.isGlobe && !selectedResort) {
+    if (!regionSummaries?.length) return null;
+    return (
+      <div
+        className="absolute left-0 right-0 z-20 lg:hidden pointer-events-none"
+        style={{ bottom: "calc(12px + env(safe-area-inset-bottom, 0px))", maxHeight: "140px", overflow: "hidden" }}
+      >
+        <div className="pointer-events-auto flex items-center justify-between px-4 mb-1">
+          <span className="text-[10px] text-slate-400 font-medium">
+            {regionSummaries.length} region{regionSummaries.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        <div
+          className="pointer-events-auto flex gap-2.5 px-3 overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar items-end"
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+        >
+          {regionSummaries.map((region) => (
+            <CompactRegionCard
+              key={region.regionId}
+              region={region}
+              onClick={() => onRegionCardClick(region.regionId)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   // Sort by live snowfall first, then avg snowfall, then cap at 50
   const sorted = resorts

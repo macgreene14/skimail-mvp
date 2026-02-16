@@ -39,6 +39,10 @@ const useMapStore = create(
       navRegion: null,
       setNavRegion: (r) => set({ navRegion: r }),
 
+      // ── Pending region fly (set by region card click, consumed by MapExplore) ──
+      pendingRegionFly: null,
+      setPendingRegionFly: (id) => set({ pendingRegionFly: id }),
+
       // ── 3D terrain / fly-to state ──
       previousViewState: null,
       setPreviousViewState: (vs) => set({ previousViewState: vs }),

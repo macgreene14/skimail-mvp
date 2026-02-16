@@ -2,20 +2,20 @@
   {
     "id": "rocky-mountain",
     "label": "Rockies",
-    "emoji": "\u26f0\ufe0f",
+    "emoji": "⛰️",
     "center": [
       -110.5,
       45.5
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        -115.0,
-        35.0
+        -115,
+        35
       ],
       [
-        -104.0,
-        52.0
+        -104,
+        52
       ]
     ],
     "countries": [
@@ -35,20 +35,20 @@
   {
     "id": "pnw",
     "label": "PNW",
-    "emoji": "\ud83c\udf32",
+    "emoji": "🌲",
     "center": [
       -121.7,
       46.8
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        -125.0,
-        42.0
+        -125,
+        42
       ],
       [
-        -116.0,
-        50.0
+        -116,
+        50
       ]
     ],
     "countries": [
@@ -62,20 +62,20 @@
   {
     "id": "california",
     "label": "California",
-    "emoji": "\u2600\ufe0f",
+    "emoji": "☀️",
     "center": [
       -119.8,
-      38.0
+      38
     ],
-    "zoom": 7.5,
+    "zoom": 6,
     "bounds": [
       [
         -124.5,
-        32.0
+        32
       ],
       [
-        -114.0,
-        42.0
+        -114,
+        42
       ]
     ],
     "countries": [
@@ -89,20 +89,20 @@
   {
     "id": "northeast",
     "label": "Northeast",
-    "emoji": "\ud83c\udfd4\ufe0f",
+    "emoji": "🏔️",
     "center": [
-      -72.0,
-      44.0
+      -72,
+      44
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        -80.0,
-        40.0
+        -80,
+        40
       ],
       [
-        -66.0,
-        48.0
+        -66,
+        48
       ]
     ],
     "countries": [
@@ -123,20 +123,20 @@
   {
     "id": "midwest",
     "label": "Midwest",
-    "emoji": "\ud83c\udf3e",
+    "emoji": "🌾",
     "center": [
-      -89.0,
-      45.0
+      -89,
+      45
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        -96.0,
-        38.0
+        -96,
+        38
       ],
       [
-        -82.0,
-        49.0
+        -82,
+        49
       ]
     ],
     "countries": [
@@ -155,20 +155,20 @@
   {
     "id": "western-canada",
     "label": "W. Canada",
-    "emoji": "\ud83c\udf41",
+    "emoji": "🍁",
     "center": [
-      -117.0,
-      51.0
+      -117,
+      51
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        -130.0,
-        48.0
+        -130,
+        48
       ],
       [
-        -110.0,
-        55.0
+        -110,
+        55
       ]
     ],
     "countries": [
@@ -182,20 +182,20 @@
   {
     "id": "eastern-canada",
     "label": "E. Canada",
-    "emoji": "\ud83c\udf41",
+    "emoji": "🍁",
     "center": [
-      -71.0,
-      47.0
+      -71,
+      47
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        -80.0,
-        44.0
+        -80,
+        44
       ],
       [
-        -60.0,
-        52.0
+        -60,
+        52
       ]
     ],
     "countries": [
@@ -209,19 +209,19 @@
   {
     "id": "alps",
     "label": "Alps",
-    "emoji": "\ud83c\udfd4\ufe0f",
+    "emoji": "🏔️",
     "center": [
       10.5,
       46.8
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        5.0,
+        5,
         43.5
       ],
       [
-        17.0,
+        17,
         48.5
       ]
     ],
@@ -239,20 +239,20 @@
   {
     "id": "scandinavia",
     "label": "Scandinavia",
-    "emoji": "\u2744\ufe0f",
+    "emoji": "❄️",
     "center": [
-      14.0,
-      63.0
+      14,
+      63
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        4.0,
-        55.0
+        4,
+        55
       ],
       [
-        32.0,
-        72.0
+        32,
+        72
       ]
     ],
     "countries": [
@@ -264,20 +264,20 @@
   {
     "id": "japan",
     "label": "Japan",
-    "emoji": "\ud83d\uddfe",
+    "emoji": "🗾",
     "center": [
       138.5,
       36.8
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        128.0,
-        30.0
+        128,
+        30
       ],
       [
-        146.0,
-        46.0
+        146,
+        46
       ]
     ],
     "countries": [
@@ -287,20 +287,20 @@
   {
     "id": "oceania",
     "label": "Oceania",
-    "emoji": "\ud83c\udf0f",
+    "emoji": "🌏",
     "center": [
-      148.0,
-      -37.0
+      148,
+      -37
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        143.0,
-        -47.0
+        143,
+        -47
       ],
       [
-        175.0,
-        -34.0
+        175,
+        -34
       ]
     ],
     "countries": [
@@ -311,20 +311,20 @@
   {
     "id": "south-america",
     "label": "S. America",
-    "emoji": "\ud83c\udfd4\ufe0f",
+    "emoji": "🏔️",
     "center": [
-      -70.0,
-      -33.0
+      -70,
+      -33
     ],
-    "zoom": 7.0,
+    "zoom": 5.5,
     "bounds": [
       [
-        -75.0,
-        -55.0
+        -75,
+        -55
       ],
       [
-        -65.0,
-        -20.0
+        -65,
+        -20
       ]
     ],
     "countries": [

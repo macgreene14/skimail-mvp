@@ -2,6 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { getPercentile } from "../utils/percentiles";
 import useMapStore from "../store/useMapStore";
+import { RegionCard } from "./RegionCard";
 // zoom imports removed — nav state drives UI now
 
 const PASS_COLORS_HEX = {
@@ -301,15 +302,35 @@ function ResortCard({ resort, isSelected, isHighlighted, onClick }) {
   );
 }
 
-export function ResultsContainer({ resorts, setSelectedResort, selectedResort, nav }) {
+export function ResultsContainer({ resorts, setSelectedResort, selectedResort, nav, regionSummaries, onRegionCardClick }) {
   const searchQuery = useMapStore((s) => s.searchQuery);
   const setSearchQuery = useMapStore((s) => s.setSearchQuery);
   const highlightedSlug = useMapStore((s) => s.highlightedSlug);
   const snowBySlug = useMapStore((s) => s.snowBySlug);
   const isDetailView = nav?.isResort || false;
 
-  // Hide results at globe zoom — users pick a region first
+  // Globe view — show region summary cards
   if (nav?.isGlobe && !selectedResort) {
+    if (regionSummaries?.length > 0) {
+      return (
+        <div className="flex flex-col h-full">
+          <div className="sticky top-0 z-10 p-2.5" style={{ background: "rgba(15,23,42,0.95)", backdropFilter: "blur(12px)" }}>
+            <div className="text-[10px] text-slate-500 px-1">
+              {regionSummaries.length} region{regionSummaries.length !== 1 ? "s" : ""} · select one to explore
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 overflow-auto px-2 py-1 flex-1">
+            {regionSummaries.map((region) => (
+              <RegionCard
+                key={region.regionId}
+                region={region}
+                onClick={() => onRegionCardClick(region.regionId)}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col h-full items-center justify-center text-center px-6">
         <div className="text-3xl mb-3">🌍</div>
