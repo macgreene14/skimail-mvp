@@ -51,7 +51,8 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
         zoom: cam ? cam.zoom : 14.5,
         pitch: cam ? cam.pitch : 72,
         bearing: cam ? cam.bearing : -30,
-        duration: 2500,
+        speed: 1.2,
+        curve: 1.8,
         essential: true,
       });
     },
@@ -68,7 +69,8 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
       zoom: 1.8,
       pitch: 0,
       bearing: 0,
-      duration: 1500,
+      speed: 0.8,
+      curve: 1.8,
       essential: true,
     });
     setSelectedResort(null);
@@ -94,6 +96,7 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
         pitch: 0,
         bearing: 0,
         duration: 1200,
+        curve: 1.5,
         essential: true,
       });
     },
@@ -135,7 +138,8 @@ export default function useMapNavigation(mapRef, stopSpin, nav) {
       zoom,
       pitch: 0,
       bearing: 0,
-      duration: 1500,
+      speed: 1.0,
+      curve: 1.6,
       essential: true,
     });
     setSelectedResort(null);
