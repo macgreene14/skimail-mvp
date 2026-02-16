@@ -189,22 +189,7 @@ export default function MapControls({
           )}
         </div>
 
-        {/* Base map switcher — mobile only (desktop version is in top-right) */}
-        <div className="sm:hidden">
-          <BaseMapSwitcher
-            activeStyle={mapStyleKey}
-            onStyleChange={(key) => {
-              setMapStyle(key, MAP_STYLES[key]);
-              if (key !== 'satellite' && satelliteEnabled) {
-                useMapStore.setState({ satelliteEnabled: false });
-              } else if (key === 'satellite' && !satelliteEnabled) {
-                useMapStore.setState({ satelliteEnabled: true });
-              }
-            }}
-            mapboxToken={MAPBOX_TOKEN}
-            openDirection="down"
-          />
-        </div>
+        {/* Base map switcher removed from top-left — now in top-right under filters */}
       </div>
 
       {/* ── Top-right: Filter pills (desktop) + base map switcher ── */}
@@ -244,8 +229,8 @@ export default function MapControls({
         />
       </div>
 
-      {/* ── Top-right: Collapsible filters (mobile) ── */}
-      <div className="pointer-events-auto absolute right-3 top-3 sm:hidden">
+      {/* ── Top-right: Collapsible filters + base map switcher (mobile) ── */}
+      <div className="pointer-events-auto absolute right-3 top-3 sm:hidden flex flex-col items-end gap-2">
         <button
           onClick={() => setFiltersOpen(!filtersOpen)}
           className="flex items-center gap-1 rounded-lg px-3 py-2 min-h-[44px] text-xs font-semibold backdrop-blur-sm transition-all"
@@ -286,11 +271,25 @@ export default function MapControls({
             </button>
           </div>
         )}
+        <BaseMapSwitcher
+          activeStyle={mapStyleKey}
+          onStyleChange={(key) => {
+            setMapStyle(key, MAP_STYLES[key]);
+            if (key !== 'satellite' && satelliteEnabled) {
+              useMapStore.setState({ satelliteEnabled: false });
+            } else if (key === 'satellite' && !satelliteEnabled) {
+              useMapStore.setState({ satelliteEnabled: true });
+            }
+          }}
+          mapboxToken={MAPBOX_TOKEN}
+          openDirection="down"
+          openAlign="right"
+        />
       </div>
 
       {/* ── Back button: top-left on mobile (below regions+basemap), bottom-left on desktop ── */}
       {showBackButton && (
-        <div className="pointer-events-auto absolute left-3 top-[7.5rem] sm:top-auto sm:bottom-3 sm:left-[calc(3rem+64px)]">
+        <div className="pointer-events-auto absolute left-3 top-1/2 -translate-y-1/2 sm:top-auto sm:bottom-3 sm:translate-y-0 sm:left-[calc(3rem+64px)]">
           <button
             onClick={handleBack}
             className="group flex items-center gap-2 rounded-2xl min-h-[44px] pl-3 pr-4 py-2 text-sm font-medium backdrop-blur-xl transition-all duration-200 hover:scale-[1.03] active:scale-95 sm:min-h-0 sm:pl-2.5 sm:pr-3.5 sm:py-1.5 sm:text-xs sm:rounded-xl"
@@ -307,30 +306,12 @@ export default function MapControls({
             >
               <polyline points="15 18 9 12 15 6" />
             </svg>
-            <span>{nav?.isResort ? (regionMeta ? regionMeta.label : "Region") : "Globe"}</span>
+            <span>{nav?.isResort ? (regionMeta ? regionMeta.label : "Region") : "🌍 Globe"}</span>
           </button>
         </div>
       )}
 
-      {/* ── Bottom-right: Satellite toggle (detail zoom only) ── */}
-      {nav?.isResort && (
-        <div className="pointer-events-auto absolute bottom-[12.5rem] right-3 sm:bottom-[8rem]">
-          <button
-            onClick={() => useMapStore.getState().toggleSatellite()}
-            className={`flex items-center justify-center rounded-full w-11 h-11 sm:w-9 sm:h-9 text-base sm:text-sm backdrop-blur-sm transition-all ${
-              satelliteEnabled
-                ? "bg-emerald-500/80 text-white shadow-lg shadow-emerald-500/25 ring-1 ring-emerald-400/40"
-                : "text-white/50 hover:text-white/80 border border-white/10"
-            }`}
-            style={{
-              background: satelliteEnabled ? undefined : "rgba(15,23,42,0.8)",
-            }}
-            title={satelliteEnabled ? "Disable satellite imagery" : "Enable satellite imagery"}
-          >
-            🛰
-          </button>
-        </div>
-      )}
+      {/* Satellite toggle removed — base map switcher includes satellite option */}
 
       {/* ── Bottom-right: Compass (resets bearing to north) ── */}
       {Math.abs(bearing) > 1 && (
