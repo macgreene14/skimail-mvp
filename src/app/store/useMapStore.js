@@ -22,11 +22,11 @@ const useMapStore = create(
       showEpic: true,
       showMC: true,
       showIndy: true,
-      showIndependent: true,
+      showIndependent: false,
       togglePass: (pass) => set((s) => ({ [pass]: !s[pass] })),
 
       // ── Snow layers ──
-      showSnow: false,
+      showSnow: true,
       toggleSnow: () => set((s) => ({ showSnow: !s.showSnow })),
       showSnowCover: false,
       toggleSnowCover: () => set((s) => ({ showSnowCover: !s.showSnowCover })),
