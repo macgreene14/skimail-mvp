@@ -35,6 +35,10 @@ const useMapStore = create(
       showPistes: true,
       togglePistes: () => set((s) => ({ showPistes: !s.showPistes })),
 
+      // ── Nav region (transient — not persisted, clears on refresh = globe view) ──
+      navRegion: null,
+      setNavRegion: (r) => set({ navRegion: r }),
+
       // ── 3D terrain / fly-to state ──
       previousViewState: null,
       setPreviousViewState: (vs) => set({ previousViewState: vs }),

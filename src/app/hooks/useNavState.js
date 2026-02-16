@@ -1,25 +1,43 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect, useRef } from "react";
 import { useQueryState } from "nuqs";
+import useMapStore from "../store/useMapStore";
 
 /**
- * useNavState — explicit navigation state machine backed by URL params via nuqs.
+ * useNavState — navigation state machine.
  *
  * States:
- *   globe  → no params, show region labels, hide results
- *   region → ?region=alps, show resort dots + results
- *   resort → ?resort=big-sky, show detail card + 3D terrain
+ *   globe  → no region, no resort
+ *   region → region set in Zustand (transient), no resort
+ *   resort → ?resort=big-sky in URL (shareable), region derived
  *
- * The URL IS the nav state. Camera follows. No zoom-threshold logic needed.
+ * Region is transient (Zustand) — clears on refresh = globe view.
+ * Resort is persistent (nuqs URL param) — shareable permalink.
  */
-export default function useNavState() {
-  const [regionRaw, setRegion] = useQueryState("region");
+export default function useNavState(resortCollection) {
   const [resortRaw, setResort] = useQueryState("resort");
 
-  // Normalize empty strings to null (nuqs can return "" instead of null)
-  const region = regionRaw || null;
+  // Normalize empty string to null
   const resort = resortRaw || null;
+
+  // Region from Zustand (transient)
+  const region = useMapStore((s) => s.navRegion);
+  const setNavRegion = useMapStore((s) => s.setNavRegion);
+
+  // On mount: if ?resort=slug exists, derive region from resort properties
+  const didDeriveRef = useRef(false);
+  useEffect(() => {
+    if (didDeriveRef.current) return;
+    if (!resort || !resortCollection) return;
+    didDeriveRef.current = true;
+    const features = resortCollection.features || resortCollection;
+    const found = features.find((f) => f.properties?.slug === resort);
+    if (found) {
+      const regionId = found.properties?.region_id || found.properties?.region;
+      if (regionId) setNavRegion(regionId);
+    }
+  }, [resort, resortCollection, setNavRegion]);
 
   // Derived view — single source of truth
   const navView = useMemo(() => {
@@ -35,37 +53,37 @@ export default function useNavState() {
   // Navigate to a region
   const goToRegion = useCallback(
     (regionId) => {
-      setRegion(regionId || null);
+      setNavRegion(regionId || null);
       setResort(null);
     },
-    [setRegion, setResort]
+    [setNavRegion, setResort]
   );
 
   // Navigate to a resort (auto-sets region if known)
   const goToResort = useCallback(
     (slug, regionId) => {
-      if (regionId) setRegion(regionId);
+      if (regionId) setNavRegion(regionId);
       setResort(slug || null);
     },
-    [setRegion, setResort]
+    [setNavRegion, setResort]
   );
 
   // Go back one level
   const goBack = useCallback(() => {
     if (resort) {
       setResort(null);
-      // Stay in region view
+      // Stay in region view (navRegion remains set)
     } else if (region) {
-      setRegion(null);
+      setNavRegion(null);
       // Go to globe
     }
-  }, [region, resort, setRegion, setResort]);
+  }, [region, resort, setNavRegion, setResort]);
 
   // Go to globe (reset all)
   const goToGlobe = useCallback(() => {
-    setRegion(null);
+    setNavRegion(null);
     setResort(null);
-  }, [setRegion, setResort]);
+  }, [setNavRegion, setResort]);
 
   return {
     navView,       // "globe" | "region" | "resort"
