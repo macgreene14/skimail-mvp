@@ -201,6 +201,22 @@ export default function MapControls({
           )}
         </div>
 
+        {/* Base map switcher — mobile only (desktop version is in top-right) */}
+        <div className="sm:hidden">
+          <BaseMapSwitcher
+            activeStyle={mapStyleKey}
+            onStyleChange={(key) => {
+              setMapStyle(key, MAP_STYLES[key]);
+              if (key !== 'satellite' && satelliteEnabled) {
+                useMapStore.setState({ satelliteEnabled: false });
+              } else if (key === 'satellite' && !satelliteEnabled) {
+                useMapStore.setState({ satelliteEnabled: true });
+              }
+            }}
+            mapboxToken={MAPBOX_TOKEN}
+            openDirection="down"
+          />
+        </div>
       </div>
 
       {/* ── Top-right: Filter pills (desktop) + base map switcher ── */}
