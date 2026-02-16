@@ -93,16 +93,6 @@ const useMapStore = create(
       highlightedSlug: null,
       setHighlightedSlug: (slug) => set({ highlightedSlug: slug }),
 
-      // ── Filter-driven resort list ──
-      // Set by MapExplore whenever pass toggles or viewport change.
-      // Read by MobileCarousel + ResultsContainer.
-      filteredResorts: [],
-      setFilteredResorts: (r) => set({ filteredResorts: r }),
-
-      // Legacy alias — renderedResorts → filteredResorts
-      renderedResorts: [],
-      setRenderedResorts: (r) => set({ renderedResorts: r, filteredResorts: r }),
-
       // ── Current zoom level (set by MapExplore on moveEnd) ──
       currentZoom: 1.2,
       setCurrentZoom: (z) => set({ currentZoom: z }),

@@ -4,7 +4,6 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import Map, { Source, GeolocateControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import useMapStore from '../store/useMapStore';
-import useViewportResorts from '../hooks/useViewportResorts';
 import useGlobeSpin from '../hooks/useGlobeSpin';
 import useMapNavigation from '../hooks/useMapNavigation';
 import useSnowData from '../hooks/useSnowData';
@@ -41,7 +40,7 @@ export function MapExplore({ resortCollection, nav }) {
   const setPisteData = useMapStore((s) => s.setPisteData);
 
   // Hooks — called unconditionally before any returns
-  const { queryViewport, bindMapEvents } = useViewportResorts(mapRef, resorts, nav.navView);
+  const setCurrentZoom = useMapStore((s) => s.setCurrentZoom);
   const { spinning, setSpinning, spinningRef, setUserStopped, stopSpin } = useGlobeSpin(mapRef);
   const { flyToResort, resetView, flyToRegion, onRegionClick, clickedFromMapRef } =
     useMapNavigation(mapRef, stopSpin, nav);
@@ -64,14 +63,6 @@ export function MapExplore({ resortCollection, nav }) {
       .catch(() => { if (!cancelled) setPisteData(null); });
     return () => { cancelled = true; };
   }, [selectedResort, showPistes, setPisteData]);
-
-  // When spin stops, query viewport
-  useEffect(() => {
-    if (!spinning && mapRef.current) {
-      const timer = setTimeout(() => queryViewport(), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [spinning, queryViewport]);
 
   // Filtered GeoJSON with snow data merged
   const filteredGeoJSON = useMemo(() => {
@@ -98,12 +89,13 @@ export function MapExplore({ resortCollection, nav }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resorts, showIkon, showEpic, showMC, showIndy, showIndependent, snowStableKey]);
 
-  // onMoveEnd — update visible slugs for tiered snow fetching using bounds
+  // onMoveEnd — update zoom + visible slugs for tiered snow fetching
   const onMoveEnd = useCallback(() => {
     if (spinningRef.current) return;
     const mapWrapper = mapRef.current;
     if (!mapWrapper) return;
     const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
+    setCurrentZoom(map.getZoom());
     const bounds = map.getBounds();
     if (!bounds) return;
     const west = bounds.getWest();
@@ -120,7 +112,7 @@ export function MapExplore({ resortCollection, nav }) {
       .map((r) => r.properties?.slug)
       .filter(Boolean);
     setVisibleSlugs(slugs);
-  }, [spinningRef, resorts, setVisibleSlugs]);
+  }, [spinningRef, resorts, setVisibleSlugs, setCurrentZoom]);
 
   // Click on resort
   const onClick = useCallback(
@@ -152,8 +144,7 @@ export function MapExplore({ resortCollection, nav }) {
 
   const handleMapLoad = useCallback(() => {
     onMapLoad();
-    bindMapEvents();
-  }, [onMapLoad, bindMapEvents]);
+  }, [onMapLoad]);
 
   const interactiveLayerIds = useMemo(() => ['resort-dots', 'resort-markers'], []);
   const currentZoom = useMapStore((s) => s.currentZoom);
