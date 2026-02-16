@@ -47,14 +47,13 @@ function CompactCard({ resort, isSelected, isHighlighted, onClick, snowInfo }) {
       </div>
 
       {/* Snow data — primary content for compact view */}
-      {snowInfo && (snowInfo.snowfall_7d > 0 || snowInfo.snowfall_24h > 0 || snowInfo.snow_depth > 0) ? (
-        <div className="flex flex-col gap-0.5 text-[10px] font-medium text-sky-300">
+      {snowInfo && (snowInfo.snowfall_7d > 0 || snowInfo.snowfall_24h > 0) ? (
+        <div className="flex items-center gap-2 text-[10px] font-medium text-sky-300">
           {snowInfo.snowfall_24h > 0 && <span>❄ {Math.round(snowInfo.snowfall_24h)}cm new</span>}
-          {snowInfo.snowfall_7d > 0 && <span>❄ {Math.round(snowInfo.snowfall_7d)}cm / 7d</span>}
-          {snowInfo.snow_depth > 0 && <span>📏 {Math.round(snowInfo.snow_depth)}cm base</span>}
+          {snowInfo.snowfall_7d > 0 && <span>🗓 {Math.round(snowInfo.snowfall_7d)}cm/7d</span>}
         </div>
       ) : (
-        <p className="text-[10px] text-slate-500">No recent snow</p>
+        <p className="text-[10px] text-slate-500 italic">No recent snow</p>
       )}
     </div>
   );
