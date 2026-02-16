@@ -335,9 +335,9 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort, n
   return (
     <div className="flex flex-col h-full">
       {/* Search bar */}
-      <div className="sticky top-0 z-10 p-2" style={{ background: "rgba(15,23,42,0.95)", backdropFilter: "blur(12px)" }}>
+      <div className="sticky top-0 z-10 p-2.5" style={{ background: "rgba(15,23,42,0.95)", backdropFilter: "blur(12px)" }}>
         <div className="relative">
-          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
@@ -345,20 +345,20 @@ export function ResultsContainer({ resorts, setSelectedResort, selectedResort, n
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search resorts, locations..."
-            className="w-full rounded-lg py-2 pl-8 pr-8 text-xs text-white placeholder-slate-500 outline-none"
-            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
+            placeholder="Search resorts..."
+            className="w-full rounded-xl py-2.5 pl-9 pr-9 text-xs text-white placeholder-slate-500 outline-none transition-colors focus:ring-1 focus:ring-sky-500/40"
+            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-white/10 text-slate-400 hover:text-white hover:bg-white/20 text-[10px] transition-colors"
             >
               ✕
             </button>
           )}
         </div>
-        <div className="mt-1 text-[10px] text-slate-500 px-1">
+        <div className="mt-1.5 text-[10px] text-slate-500 px-1">
           {sorted?.length || 0} resort{(sorted?.length || 0) !== 1 ? 's' : ''} in view
         </div>
       </div>
