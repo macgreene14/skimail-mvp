@@ -29,9 +29,9 @@ export default function useGlobeSpin(mapRef, isGlobe) {
     }
   }, [isGlobe]);
 
-  // Run spin interval
+  // Run spin interval — only when map is available
   useEffect(() => {
-    if (!spinning || !isGlobe) return;
+    if (!spinning || !isGlobe || !mapRef.current) return;
     spinTimerRef.current = setInterval(() => {
       const map = mapRef.current;
       if (!map) return;
