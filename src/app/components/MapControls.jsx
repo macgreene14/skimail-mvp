@@ -54,6 +54,7 @@ export default function MapControls({
   mapRef,
   spinning,
   stopSpin,
+  toggleSpin,
   isResortView,
   resetView,
   flyToRegion,
@@ -194,7 +195,7 @@ export default function MapControls({
           {/* Spin toggle — right of regions button */}
           {nav?.isGlobe && (
             <button
-              onClick={spinning ? stopSpin : undefined}
+              onClick={toggleSpin}
               className={`flex items-center justify-center rounded-lg min-h-[44px] w-[44px] backdrop-blur-sm transition-all sm:min-h-0 sm:w-9 sm:h-9 ${
                 spinning ? "text-white/80" : "text-white/40"
               }`}
@@ -202,7 +203,7 @@ export default function MapControls({
                 background: "rgba(15,23,42,0.8)",
                 border: "1px solid rgba(255,255,255,0.15)",
               }}
-              title={spinning ? "Pause rotation" : "Rotating..."}
+              title={spinning ? "Pause rotation" : "Resume rotation"}
             >
               <svg className={`w-4 h-4 ${spinning ? "animate-spin" : ""}`} style={{ animationDuration: "3s" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56" />

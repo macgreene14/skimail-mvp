@@ -42,7 +42,7 @@ export function MapExplore({ resortCollection, nav }) {
 
   // Hooks — called unconditionally before any returns
   const setCurrentZoom = useMapStore((s) => s.setCurrentZoom);
-  const { spinning, setSpinning, spinningRef, stopSpin } = useGlobeSpin(mapRef, nav.isGlobe);
+  const { spinning, setSpinning, spinningRef, stopSpin, toggleSpin } = useGlobeSpin(mapRef, nav.isGlobe);
   const { flyToResort, resetView, flyToRegion, onRegionClick, clickedFromMapRef } =
     useMapNavigation(mapRef, stopSpin, nav);
   const {
@@ -240,6 +240,7 @@ export function MapExplore({ resortCollection, nav }) {
         mapRef={mapRef}
         spinning={spinning}
         stopSpin={stopSpin}
+        toggleSpin={toggleSpin}
         isResortView={isResortView}
         resetView={resetView}
         flyToRegion={flyToRegion}

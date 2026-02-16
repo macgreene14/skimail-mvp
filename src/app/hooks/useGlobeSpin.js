@@ -54,10 +54,23 @@ export default function useGlobeSpin(mapRef, isGlobe) {
     }, 5000);
   }, []);
 
+  // Toggle spin on/off (for button clicks)
+  const toggleSpin = useCallback(() => {
+    clearTimeout(idleTimerRef.current);
+    if (spinningRef.current) {
+      setSpinning(false);
+      setUserPaused(true);
+    } else {
+      setUserPaused(false);
+      setSpinning(true);
+    }
+  }, [spinningRef]);
+
   return {
     spinning,
     setSpinning,
     spinningRef,
+    toggleSpin,
     stopSpin,
   };
 }
