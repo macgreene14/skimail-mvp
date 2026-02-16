@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import useMapStore from "../store/useMapStore";
 import BaseMapSwitcher from "./BaseMapSwitcher";
 import regionsManifest from "../../../assets/regions.json";
@@ -64,6 +64,24 @@ export default function MapControls({
 }) {
   const [regionsOpen, setRegionsOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [bearing, setBearing] = useState(0);
+
+  // Track bearing changes for compass
+  useEffect(() => {
+    const mapWrapper = mapRef.current;
+    if (!mapWrapper) return;
+    const map = mapWrapper.getMap ? mapWrapper.getMap() : mapWrapper;
+    const onRotate = () => setBearing(map.getBearing());
+    map.on("rotate", onRotate);
+    setBearing(map.getBearing());
+    return () => map.off("rotate", onRotate);
+  }, [mapRef]);
+
+  const resetBearing = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.easeTo({ bearing: 0, pitch: 0, duration: 500 });
+  }, [mapRef]);
 
   const {
     showIkon, showEpic, showMC, showIndy, showIndependent, showSnow, showPistes,
@@ -301,6 +319,28 @@ export default function MapControls({
           ⟳
         </button>
       </div>
+
+      {/* ── Bottom-right: Compass (resets bearing to north) ── */}
+      {Math.abs(bearing) > 1 && (
+        <div className="pointer-events-auto absolute bottom-[5.5rem] right-3 sm:bottom-[1.5rem]">
+          <button
+            onClick={resetBearing}
+            className="flex items-center justify-center rounded-full w-11 h-11 sm:w-9 sm:h-9 backdrop-blur-sm transition-all text-white/70 hover:text-white border border-white/10"
+            style={{ background: "rgba(15,23,42,0.8)" }}
+            title="Reset to north"
+          >
+            <svg
+              width="18" height="18" viewBox="0 0 24 24" fill="none"
+              style={{ transform: `rotate(${-bearing}deg)`, transition: "transform 150ms ease-out" }}
+            >
+              {/* North needle (red) */}
+              <polygon points="12,2 14.5,12 9.5,12" fill="#ef4444" />
+              {/* South needle (white) */}
+              <polygon points="12,22 14.5,12 9.5,12" fill="rgba(255,255,255,0.4)" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* ── Bottom-left: Base map switcher ── */}
       <div className="pointer-events-auto absolute bottom-[9rem] left-3 sm:bottom-3">

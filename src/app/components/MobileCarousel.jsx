@@ -93,50 +93,57 @@ function MobileSearchBar({ searchQuery, setSearchQuery }) {
   const isOpen = expanded || !!searchQuery;
 
   return (
-    <div className="flex justify-end">
-      {isOpen ? (
-        <div
-          className="relative w-full rounded-full backdrop-blur-md transition-all"
-          style={{
-            background: "rgba(15,23,42,0.6)",
-            border: "1px solid rgba(255,255,255,0.12)",
-          }}
-        >
-          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-          <input
-            ref={inputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onBlur={() => { if (!searchQuery) setExpanded(false); }}
-            placeholder="Search resorts..."
-            className="w-full rounded-full py-1 pl-7 pr-7 text-[11px] text-white placeholder-slate-500 outline-none bg-transparent"
-          />
+    <div className="flex justify-end" style={{ minWidth: isOpen ? "100%" : "44px" }}>
+      <div
+        className="relative rounded-full overflow-hidden"
+        style={{
+          width: isOpen ? "100%" : "44px",
+          transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          background: "rgba(15,23,42,0.85)",
+          border: "1px solid rgba(255,255,255,0.15)",
+          boxShadow: isOpen
+            ? "0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)"
+            : "0 2px 8px rgba(0,0,0,0.3)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+        }}
+      >
+        {isOpen ? (
+          <>
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              ref={inputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onBlur={() => { if (!searchQuery) setExpanded(false); }}
+              placeholder="Search resorts, locations..."
+              className="w-full rounded-full min-h-[44px] pl-10 pr-11 text-[13px] text-white placeholder-slate-500 outline-none bg-transparent tracking-wide"
+            />
+            <button
+              onClick={() => { setSearchQuery(""); setExpanded(false); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full bg-white/10 text-slate-400 hover:text-white hover:bg-white/20 transition-all duration-200"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </>
+        ) : (
           <button
-            onClick={() => { setSearchQuery(""); setExpanded(false); }}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-[10px]"
+            onClick={() => setExpanded(true)}
+            className="flex items-center justify-center w-[44px] h-[44px] rounded-full"
           >
-            ✕
+            <svg className="w-[18px] h-[18px] text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
           </button>
-        </div>
-      ) : (
-        <button
-          onClick={() => setExpanded(true)}
-          className="flex items-center justify-center w-8 h-8 rounded-full backdrop-blur-md transition-all"
-          style={{
-            background: "rgba(15,23,42,0.5)",
-            border: "1px solid rgba(255,255,255,0.12)",
-          }}
-        >
-          <svg className="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
-          </svg>
-        </button>
-      )}
+        )}
+      </div>
     </div>
   );
 }

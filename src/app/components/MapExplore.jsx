@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import Map, { Source, NavigationControl, GeolocateControl } from 'react-map-gl';
+import Map, { Source, GeolocateControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import useMapStore from '../store/useMapStore';
 import useViewportResorts from '../hooks/useViewportResorts';
@@ -188,7 +188,6 @@ export function MapExplore({ resortCollection, nav }) {
           maxzoom={14}
         />
 
-        <NavigationControl position="bottom-right" showCompass={false} />
         <GeolocateControl
           position="top-right"
           positionOptions={{ enableHighAccuracy: true }}
