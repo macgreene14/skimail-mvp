@@ -177,7 +177,7 @@ function ExpandedMobileCard({ resort }) {
 
   return (
     <div className="snap-center shrink-0 w-full rounded-xl p-3 border border-sky-500/60 ring-1 ring-sky-500/30 bg-slate-900/95 backdrop-blur-xl overflow-y-auto"
-      style={{ maxHeight: "calc(50vh - env(safe-area-inset-bottom, 0px))" }}
+      style={{ maxHeight: "calc(48vh - env(safe-area-inset-bottom, 0px) - 16px)" }}
     >
       <div className="flex items-center gap-1.5 mb-1">
         {passLink ? (
@@ -296,7 +296,8 @@ export function MobileCarousel({ resorts, selectedResort, setSelectedResort, nav
       className="absolute left-0 right-0 z-20 sm:hidden pointer-events-none"
       style={{
         bottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
-        maxHeight: showExpanded ? "55vh" : "110px",
+        maxHeight: showExpanded ? "50vh" : "110px",
+        overflow: "hidden",
       }}
     >
       {/* Resort count + search */}

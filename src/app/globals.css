@@ -20,12 +20,18 @@
   height: 100% !important;
 }
 
+html,
 body {
   background: #f8fafc;
   color: #1e293b;
+  overflow: hidden;
+  height: 100%;
+  /* Prevent iOS bounce / pull-to-refresh on mobile */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling (for inner scrollable containers) */
 html {
   scroll-behavior: smooth;
 }
