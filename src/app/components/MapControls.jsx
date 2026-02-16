@@ -279,9 +279,9 @@ export default function MapControls({
         )}
       </div>
 
-      {/* ── Back button: mid-left on mobile (clear of carousel + search), bottom-left on desktop ── */}
+      {/* ── Back button: top-left on mobile (below regions+basemap), bottom-left on desktop ── */}
       {showBackButton && (
-        <div className="pointer-events-auto absolute left-3 bottom-[12.5rem] sm:bottom-3 sm:left-[calc(3rem+64px)]">
+        <div className="pointer-events-auto absolute left-3 top-[7.5rem] sm:top-auto sm:bottom-3 sm:left-[calc(3rem+64px)]">
           <button
             onClick={handleBack}
             className="flex items-center gap-1 rounded-full min-h-[44px] px-4 py-2.5 text-xs font-semibold backdrop-blur-md transition-all sm:min-h-0 sm:px-3 sm:py-1.5"
